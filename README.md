@@ -25,6 +25,8 @@ TP Jour 1 – Retail Intelligence Platform (IPSSI). Socle obligatoire : UC-01 et
 
 ### 05_contribution_individuelle
 - `contribution_noah.md`
+- `contribution_Lorenzo.md`
+- `scripts/` : scripts de profilage et de vérification des relations (Lorenzo)
 
 ## Relancer les scripts d'exploration
 

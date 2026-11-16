@@ -21,7 +21,7 @@
 | **Conteneurs** | Un par zone : `bronze`, `silver`, `gold` |
 | **Organisation** | La même qu'en local : `zone/source/table/` |
 | **Identités** | Chaque personne se connecte avec son compte Entra ID (l'annuaire d'Azure) |
-| **RBAC** | Des rôles par conteneur. Équipe Data : lecture et écriture partout. Direction et contrôleur : lecture sur `gold` seulement |
+| **RBAC** | Des rôles par conteneur. Équipe Data : lecture et écriture partout. Profils métier : lecture sur `gold` seulement |
 | **ACL** | Des droits par dossier. Exemple : bloquer le dossier des clients |
 | **Secrets** | Les mots de passe et les clés sont rangés dans Key Vault, jamais dans le code |
 | **Coûts et quotas** | Le stockage coûte peu, mais les calculs Spark coûtent cher : on les arrête quand on ne s'en sert pas. On met une alerte de budget et on vérifie les limites de l'abonnement étudiant |

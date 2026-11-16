@@ -33,7 +33,7 @@ Les zones Bronze, Silver et Gold sont stockées dans HDFS.
 | Zone | Rôle | Contenu | Format |
 |---|---|---|---|
 | **Bronze** | Garder une copie exacte des fichiers reçus | Les 34 fichiers, rangés par date de réception | `.dat` |
-| **Silver** | Avoir des données propres | Noms de colonnes ajoutés, espaces enlevés, bons types, `data` et `data_refresh` fusionnés | Parquet |
+| **Silver** | Avoir des données propres | Noms de colonnes ajoutés, espaces enlevés, bons types, `data` et `data_refresh` fusionnés sans doublons, un numéro de ligne ajouté aux ventes, les identifiants vides remplacés par -1 (« Inconnu »). Les lignes douteuses (par exemple les retours sans vente) sont mises de côté dans un dossier `quarantaine` | Parquet |
 | **Gold** | Avoir des données prêtes pour les KPI | Une table des ventes reliée aux produits, magasins, clients et dates, plus les KPI déjà calculés | Parquet |
 
 Si des données complémentaires arrivent, elles seront rangées à part et non mélangées avec TPCx-BB.

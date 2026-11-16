@@ -22,6 +22,9 @@ Tous les flux sont en **batch**. Il n'y a pas de flux en continu, car on reçoit
 | **Contrôles** | Fichier complet | Fichier pas déjà chargé | Colonnes, types, doublons, vides | Chaque vente a un produit, un magasin et une date qui existent | Les totaux sont corrects |
 | **Transformations** | Aucune | Aucune | Noms de colonnes, espaces, types, fusion | Regrouper ventes magasin et web | Totaux par mois, magasin, produit |
 | **Résultat** | Fichiers stockés | Fichiers stockés | Tables propres | Tables pour les KPI | 5 KPI |
-| **Utilisé par** | Équipe Data | Équipe Data | Équipe Data | Direction, contrôleur | Direction, contrôleur |
+| **Utilisé par** | Équipe Data (P3) | Équipe Data (P3) | Équipe Data (P3) | Profils métier (P1, P2, P4, P5, P6) | Profils métier (P1, P2, P4, P5, P6) |
 
-**Attention** : le flux 2 doit être fait avant de relier les stocks aux produits, car 180 produits ne sont que dans `data_refresh`.
+**Attention** :
+- le flux 2 doit être fait avant de relier les stocks aux produits, car 180 produits ne sont que dans `data_refresh` ;
+- il faut toujours charger les tables de référence (produits, clients…) **avant** les ventes ;
+- le 13/12/2005 est présent dans `data` et dans `data_refresh` : il faut enlever les doublons au flux 3.

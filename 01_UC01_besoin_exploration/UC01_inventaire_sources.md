@@ -1,6 +1,8 @@
 # Inventaire des sources
 
-J'ai utilisé le script `preuves/explorer_donnees.py`. Les résultats complets sont dans `preuves/inventaire_fichiers.csv` et `preuves/inventaire_colonnes.csv`.
+Nous avons utilisé deux scripts :
+- `preuves/explorer_donnees.py` (Noah), dont les résultats sont dans `preuves/inventaire_fichiers.csv` et `preuves/inventaire_colonnes.csv` ;
+- `05_contribution_individuelle/scripts/etape_c_profilage.py` (Lorenzo).
 
 ## 1. Le kit de données
 
@@ -12,7 +14,7 @@ J'ai utilisé le script `preuves/explorer_donnees.py`. Les résultats complets s
 | Date | Non communiquée |
 | Format | Fichiers texte `.dat`, colonnes séparées par `|`, sans ligne de titres |
 | Volume | 283 Mo compressé, environ 1 Go décompressé |
-| Nombre de fichiers | 34 : 23 dans `data/` et 11 dans `data_refresh/` |
+| Nombre de fichiers | 36 : 34 fichiers `.dat` (23 dans `data/`, 11 dans `data_refresh/`) et 2 fichiers `item_marketprices_audit.csv` (un dans chaque dossier) |
 | Outil de génération | Non communiqué |
 
 ## 2. Les fichiers de `data/`
@@ -45,7 +47,11 @@ Chemin : `retail_project/data/<nom>/<nom>.dat`
 | Calendrier | `date_dim` | 15 Mo | 109 573 | 28 | `d_date_sk` |
 | Heures | `time_dim` | 5 Mo | 86 400 | 10 | `t_time_sk` |
 
-Il n'y a aucun doublon dans les identifiants des tables de référence (produits, clients, magasins…).
+Il n'y a aucun doublon dans les identifiants des tables de référence (produits, clients, magasins…). Chaque table de référence a aussi un code texte de 16 caractères en `_id` (exemple : `AAAAAAAAAAAAAAAB`).
+
+Pour les ventes, le couple ticket + produit **n'est pas unique** : 4 038 couples sont en double en magasin (4 136 lignes en trop), et 3 991 sur le web (4 076 lignes en trop). Un même produit peut apparaître deux fois sur un ticket. Le couple date + produit + entrepôt de `inventory` est, lui, bien unique.
+
+**Fichier en plus** : `item_marketprices_audit.csv`, un rapport de contrôle produit par le générateur (nombre de concurrents par article). Il a une ligne de titres, mais n'est pas un vrai tableau propre.
 
 ## 3. Les fichiers de `data_refresh/`
 
@@ -102,6 +108,14 @@ Ce sont les mêmes tables, mais avec **de nouvelles données à ajouter** : nouv
 - Les dates : `AAAA-MM-JJ`.
 - Dans les ventes, la date est un numéro qui renvoie au calendrier `date_dim` (par exemple, 36890 = 01/01/2001).
 - Le reste : du texte.
+- Pièges :
+  - certaines dates sont stockées comme du texte (`i_rec_start_date`, `pr_review_date`) ;
+  - `imp_start_date` et `imp_end_date` ne sont pas des dates mais des numéros du calendrier ;
+  - le texte des avis (`pr_review_content`) est libre, peut faire jusqu'à 5 748 caractères et contient du HTML (`&quot;`) : c'est une donnée **semi-structurée**.
+- Les montants sont cohérents sur toutes les lignes de `store_sales` :
+  - montant = quantité × prix ;
+  - net payé = montant − coupon ;
+  - bénéfice = net payé − coût d'achat.
 
 ## 6. Valeurs vides et problèmes
 
@@ -113,6 +127,14 @@ Ce sont les mêmes tables, mais avec **de nouvelles données à ajouter** : nouv
 | `customer`, `customer_address` | Toutes les valeurs ont des espaces en trop |
 | `customer` | `c_last_review_date` contient du texte au lieu d'une date : inutilisable |
 | Retours | Certains sont datés jusqu'en 2008, alors que les ventes s'arrêtent en 2005 |
+| `customer` | 1 717 dates de naissance impossibles (exemple : 31 février), 322 emails en double |
+| `date_dim` | `d_holiday` vaut `Y` sur toutes les dates : colonne inutilisable |
+| `store`, `web_site` | Dates de fermeture et d'ouverture irréalistes (de 1900 à 2198) |
+| `household_demographics` | 282 foyers avec un nombre de voitures égal à -1 |
+| Plusieurs tables | Colonnes toujours égales à `Unknown` (`i_container`, `p_purpose`, `s_company_name`…) ou avec des textes au hasard (`ship_mode`, `reason`, `warehouse`) |
+| `store_sales` | 3 954 ventes à 0 €. Le bénéfice est négatif sur 74 % des lignes (61 % sur le web) |
+| `store_returns` | 64 retours avec plus d'articles rendus que vendus |
+| `data` et `data_refresh` | Le 13/12/2005 est présent dans les deux dossiers (avec des tickets différents). Les retours de `data_refresh` sont datés de 2001 à 2007 : le refresh ne contient pas que des dates nouvelles |
 
 ## 7. Périodes couvertes
 
@@ -123,12 +145,18 @@ Ce sont les mêmes tables, mais avec **de nouvelles données à ajouter** : nouv
 | Stocks | 2001 → 2005, environ un relevé par semaine |
 | Clics web | 2001 → 2005 |
 | Avis | 2001 → 2006 |
+| Délai de livraison web | De 1 à 120 jours entre la vente et l'expédition (60 jours en médiane) |
 
 ## 8. Ce qui manque
 
 | Domaine | Constat |
 |---|---|
 | Stock des magasins | Absent : le stock est seulement par entrepôt |
+| Mouvements de stock | Absent : seulement une photo par semaine, pas d'entrées ni de sorties |
+| Livraison réelle | Absent : on a la date d'expédition, mais pas la date de livraison |
+| Transporteurs et motifs de retour | Inutilisables : les libellés sont des textes au hasard |
+| Planning du personnel | Absent : seulement le nombre d'employés et les horaires du magasin |
+| Historique des produits et magasins | Absent : une seule version de chaque produit et magasin |
 | Sessions web | Absent : on ne sait pas quels clics font partie d'une même visite |
 | Objectifs de vente | Absent |
 | Coûts (loyers, salaires) | Absent |
