@@ -568,3 +568,41 @@ Tous les flux sont en **batch** : les sources arrivent par lots de fichiers (cha
 **Ordre d'un lot** : F4 → F5 → F1 → F2 → F3 / F6 / F7 / F8, puis recalcul des agrégats Gold des **périodes touchées** par le lot (le refresh modifie aussi le passé).
 
 ---
+
+### Étape F – Règles minimales de gouvernance
+
+| Règle                                 | Mise en œuvre                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Traçabilité de la provenance**      | Chaque lot a un `load_id` (date + type `initial` ou `refresh`). Bronze garde le fichier d'origine et un manifeste (nom, taille, nombre de lignes, SHA-256, date de réception). Silver et Gold ajoutent les colonnes `_load_id`, `_source_file` et `_ingest_ts`. On utilise aussi le journal de provenance de NiFi. Toute valeur Gold peut ainsi être reliée à son fichier source.       |
+| **Documentation**                     | Dictionnaire des tables et colonnes (`tpcxbb_schema.json` complété par le rôle métier, le niveau de qualité et la présence de données personnelles), dictionnaire des indicateurs (étape B d'UC-01), description des zones et du grain de chaque fait, liste des limites connues (L1 à L6). Tout est versionné dans Git avec le code.                                                   |
+| **Contrôles qualité**                 | Règles exécutées par Spark à chaque lot, résultats écrits dans une table `quality_report` (règle, table, lot, nombre d'erreurs, statut). Voir le tableau ci-dessous.                                                                                                                                                                                                                    |
+| **Gestion des accès**                 | Principe du **moindre privilège**, droits par zone et par rôle (tableau ci-dessous). En local : ACL HDFS. Sur le cloud : RBAC + ACL ADLS (étape G).                                                                                                                                                                                                                                     |
+| **Protection des données**            | Pseudonymisation des données personnelles client dès Silver (hachage avec sel conservé dans un coffre de secrets). Bronze, qui contient les données personnelles en clair, est réservé aux data engineers. Gold ne contient **aucune** donnée personnelle (âge en tranches, région au lieu de l'adresse). Chiffrement au repos (natif sur Azure). Durée de conservation définie (RGPD). |
+| **Suivi des traitements**             | Table `run_log` (flux, lot, début, fin, statut, lignes lues, écrites, rejetées). Bulletins NiFi et interface Spark. Alerte si un traitement échoue ou si une règle bloquante échoue. Les traitements sont **rejouables** depuis Bronze.                                                                                                                                                 |
+| **Maîtrise des coûts et des volumes** | Parquet compressé (Snappy), partitions année/mois sur les faits, suivi de la taille par zone et par lot. Rétention : Bronze conservé (fichiers peu volumineux, nécessaires pour rejouer), anciennes versions Silver purgées au-delà de N lots, quarantaine purgée après traitement. Quotas HDFS par dossier ; sur le cloud, niveaux de stockage et budgets (étape G).                   |
+
+**Règles qualité minimales**
+
+| Id  | Règle                                                    | Seuil                                         | Action                                    |
+| --- | -------------------------------------------------------- | --------------------------------------------- | ----------------------------------------- |
+| Q1  | Nombre de champs par ligne = schéma                      | 100 %                                         | **Bloquant** : le lot est refusé          |
+| Q2  | Conversion vers le type déclaré                          | 100 %                                         | Ligne en quarantaine                      |
+| Q3  | Unicité des `*_sk` dans les dimensions                   | 0 doublon                                     | **Bloquant**                              |
+| Q4  | Clés étrangères des faits trouvées dans les dimensions   | 0 orphelin (hors NULL)                        | Orphelin → quarantaine, alerte si > 0,1 % |
+| Q5  | Taux de NULL par colonne                                 | Écart > 2 points par rapport au lot précédent | Alerte                                    |
+| Q6  | Cohérence des montants (`net_paid = ext_sales − coupon`) | 100 %                                         | Alerte                                    |
+| Q7  | Retour ↔ vente (correspondance, quantité, date)          | 100 %                                         | Quarantaine                               |
+| Q8  | Chevauchement de période avec le lot précédent           | 0 doublon de ligne                            | Déduplication + alerte                    |
+
+**Matrice des accès**
+
+| Rôle                        | Bronze                | Quarantaine        | Silver                 | Gold                                |
+| --------------------------- | --------------------- | ------------------ | ---------------------- | ----------------------------------- |
+| Data engineer (NiFi, Spark) | Lecture / écriture    | Lecture / écriture | Lecture / écriture     | Lecture / écriture                  |
+| Analyste / data scientist   | –                     | Lecture            | Lecture (pseudonymisé) | Lecture                             |
+| Direction commerciale       | –                     | –                  | –                      | Lecture                             |
+| Responsable des stocks      | –                     | –                  | –                      | Lecture (stock, logistique)         |
+| Responsable de magasin      | –                     | –                  | –                      | Lecture **filtrée sur son magasin** |
+| Comptes de service          | Écriture (NiFi / ADF) | Écriture (Spark)   | Écriture (Spark)       | Écriture (Spark)                    |
+
+---
