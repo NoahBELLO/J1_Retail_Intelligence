@@ -527,3 +527,24 @@ Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
 | **Gold**         | Données **organisées pour les indicateurs** : modèle en étoile et agrégats, règles métier appliquées (CA net, transaction = canal + numéro) | Faits, dimensions, tables d'indicateurs                                               | Parquet partitionné           | Spark écrit ; consommateurs métier et outils BI lisent  |
 
 ---
+
+### Étape D – Positionner les composants technologiques
+
+| Composant              | Statut                            | Rôle dans notre architecture                                                                                            | Zone / couche             |
+| ---------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Linux / Ubuntu         | **Obligatoire**                   | Environnement local de référence (VM ou WSL) qui héberge HDFS, NiFi et Spark                                            | Toutes (local)            |
+| Python                 | **Obligatoire**                   | Exploration (scripts UC-01 : `etape_c_profilage.py`, `etape_d_relations.py`), scripts de contrôle, PySpark              | Exploration, Silver, Gold |
+| Hadoop / HDFS          | **Obligatoire**                   | Stockage distribué des zones Bronze, Silver, Gold et quarantaine ; ACL POSIX par dossier                                | Stockage                  |
+| Apache NiFi            | **Obligatoire**                   | Ingestion des fichiers, contrôles techniques, métadonnées de provenance, dépôt dans HDFS ; orchestration des flux       | Ingestion → Bronze        |
+| Apache Spark / PySpark | **Obligatoire**                   | Lecture avec schéma explicite, nettoyage, contrôles qualité, SCD2, jointures, modèle en étoile, agrégats                | Bronze → Silver → Gold    |
+| Parquet                | **Format de référence**           | Stockage colonnaire compressé de Silver, Gold et de la quarantaine                                                      | Silver, Gold              |
+| HBase                  | Facultatif                        | _Approfondissement_ : accès rapide par clé (ex. fiche client 360°, dernier stock par article)                           | Hors socle                |
+| PDGF                   | Selon kit disponible              | Regénérer les données ou augmenter le facteur d'échelle **si le kit le permet** ; sinon on utilise les fichiers fournis | Sources                   |
+| Delta Lake             | Facultatif                        | _Approfondissement Lakehouse_ : MERGE du refresh, ACID, time travel. **Le socle fonctionne avec Parquet seul.**         | Silver, Gold (option)     |
+| ADLS Gen2              | **Objectif obligatoire** (jour 4) | Version cloud du stockage HDFS : mêmes zones, mêmes chemins. **Conçue ici, déployée au jour 4.**                        | Stockage (cloud)          |
+| Azure Data Factory     | Présentation / étude              | Équivalent cloud de NiFi pour l'orchestration et l'ingestion. **Non déployé.**                                          | Ingestion (cloud)         |
+| Azure Synapse          | Présentation / étude              | Requêtes SQL serverless sur Gold, entrepôt cloud, Spark managé. **Non déployé.**                                        | Exposition (cloud)        |
+
+> HBase et Delta Lake ne conditionnent pas la validation du socle. ADF et Synapse sont décrits, pas déployés. L'outil de tableau de bord (ex. Power BI ou Superset) est hors référentiel et reste à choisir : il ne fait pas partie des composants obligatoires.
+
+---
