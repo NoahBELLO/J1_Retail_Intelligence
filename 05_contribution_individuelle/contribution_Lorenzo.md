@@ -111,8 +111,6 @@
 
 ### 1. Répertoire de données
 
-`retail_project/retail_project/` contient deux zones :
-
 - `data/` : chargement initial (historique).
 - `data_refresh/` : lot de rafraîchissement (incrémental).
 
@@ -256,3 +254,106 @@ Un ticket est rattaché à un seul magasin, une seule date et un seul client (v�
 | Personnel / horaires         | Pas de planning, seulement `s_number_employees` et `s_hours` (3 valeurs)                   | Ajustement des effectifs par tranche horaire limité        |
 | Devise                       | Aucune colonne devise                                                                      | Unité des montants supposée                                |
 | Historique produit / magasin | Pas de versions (`rec_end_date` vide)                                                      | Évolution des prix / attributs non suivie                  |
+
+## Étape D – Vérifier les relations possibles
+
+> Contrôles réalisés avec `scripts/etape_d_relations.py` (résultat complet : `scripts/etape_d_relations.json`), sur `data` seul puis sur `data` + `data_refresh`.
+> Un **orphelin** est une valeur non nulle de la colonne enfant qui n'existe pas dans la table parente.
+
+---
+
+### 1. Colonnes candidates et 2. Présence dans les fichiers
+
+Il n'y a pas de clé étrangère déclarée dans les fichiers. Les relations sont déduites du nommage TPCx-BB : une colonne `xx_<objet>_sk` pointe vers la clé technique `*_sk` de la dimension `<objet>`. Toutes les colonnes ci-dessous sont présentes dans les fichiers concernés (le nombre de champs par ligne correspond au schéma, cf. Étape C).
+
+| Relation                                     | Colonne enfant                                                                           | Colonne parent                                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Ventes → produits                            | `ss_item_sk`, `ws_item_sk`                                                               | `item.i_item_sk`                                                                                           |
+| Ventes → clients                             | `ss_customer_sk`, `ws_bill_customer_sk`, `ws_ship_customer_sk`                           | `customer.c_customer_sk`                                                                                   |
+| Ventes → adresse / démographie               | `ss_addr_sk`, `ws_bill_addr_sk` / `ss_cdemo_sk`, `ss_hdemo_sk`                           | `customer_address.ca_address_sk` / `customer_demographics.cd_demo_sk`, `household_demographics.hd_demo_sk` |
+| Ventes → magasins / sites                    | `ss_store_sk` / `ws_web_site_sk`                                                         | `store.s_store_sk` / `web_site.web_site_sk`                                                                |
+| Ventes → dates                               | `ss_sold_date_sk`, `ws_sold_date_sk`, `ws_ship_date_sk`                                  | `date_dim.d_date_sk`                                                                                       |
+| Ventes → heures                              | `ss_sold_time_sk`, `ws_sold_time_sk`                                                     | `time_dim.t_time_sk`                                                                                       |
+| Ventes web → logistique                      | `ws_warehouse_sk`, `ws_ship_mode_sk`                                                     | `warehouse.w_warehouse_sk`, `ship_mode.sm_ship_mode_sk`                                                    |
+| Ventes → promotion                           | `ss_promo_sk`, `ws_promo_sk`                                                             | `promotion.p_promo_sk`                                                                                     |
+| Retours → ventes                             | (`sr_item_sk`, `sr_ticket_number`) / (`wr_item_sk`, `wr_order_number`)                   | (`ss_item_sk`, `ss_ticket_number`) / (`ws_item_sk`, `ws_order_number`)                                     |
+| Retours → motif                              | `sr_reason_sk`, `wr_reason_sk`                                                           | `reason.r_reason_sk`                                                                                       |
+| Stock → produit / entrepôt / date            | `inv_item_sk`, `inv_warehouse_sk`, `inv_date_sk`                                         | `item`, `warehouse`, `date_dim`                                                                            |
+| Client → référentiels                        | `c_current_addr_sk`, `c_current_cdemo_sk`, `c_current_hdemo_sk`, `c_first_sales_date_sk` | `customer_address`, `customer_demographics`, `household_demographics`, `date_dim`                          |
+| Relations **implicites** (nom non explicite) | `pr_order_sk`, `wcs_sales_sk`, `pr_user_sk`, `wcs_user_sk`, `imp_start_date`             | à identifier (voir point 6)                                                                                |
+
+---
+
+### 3. Comparaison des types
+
+- Toutes les colonnes de jointure sont déclarées en **`bigint`** des deux côtés : **aucune conversion n'est nécessaire**.
+- Aucune valeur non numérique n'a été trouvée dans ces colonnes (Étape C).
+- Les clés métier `*_id` (`char(16)`, ex. `AAAAAAAAAAAAAAAB`) ne sont **jamais** reprises dans les faits : les jointures se font uniquement sur les `*_sk`.
+- Pièges de typage :
+  - `imp_start_date` / `imp_end_date` sont des `bigint` qui contiennent en réalité des clés de date (`d_date_sk`), pas des dates ;
+  - `pr_review_date` est une chaîne `AAAA-MM-JJ`, qu'il faut joindre sur `d_date` et non sur `d_date_sk`.
+
+---
+
+### 4. Valeurs distinctes et doublons
+
+**Côté parent (dimensions)** : les clés `*_sk` sont **uniques** (0 doublon) dans toutes les dimensions, y compris après ajout du refresh. Le refresh ajoute des clés nouvelles sans chevauchement : clients 99000–99999, adresses 49500–49999, articles 17820–17999.
+
+**Côté enfant (couverture des dimensions par les ventes)** :
+
+| Dimension  | Valeurs distinctes utilisées par les ventes / total                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| `item`     | 17 820 / 17 820 (100 %), tous les articles sont vendus                                                |
+| `store`    | 12 / 12                                                                                               |
+| `customer` | ≈ 37 300 clients en magasin, ≈ 37 400 sur le web ; **60 434 / 100 000 clients ont au moins un achat** |
+| `date_dim` | 1 808 jours / 109 573 (la dimension couvre 1900–2199, les ventes 2001–2005)                           |
+| `time_dim` | ≈ 55 600 secondes / 86 400                                                                            |
+
+**Doublons gênants pour les jointures** :
+
+- La paire (ticket, article) n'est pas unique dans les ventes : 4 136 doublons en magasin, 4 076 sur le web. Conséquence : **470 retours magasin et 439 retours web correspondent à 2 lignes de vente**, et une jointure naïve doublerait le montant de ces retours.
+- `ss_ticket_number` et `ws_order_number` utilisent **la même plage de numéros (0 à 89 099)**. Le ticket n°44 et la commande web n°44 ont la même date mais ne concernent le même client que dans 0,02 % des cas : ce sont deux séquences indépendantes, **on ne doit jamais faire de jointure entre magasin et web sur ce numéro**.
+
+---
+
+### 5. Valeurs sans correspondance (orphelins)
+
+**Sur `data` seul : 0 orphelin pour toutes les relations ventes / produits / clients / magasins / dates.** Les seules valeurs sans correspondance sont les NULL déjà relevés à l'Étape C (moins de 0,2 %).
+
+Exceptions relevées :
+
+| Relation                                                        | Constat                                                                                                                                  | Explication                                                                                                                                               |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inventory.inv_item_sk` → `item` (data seul)                    | **232 380 lignes orphelines (1 %)**, soit 180 articles (`17820` à `17999`)                                                               | Ces articles n'existent que dans `data_refresh/item`. Avec le refresh : 0 orphelin. **Il faut charger `item` du refresh avant `inventory`.**              |
+| `store_returns` (refresh) → `store_sales` sur (article, ticket) | **407 / 426 retours sans vente correspondante**                                                                                          | Le ticket existe, mais l'article retourné n'est pas sur ce ticket et le client du retour n'est jamais celui de la vente (0 / 426). Le magasin correspond. |
+| `web_returns` (refresh) → `web_sales`                           | **371 / 400 retours sans vente**                                                                                                         | La commande existe, mais le client ne correspond que dans 3 cas sur 400.                                                                                  |
+| Ventes du refresh → `customer` / `item`                         | 0 orphelin **si** les dimensions du refresh sont chargées : 94 lignes de vente concernent de nouveaux clients et 56 de nouveaux articles | Ordre de chargement : dimensions d'abord, faits ensuite                                                                                                   |
+
+Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
+
+- Retour magasin et vente d'origine : même magasin dans 100 % des cas, **même client dans 90 % des cas seulement** (86 % sur le web). Les autres retours sont faits par un autre client que l'acheteur.
+- `ss_addr_sk` = `c_current_addr_sk` du client dans 99 % des cas : l'adresse de la vente est presque toujours l'adresse actuelle du client.
+- `c_first_sales_date_sk` **n'est jamais égal** à la date du premier achat réel, et il est postérieur à ce premier achat dans 66 % des cas : **cette colonne n'est pas fiable**, il faut recalculer la date du premier achat à partir des ventes.
+
+---
+
+### 6. Relations qui restent à confirmer
+
+| Relation                                                                                           | Résultat du test                                                                                                                                                         | Statut                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `web_clickstreams` (`wcs_sales_sk`, `wcs_item_sk`) → `web_sales` (`ws_order_number`, `ws_item_sk`) | Les 668 052 clics avec achat correspondent exactement aux 668 052 lignes de `web_sales`, avec le même utilisateur et le même jour (100 %)                                | **Confirmée par les données**, mais non documentée dans la spec : `wcs_sales_sk` désigne en fait un **numéro de commande**, pas une clé de ligne de vente |
+| `product_reviews.pr_order_sk` → `web_sales.ws_order_number`                                        | ≈ 99 % des avis trouvent (commande, article) dans `web_sales`, mais l'auteur (`pr_user_sk`) n'est l'acheteur que dans 92 % des cas. Contre `store_sales` : 1 % seulement | **Probable (canal web)**. À confirmer : l'auteur d'un avis peut-il être différent de l'acheteur ? 281 avis sont en double                                 |
+| `pr_user_sk`, `wcs_user_sk` → `customer.c_customer_sk`                                             | 0 orphelin                                                                                                                                                               | Probable, mais le nom (`user`) laisse penser à un compte web distinct d'un client : à confirmer                                                           |
+| `imp_start_date` / `imp_end_date` → `date_dim.d_date_sk`                                           | 0 orphelin, plage identique aux ventes                                                                                                                                   | Probable (le nom dit "date" mais la valeur est une clé)                                                                                                   |
+| Retour → vente sur (article, ticket)                                                               | Clé non unique côté ventes (909 retours ambigus)                                                                                                                         | Règle de rattachement à définir (première ligne, ou répartition proportionnelle à la quantité)                                                            |
+| Retours du `data_refresh` → ventes                                                                 | 407 + 371 retours sans vente correspondante                                                                                                                              | **À clarifier avec le fournisseur** : corrections ? données de test ? À isoler en quarantaine (zone Silver) en attendant                                  |
+| `customer.c_first_sales_date_sk`, `c_first_shipto_date_sk` → `date_dim`                            | Jointure valide techniquement, mais valeurs incohérentes avec les ventes                                                                                                 | Ne pas utiliser pour les indicateurs                                                                                                                      |
+| `store.s_closed_date_sk`, `web_site.web_open/close_date_sk` → `date_dim`                           | Jointure valide, mais dates irréalistes (1917–2198)                                                                                                                      | Ne pas utiliser pour filtrer les magasins actifs                                                                                                          |
+| Magasin ↔ web pour un même client                                                                  | `ss_customer_sk` et `ws_bill_customer_sk` pointent vers le même `customer`                                                                                               | OK pour une vision client multicanal ; **jamais de jointure entre ticket et commande**                                                                    |
+| Stock entrepôt ↔ ventes magasin                                                                    | Aucune colonne commune entre `store` et `warehouse`                                                                                                                      | **Pas de relation** : impossible de rattacher le stock à un magasin                                                                                       |
+
+**Modèle en étoile retenu pour le cas d'usage UC1** (relations vérifiées, 0 orphelin) :
+
+- `store_sales` → `item`, `customer`, `store`, `date_dim`, `time_dim`, `promotion`
+- `web_sales` → `item`, `customer`, `web_site`, `date_dim`, `time_dim`, `warehouse`, `ship_mode`, `promotion`
+- `inventory` → `item`, `warehouse`, `date_dim` (à condition de charger le refresh de `item`)
