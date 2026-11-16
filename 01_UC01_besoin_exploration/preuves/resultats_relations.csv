@@ -1,0 +1,27 @@
+relation;lignes;vides;sans_correspondance
+store_sales.ss_sold_date_sk -> date_dim;667579;0;0
+store_sales.ss_sold_time_sk -> time_dim;667579;0;0
+store_sales.ss_item_sk -> item;667579;0;0
+store_sales.ss_customer_sk -> customer;667579;0;0
+store_sales.ss_store_sk -> store;667579;0;0
+store_sales.ss_promo_sk -> promotion;667579;158;0
+web_sales.ws_sold_date_sk -> date_dim;668052;0;0
+web_sales.ws_item_sk -> item;668052;0;0
+web_sales.ws_bill_customer_sk -> customer;668052;0;0
+web_sales.ws_web_site_sk -> web_site;668052;154;0
+web_sales.ws_web_page_sk -> web_page;668052;164;0
+web_sales.ws_warehouse_sk -> warehouse;668052;158;0
+store_returns.sr_item_sk -> item;37902;0;0
+store_returns.sr_store_sk -> store;37902;0;0
+store_returns.sr_reason_sk -> reason;37902;11;0
+web_returns.wr_item_sk -> item;38487;0;0
+web_returns.wr_reason_sk -> reason;38487;7;0
+inventory.inv_item_sk -> item;23255100;0;232380
+inventory.inv_warehouse_sk -> warehouse;23255100;0;0
+web_clickstreams.wcs_item_sk -> item;6770550;0;0
+
+tickets présents dans plusieurs magasins; 0
+couples (ticket, produit) en double dans store_sales; 4038
+lignes par ticket (min / moyenne / max);1;7.4;14
+retours magasin sans vente correspondante (ticket + produit); 0
+retours web sans vente correspondante (commande + produit); 0
