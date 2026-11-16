@@ -168,36 +168,143 @@
 - Une corrélation n'est pas une cause.
 - Stock par entrepôt seulement, pas d'objectifs de vente, 2005 incomplète dans `data/`.
 
+
+---
+
 ## UC2
 
-> Livrables dans `02_UC02_architecture/`. _Rédaction faite avec l'aide de Claude._
+> Conception logique, sans déploiement technique (consigne UC-02). Les données citées viennent de l'inventaire UC-01 (étapes C à E ci-dessus).
+> _Rédaction faite avec l'aide de Claude._
 
-### Étape A – Contraintes
+---
 
-- Fichiers texte structurés (sauf le texte des avis), environ 1 Go, 23 tables, historique de 2001 à 2008, données personnelles dans `customer`.
+### Étape A – Identifier les contraintes
 
-### Étape B – Comparaison des architectures
+| Contrainte | Constat UC-01 | Conséquence pour l'architecture |
+| --- | --- | --- |
+| **Formats** | Fichiers texte `.dat` séparés par `\|`, sans ligne de titres. Seul le texte des avis est libre | Ajouter les noms de colonnes à la lecture, garder les fichiers d'origine |
+| **Volumes** | Environ 1 Go. Plus gros fichier : `inventory` (405 Mo, 23 millions de lignes) | Stockage HDFS et format Parquet pour réduire la place |
+| **Diversité** | 23 tables : ventes, retours, produits, clients, stocks, clics, avis… | Une zone qui accepte tous les fichiers |
+| **Historique** | 2001 à 2008, avec de nouvelles données dans `data_refresh` | Garder l'historique et pouvoir ajouter des lots |
+| **Qualité** | Espaces en trop, une colonne inutilisable, 180 produits du stock absents de `data/item` | Une étape de nettoyage avant les KPI |
+| **Usages** | Calcul des KPI et tableaux de bord | Une zone prête pour les KPI |
+| **Sécurité** | Noms, emails et dates de naissance dans `customer` | Données personnelles absentes de la zone Gold |
+| **Évolution** | Hadoop, NiFi, Spark puis Azure dans le parcours | Même organisation en local et sur Azure |
 
-- Comparaison Data Warehouse / Data Lake / Lakehouse : principe, données, avantages, limites, usages, gouvernance, pertinence.
-- **Choix** : Data Lake en zones Bronze / Silver / Gold, avec une zone Gold organisée comme un Data Warehouse.
+---
 
-### Étape C – Architecture logique
+### Étape B – Comparer les approches architecturales
 
-- Sources → NiFi → Bronze (fichiers d'origine) → Spark → Silver (Parquet, données propres) → Spark → Gold (Parquet, données pour les KPI) → tableaux de bord.
+| | **1. Data Warehouse** | **2. Data Lake en zones** | **3. Data Lakehouse** |
+| --- | --- | --- | --- |
+| **Principe** | Base de données qui reçoit des données déjà propres | Grand espace où l'on stocke les fichiers tels quels, puis on les nettoie par étapes | Data Lake avec en plus les fonctions d'une base de données |
+| **Types de données adaptés** | Tableaux uniquement | Tous types (tableaux, texte, JSON…) | Tous types |
+| **Avantages** | Rapide et fiable pour les KPI | Pas cher, garde les données brutes, accepte tout | Les avantages des deux |
+| **Limites** | Rigide, pas adapté au texte et aux clics | Peut devenir désorganisé sans règles | Plus complexe à mettre en place |
+| **Usages permis** | Tableaux de bord, reporting | Exploration, data science | Les deux |
+| **Contraintes de gouvernance** | Simple | Indispensable (règles, droits, catalogue) | Indispensable |
+| **Pertinence pour Retail Intelligence** | Bien pour les ventes, pas pour les clics et les avis | Bien : accepte tous nos fichiers et utilise les outils du parcours | Intéressant, mais Delta Lake est facultatif |
 
-### Étape D – Composants
+**Choix retenu** : un **Data Lake en zones Bronze / Silver / Gold**, avec une zone Gold organisée comme un Data Warehouse.
 
-- Obligatoires : Linux, Python, HDFS, NiFi, Spark, Parquet. ADLS Gen2 au jour 4.
-- Étude seulement : Data Factory, Synapse. Facultatifs et non utilisés : HBase, Delta Lake.
+- On stocke tous les fichiers au même endroit et on garde les fichiers d'origine en cas d'erreur.
+- La zone Gold permet de calculer facilement les KPI.
+- C'est cohérent avec les outils obligatoires du parcours.
 
-### Étape E – Flux
+---
 
-- 5 flux en batch : chargement initial, nouvelles données, nettoyage, préparation des KPI, calcul des KPI.
+### Étape C – Architecture logique cible
 
-### Étape F – Gouvernance
+```mermaid
+flowchart LR
+    S1[(Fichiers data/)] --> N[NiFi]
+    S2[(Fichiers data_refresh/)] --> N
+    N --> B[Bronze<br>fichiers d'origine]
+    B -->|Spark| SV[Silver<br>données nettoyées]
+    SV -->|Spark| G[Gold<br>données pour les KPI]
+    G --> K[KPI et tableaux de bord]
+```
 
-- Provenance, documentation, contrôles qualité, droits d'accès par zone, protection des données clients, journaux, coûts.
+**Rôle des zones dans cette proposition**
 
-### Étape G – Local vers Azure
+| Zone | Rôle | Contenu | Format |
+| --- | --- | --- | --- |
+| **Bronze** | Garder une copie exacte des fichiers reçus | Les 34 fichiers, rangés par date de réception | `.dat` |
+| **Silver** | Avoir des données propres | Noms de colonnes ajoutés, espaces enlevés, bons types, `data` et `data_refresh` fusionnés | Parquet |
+| **Gold** | Avoir des données prêtes pour les KPI | Une table des ventes reliée aux produits, magasins, clients et dates, plus les KPI calculés | Parquet |
 
-- HDFS → ADLS Gen2 (conteneurs `bronze`, `silver`, `gold`), accès avec Entra ID + RBAC + ACL, secrets dans Key Vault, alerte de budget.
+---
+
+### Étape D – Positionner les composants technologiques
+
+| Composant | Statut | Rôle dans notre architecture |
+| --- | --- | --- |
+| Linux / Ubuntu | **Obligatoire** | Le système où tout tourne |
+| Python | **Obligatoire** | Explorer les fichiers (scripts d'UC-01) |
+| Hadoop / HDFS | **Obligatoire** | Stocker les zones Bronze, Silver et Gold |
+| Apache NiFi | **Obligatoire** | Déposer les fichiers dans Bronze |
+| Spark / PySpark | **Obligatoire** | Nettoyer les données et calculer les KPI |
+| Parquet | **Format de référence** | Format des zones Silver et Gold |
+| ADLS Gen2 | **Obligatoire** (jour 4) | Remplace HDFS sur Azure |
+| Azure Data Factory | Étude seulement | Pourrait remplacer NiFi sur Azure |
+| Azure Synapse | Étude seulement | Pourrait remplacer Spark sur Azure |
+| HBase | Facultatif | Non utilisé |
+| Delta Lake | Facultatif | Non utilisé (permettrait de passer en Lakehouse) |
+| PDGF | Selon le kit | Non utilisé : les données étaient déjà générées |
+
+> L'architecture fonctionne **sans** HBase ni Delta Lake.
+
+---
+
+### Étape E – Décrire les flux de données
+
+Tous les flux sont en **batch** : on reçoit des fichiers et les KPI sont calculés chaque mois. Le temps réel n'est pas utile.
+
+| # | Source | Format d'entrée | Ingestion | Destination | Contrôles | Transformations | Résultat attendu | Consommateur final |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `data/` | `.dat` | NiFi | Bronze | Fichier complet | Aucune | Fichiers stockés | Équipe Data |
+| 2 | `data_refresh/` | `.dat` | NiFi | Bronze | Fichier pas déjà chargé | Aucune | Fichiers stockés | Équipe Data |
+| 3 | Bronze | `.dat` | Spark | Silver | Colonnes, types, doublons, vides | Noms de colonnes, espaces, types, fusion | Tables propres | Équipe Data |
+| 4 | Silver | Parquet | Spark | Gold | Chaque vente a un produit, un magasin et une date qui existent | Regrouper ventes magasin et web | Tables pour les KPI | Profils métier |
+| 5 | Gold | Parquet | Spark SQL / Python | Tableaux de bord | Les totaux sont corrects | Totaux par mois, magasin, produit | KPI calculés | Profils métier |
+
+> Le flux 2 doit être fait avant de relier les stocks aux produits (180 produits ne sont que dans `data_refresh`).
+
+---
+
+### Étape F – Règles minimales de gouvernance
+
+| Règle | Mise en œuvre |
+| --- | --- |
+| **Traçabilité de la provenance** | Chaque fichier est rangé avec sa date de réception, chaque ligne garde le nom de son fichier d'origine |
+| **Documentation** | Un dictionnaire des tables et colonnes (point de départ : l'inventaire d'UC-01), dossiers nommés `zone/source/table/` |
+| **Contrôles qualité** | À chaque chargement : lignes, colonnes, doublons, vides. Chargement bloqué si un contrôle échoue |
+| **Gestion des accès** | Bronze et Silver : Équipe Data. Gold : profils métier en lecture |
+| **Protection des données** | Les noms et emails des clients ne vont pas dans Gold |
+| **Suivi des traitements** | Un journal par traitement : date, fichier, nombre de lignes, erreurs |
+| **Maîtrise des coûts et des volumes** | Parquet, gros fichiers rangés par date, suivi de la taille des zones |
+
+---
+
+### Étape G – Comparer architecture locale et cloud
+
+| Couche | Local | Azure |
+| --- | --- | --- |
+| Ingestion | NiFi | NiFi ou Data Factory |
+| Stockage | HDFS | ADLS Gen2 |
+| Traitements | Spark | Spark dans Synapse |
+| Format | Parquet | Parquet |
+| Accès | Droits des dossiers HDFS | Entra ID + RBAC + ACL |
+| Mots de passe | Fichiers de configuration | Key Vault |
+
+> La cible Azure est un plan : rien n'est déployé (prévu au jour 4).
+
+**Éléments de la cible cloud**
+
+- **Compte de stockage** : un compte avec l'option « espace de noms hiérarchique » (ADLS Gen2).
+- **Conteneurs** : un par zone (`bronze`, `silver`, `gold`).
+- **Organisation des données** : la même qu'en local, `zone/source/table/`.
+- **Identités et accès** : connexion avec Entra ID.
+- **RBAC et ACL** : Équipe Data en lecture et écriture partout, profils métier en lecture sur `gold` seulement. ACL pour bloquer le dossier des clients.
+- **Secrets** : dans Key Vault, jamais dans le code.
+- **Coûts et quotas** : arrêter les calculs Spark quand on ne s'en sert pas, alerte de budget, vérifier les limites de l'abonnement étudiant.
