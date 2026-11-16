@@ -357,3 +357,116 @@ Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
 - `store_sales` → `item`, `customer`, `store`, `date_dim`, `time_dim`, `promotion`
 - `web_sales` → `item`, `customer`, `web_site`, `date_dim`, `time_dim`, `warehouse`, `ship_mode`, `promotion`
 - `inventory` → `item`, `warehouse`, `date_dim` (à condition de charger le refresh de `item`)
+
+## Étape E – Formaliser les limites
+
+> Chiffres issus des étapes C et D (`scripts/etape_c_profil.json`, `scripts/etape_d_relations.json`) et de contrôles complémentaires sur `data`.
+> Pour chaque limite : **constat**, **impact** sur les indicateurs de l'étape B, **traitement proposé**.
+
+---
+
+### L1. Une table présente n'est pas une table complète
+
+- **Constat** :
+  - Les 23 tables sont présentes, mais plusieurs champs sont vides ou n'ont aucune valeur utile :
+    - `i_rec_end_date`, `s_rec_end_date`, `web_rec_end_date` : 100 % nuls (aucun historique) ;
+    - `d_holiday` : toujours `Y` ;
+    - `i_container`, `p_purpose`, `s_company_name` : toujours `Unknown` ;
+    - `ship_mode` (`sm_type`, `sm_carrier`) et `reason.r_reason_desc` : libellés aléatoires.
+  - Des clés étrangères secondaires sont nulles : `ws_warehouse_sk` (158 lignes), `ws_ship_mode_sk` (170), `sr_reason_sk` (11), `ss_promo_sk` (158).
+- **Impact** :
+  - Les analyses par transporteur ou par motif de retour sont impossibles à interpréter.
+  - Les effets des jours fériés ne sont pas mesurables.
+  - Une ligne de vente sans entrepôt sort de l'analyse logistique.
+- **Traitement** :
+  - En zone Silver, contrôler le taux de remplissage **et** la variété des valeurs de chaque colonne (une colonne pleine mais constante est inutile).
+  - Rattacher les clés nulles à un membre « Inconnu » (`-1`) au lieu de supprimer la ligne, pour que le CA total reste juste.
+
+---
+
+### L2. Vente magasin et vente web ne sont pas modélisées de la même manière
+
+- **Constat** :
+  - `store_sales` a 23 colonnes, `web_sales` en a 34.
+  - Le web distingue l'**acheteur** (`ws_bill_customer_sk`) du **destinataire** (`ws_ship_customer_sk`) : ils sont différents dans 7,2 % des lignes.
+  - Le web a en plus une date d'expédition, un entrepôt, un mode de livraison et des frais de port (`ws_ext_ship_cost` = 852 M au total, soit plus de la moitié du CA web hors port de 1 535 M).
+  - Le magasin est rattaché à `store`, le web à `web_site` : il n'y a pas de dimension « point de vente » commune.
+  - Les deux canaux n'ont pas les mêmes plages de prix : prix catalogue jusqu'à 200 en magasin, jusqu'à 300 sur le web.
+- **Impact** :
+  - `SUM(ss_net_paid) + SUM(ws_net_paid)` reste comparable, car les deux sont hors taxes et hors port. Mais si on prend `ws_net_paid_inc_ship` pour le web, le CA web est gonflé d'environ 55 %.
+  - « Client » ne veut pas dire la même chose selon le canal (acheteur ou destinataire).
+- **Traitement** :
+  - Construire en zone Gold un fait de ventes unifié avec une colonne `canal`, et une seule définition des montants : `net_paid`, hors taxes et hors port.
+  - Pour le web, prendre l'**acheteur** comme client.
+  - Garder les colonnes propres au web (port, livraison) dans un fait séparé.
+
+---
+
+### L3. Vente, commande, ligne de vente et transaction ne sont pas interchangeables
+
+- **Constat** :
+  - Une ligne de `store_sales` / `web_sales` est une **ligne d'article**, pas une vente.
+  - Il y a 667 579 lignes pour 89 100 tickets en magasin, et 668 052 lignes pour 89 100 commandes web, soit **7,5 lignes par ticket en moyenne** (de 1 à 14).
+  - La paire (ticket, article) n'est pas unique : environ 4 100 doublons par canal.
+  - Les numéros de ticket et de commande partagent la même plage (0–89 099) mais ce sont deux séquences indépendantes.
+- **Impact** :
+  - Un `COUNT(*)` donne un nombre de « transactions » **7,5 fois trop élevé**, et le panier moyen est alors divisé d'autant.
+  - Un `COUNT(DISTINCT ticket)` qui mélange les deux canaux sans les séparer compte comme une seule transaction le ticket n°44 et la commande n°44, qui sont différents.
+- **Traitement** :
+  - Documenter le grain du fait (1 ligne = 1 ligne d'article d'un ticket ou d'une commande) et ajouter une clé technique de ligne.
+  - Définir une transaction comme le couple (`canal`, `numéro`) et compter `COUNT(DISTINCT canal || '-' || numéro)`.
+
+---
+
+### L4. Un clic web n'est ni un ajout au panier ni un achat
+
+- **Constat** :
+  - `web_clickstreams` contient 6,77 M de clics.
+  - Seuls **9,9 %** ont un `wcs_sales_sk`. Il y en a exactement autant que de lignes dans `web_sales` (668 052), donc ces clics correspondent aux lignes d'achat elles-mêmes, et non à un parcours qui y mène.
+  - **42 %** des clics sont anonymes (`wcs_user_sk` nul), et **aucun** clic anonyme n'aboutit à un achat.
+  - Il n'existe **aucun événement « ajout au panier »** ni type d'action : on a seulement la page vue, l'article et l'heure.
+- **Impact** :
+  - Un « taux de conversion » égal à clics avec achat / clics (≈ 10 %) est un artefact de la modélisation, pas un comportement mesuré.
+  - Le tunnel visite → panier → achat ne peut pas être reconstruit.
+  - Les visiteurs anonymes ne peuvent pas être rattachés à un client.
+- **Traitement** :
+  - Présenter les clics comme de l'**intérêt** pour un article (consultations) et ne pas en déduire d'intention d'achat.
+  - Calculer la conversion par article (nombre d'acheteurs / nombre de visiteurs identifiés), en indiquant clairement l'hypothèse.
+  - Signaler l'absence d'événement « panier » comme donnée manquante.
+
+---
+
+### L5. Les retours doivent être distingués des ventes
+
+- **Constat** :
+  - Les retours sont dans des tables séparées (`store_returns` : 37 902 lignes, `web_returns` : 38 487), avec des montants positifs, alors que les montants des ventes ne sont jamais diminués des retours.
+  - Montants retournés : 36,7 M en magasin et 50,3 M sur le web, à comparer à un CA de 1 150 M et 1 535 M (environ 3 %).
+  - **20 % des retours magasin et 23 % des retours web sont datés après la fin des ventes** (13/12/2005, jusqu'en 2008).
+  - 909 retours correspondent à 2 lignes de vente (clé non unique).
+  - Le refresh contient 778 retours sans vente correspondante.
+  - Le client du retour diffère de l'acheteur dans 10 % des cas en magasin et 14 % sur le web.
+- **Impact** :
+  - Le CA de l'étape B est un CA **brut des retours**.
+  - Un CA net de retours dépend de la date choisie :
+    - à la **date du retour**, la fin de période est faussée (retours sans ventes en face) ;
+    - à la **date de la vente**, le CA d'un mois change encore plusieurs mois plus tard.
+  - Le taux de retour par magasin devient faux si on fait une jointure sans traiter les doublons.
+- **Traitement** :
+  - Garder deux faits distincts (ventes / retours) et deux indicateurs : CA brut et montant des retours. Le CA net se calcule ensuite comme `CA brut − retours`, avec la règle de date documentée (date de la vente recommandée pour le taux de retour).
+  - Mettre en quarantaine les retours du refresh qui n'ont pas de vente correspondante.
+
+---
+
+### L6. Une corrélation ne démontre pas une causalité
+
+- **Constat** : les données permettent de croiser beaucoup d'indicateurs : promotions et quantités vendues, note des avis et ventes, prix concurrents (`item_marketprices`) et ventes, tranche horaire et CA. Mais :
+  - les données sont **synthétiques** (générateur TPCx-BB) : les liens observés reflètent les règles du générateur, pas le comportement de vrais clients ;
+  - il n'y a **pas de groupe témoin** : on ne sait pas ce qu'un article en promotion aurait vendu sans la promotion ;
+  - il existe des facteurs cachés (saisonnalité, ouverture d'un magasin, assortiment) ;
+  - les avis sont très positifs (61 % de notes 5/5) et l'auteur n'est l'acheteur que dans 92 % des cas.
+- **Impact** :
+  - « Les articles en promotion se vendent plus » ne prouve pas que la promotion **cause** la hausse : on a peut-être mis en promotion des articles qui se vendaient déjà bien.
+  - Même chose pour « les bons avis font vendre » : un article très vendu reçoit mécaniquement plus d'avis.
+- **Traitement** :
+  - Présenter ces croisements comme des **pistes d'analyse**, jamais comme des leviers démontrés.
+  - Pour tester une causalité, comparer avant / après sur le même article et le même magasin, ou proposer un test A/B à la direction commerciale.
