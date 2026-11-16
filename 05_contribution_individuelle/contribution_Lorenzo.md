@@ -606,3 +606,66 @@ Tous les flux sont en **batch** : les sources arrivent par lots de fichiers (cha
 | Comptes de service          | Écriture (NiFi / ADF) | Écriture (Spark)   | Écriture (Spark)       | Écriture (Spark)                    |
 
 ---
+
+### Étape G – Comparer architecture locale et cloud
+
+| Couche      | Local (Linux / Ubuntu)                              | Cloud Azure                                                         |
+| ----------- | --------------------------------------------------- | ------------------------------------------------------------------- |
+| Sources     | Fichiers du kit sur disque local                    | Dépôt dans un conteneur `landing` (ou copie par ADF)                |
+| Ingestion   | Apache NiFi                                         | Azure Data Factory (_étude_) ou NiFi sur VM                         |
+| Stockage    | HDFS : `/bronze`, `/silver`, `/gold`, `/quarantine` | **ADLS Gen2** : conteneurs `bronze`, `silver`, `gold`, `quarantine` |
+| Traitements | Spark / PySpark local                               | Spark managé (Synapse Spark, _étude_) ou Databricks (hors parcours) |
+| Format      | Parquet (Delta Lake facultatif)                     | Parquet (Delta Lake facultatif)                                     |
+| Exposition  | Notebooks, Spark SQL, export                        | Synapse serverless SQL (_étude_) + outil BI                         |
+| Sécurité    | Utilisateurs Linux + ACL HDFS                       | Microsoft Entra ID + RBAC + ACL                                     |
+| Supervision | Logs NiFi / Spark, `run_log`                        | Azure Monitor, suivi des exécutions ADF, `run_log`                  |
+| Coût        | Matériel local, pas de coût à l'usage               | Paiement à l'usage : stockage, transactions, calcul                 |
+
+> Les **chemins et les zones sont identiques** dans les deux environnements, ce qui permet de passer du local au cloud sans refonte. La cible cloud est une **conception logique** : le déploiement est prévu au jour 4.
+
+**Éléments de la cible cloud**
+
+- **Compte de stockage** :
+  - un compte `StorageV2` avec **espace de noms hiérarchique activé**, ce qui en fait un ADLS Gen2 (vrais dossiers et ACL POSIX) ;
+  - région France Central ;
+  - redondance LRS pour la formation (ZRS ou GRS en production) ;
+  - accès public désactivé, HTTPS obligatoire, TLS 1.2 minimum.
+  - Nommage proposé : `stretailintel<env>` (`dev`, `prod`).
+- **Espaces et conteneurs** :
+  - **un conteneur par zone** : `landing` (dépôt temporaire), `bronze`, `silver`, `gold`, `quarantine` ;
+  - plus `logs` pour `run_log` et `quality_report`.
+  - Avoir un conteneur par zone simplifie les droits et les règles de cycle de vie.
+- **Organisation des données** :
+  - `bronze/tpcxbb/<table>/load_id=<AAAAMMJJ_HHMM>_<initial|refresh>/<fichier>.dat` + `_manifest.json`
+  - `silver/<domaine>/<table>/year=AAAA/month=MM/*.parquet` (faits) et `silver/<domaine>/<table>/*.parquet` (dimensions)
+  - `gold/<sujet>/fact_sales/year=…/month=…`, `gold/<sujet>/dim_*`, `gold/kpi/…`
+  - `quarantine/<table>/load_id=…/`
+- **Identités et accès** :
+  - **Microsoft Entra ID** ;
+  - des **groupes** par rôle (`grp-data-engineers`, `grp-analysts`, `grp-business-commercial`, `grp-business-stock`, `grp-store-managers`) : on n'attribue jamais de droit à une personne directement ;
+  - des **identités managées** pour ADF et Synapse : pas de compte technique avec mot de passe.
+- **RBAC et ACL** :
+  - **RBAC** pour les droits larges, au niveau d'un conteneur :
+    - `Storage Blob Data Contributor` pour l'identité managée d'ingestion sur `landing` et `bronze` ;
+    - `Storage Blob Data Contributor` pour l'identité de traitement sur `silver`, `gold` et `quarantine` ;
+    - `Storage Blob Data Reader` pour les analystes sur `silver` et `gold`.
+    - Personne n'a `Owner` ou `Contributor` sur les données.
+  - **ACL POSIX** pour les droits fins, au niveau d'un dossier :
+    - les groupes métier n'ont accès qu'à `gold` (lecture + exécution), avec des ACL **par défaut** pour que les nouveaux dossiers en héritent ;
+    - le dossier `gold/stock` est réservé à `grp-business-stock`.
+  - Le filtrage par magasin pour les responsables de magasin se fait dans la couche d'exposition (sécurité au niveau des lignes dans Synapse ou dans l'outil BI) : les ACL fonctionnent par fichier, pas par ligne.
+- **Sécurité des secrets** :
+  - **Azure Key Vault** pour le sel de pseudonymisation et les éventuelles chaînes de connexion ;
+  - les identités managées accèdent au coffre via RBAC (`Key Vault Secrets User`) ;
+  - **clés d'accès du compte désactivées** (authentification Entra ID uniquement) ;
+  - aucun secret dans le code ni dans Git ;
+  - si un jeton SAS est indispensable : SAS de délégation utilisateur, de courte durée et limité à un conteneur.
+- **Coûts et quotas** :
+  - **Coûts** :
+    - Stockage : à environ 1 Go de données, le coût est négligeable (quelques centimes par mois). Ce qui coûtera, ce sont les **transactions** (beaucoup de petits fichiers, donc compacter les fichiers Parquet) et le **calcul** : nombre d'activités ADF, et volume de données lu par Synapse serverless (facturé au To lu, donc Parquet + partitions réduisent directement la facture).
+    - **Cycle de vie** : Bronze passe en niveau _Cool_ après 30 jours ; `landing` et `quarantine` sont purgés automatiquement.
+  - **Quotas** :
+    - **budget Azure avec alertes** (50 %, 80 %, 100 %) ;
+    - tags `projet` et `env` pour répartir les coûts ;
+    - limites du compte de stockage (débit, nombre de requêtes) très au-dessus de notre volume ;
+    - quotas de vCPU par région à vérifier pour Spark.
