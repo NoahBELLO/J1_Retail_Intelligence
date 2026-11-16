@@ -512,3 +512,18 @@ Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
 - **Delta Lake** est présenté comme un **approfondissement facultatif**. Il apporterait le MERGE, l'ACID et le time travel, mais l'architecture fonctionne sans lui.
 
 ---
+
+### Étape C – Architecture logique cible
+
+![schema](./images/architecture_tpcxbb_medallion.png)
+
+**Rôle des zones dans cette proposition**
+
+| Zone             | Rôle                                                                                                                                        | Contenu                                                                               | Format                        | Qui écrit / qui lit                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------- |
+| **Bronze / Raw** | Garder **exactement** ce qui a été reçu, avec sa provenance. Permet de rejouer tous les traitements.                                        | Les `.dat` et `.csv` d'origine, un dossier par lot (`initial`, `refresh`) + manifeste | Format d'origine (`.dat`)     | NiFi écrit (ajout seulement) ; data engineers lisent    |
+| **Quarantaine**  | Isoler les données rejetées sans les perdre                                                                                                 | Lignes en échec (ex. 778 retours du refresh sans vente) + motif du rejet              | Parquet                       | Spark écrit ; data engineers et référent qualité lisent |
+| **Silver**       | Données **nettoyées, typées, harmonisées et contrôlées**, au niveau de détail de la source, historisées                                     | 23 tables typées, pseudonymisées, dédoublonnées ; SCD2 pour `item` et `customer`      | Parquet (option : Delta Lake) | Spark écrit ; data engineers et analystes lisent        |
+| **Gold**         | Données **organisées pour les indicateurs** : modèle en étoile et agrégats, règles métier appliquées (CA net, transaction = canal + numéro) | Faits, dimensions, tables d'indicateurs                                               | Parquet partitionné           | Spark écrit ; consommateurs métier et outils BI lisent  |
+
+---
