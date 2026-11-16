@@ -23,17 +23,16 @@
 | **Limites** | Rigide, ne garde pas le brut, pas adapté au texte et aux clics | Peut devenir un « marécage de données » sans règles. Pas de mise à jour fiable des fichiers | Plus complexe, technologies plus récentes. Delta Lake est **facultatif** dans le parcours |
 | **Usages** | Tableaux de bord, rapports, KPI officiels | Exploration, data science, archivage | Les deux |
 | **Gouvernance** | Simple, car le périmètre est réduit | Indispensable : catalogue, provenance, droits par dossier | Celle du Data Lake, plus la gestion des versions |
-| **Pour notre projet** | Moyenne : bien pour les KPI, mais pas pour les clics, le texte et le brut | Bonne pour stocker et explorer, mais pas suffisante seule pour des KPI fiables | La plus adaptée, car `data_refresh` corrige le passé et il faut garder l'historique |
+| **Pour notre projet** | Moyenne : bien pour les KPI, mais pas pour les clics, le texte et le brut | **Bonne** : accepte tous nos fichiers et utilise les outils obligatoires. Avec des zones et des contrôles, les KPI restent fiables | Intéressante **plus tard** (`data_refresh` corrige le passé), mais elle demande Delta Lake, qui est facultatif |
 
 ## 3. Notre choix
 
-Une architecture en **zones Bronze / Silver / Gold** (aussi appelée « médaillon »), avec une zone Gold **organisée en étoile comme un Data Warehouse**.
+**Aujourd'hui (socle obligatoire)** : un **Data Lake en zones Bronze / Silver / Gold** (organisation « médaillon »), avec une zone Gold **organisée en étoile comme un Data Warehouse**. Il utilise HDFS, Spark et Parquet. Pour mettre à jour des données, on réécrit des dossiers entiers, et chaque lot a un numéro (`load_id`).
 
-- **Le socle obligatoire** utilise HDFS, Spark et Parquet. Pour mettre à jour des données, on réécrit des dossiers entiers, et chaque lot a un numéro (`load_id`).
-- **Delta Lake** (facultatif) permettrait d'en faire un vrai Lakehouse : mises à jour fiables, retour à une version précédente. L'architecture fonctionne **sans** lui.
+**Plus tard (évolution possible)** : en ajoutant **Delta Lake** (facultatif), ce Data Lake devient un **Lakehouse** : mises à jour fiables, retour à une version précédente. L'architecture fonctionne **sans** Delta Lake.
 
 Pourquoi :
 - on garde tous les fichiers d'origine, ce qui permet de refaire les traitements ;
 - la zone Gold rend les KPI simples et fiables ;
 - c'est cohérent avec les outils obligatoires du parcours ;
-- on peut évoluer vers un Lakehouse plus tard sans tout refaire.
+- on peut passer au Lakehouse plus tard sans tout refaire, car les zones restent les mêmes.

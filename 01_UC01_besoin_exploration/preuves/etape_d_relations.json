@@ -1,0 +1,2224 @@
+[
+ {
+  "domain": "ventes-produits",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 0,
+   "child_distinct": 17820,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 0,
+   "child_distinct": 17856,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 144
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_customer_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 0,
+   "child_distinct": 37336,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 61664
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 0,
+   "child_distinct": 37860,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 62140
+  }
+ },
+ {
+  "domain": "ventes-magasins",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_store_sk"
+  ],
+  "parent": "store",
+  "parent_cols": [
+   "s_store_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 12,
+   "parent_distinct": 12,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 12,
+   "parent_distinct": 12,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_sold_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 0,
+   "child_distinct": 1808,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107765
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 0,
+   "child_distinct": 1826,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107747
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_sold_time_sk"
+  ],
+  "parent": "time_dim",
+  "parent_cols": [
+   "t_time_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 0,
+   "child_distinct": 55645,
+   "parent_rows": 86400,
+   "parent_distinct": 86400,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 30755
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 0,
+   "child_distinct": 55977,
+   "parent_rows": 86400,
+   "parent_distinct": 86400,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 30423
+  }
+ },
+ {
+  "domain": "ventes-autres",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_promo_sk"
+  ],
+  "parent": "promotion",
+  "parent_cols": [
+   "p_promo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 158,
+   "child_distinct": 300,
+   "parent_rows": 300,
+   "parent_distinct": 300,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 159,
+   "child_distinct": 300,
+   "parent_rows": 300,
+   "parent_distinct": 300,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_addr_sk"
+  ],
+  "parent": "customer_address",
+  "parent_cols": [
+   "ca_address_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 448,
+   "child_distinct": 26286,
+   "parent_rows": 49500,
+   "parent_distinct": 49500,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 23214
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 462,
+   "child_distinct": 26675,
+   "parent_rows": 50000,
+   "parent_distinct": 50000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 23325
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_cdemo_sk"
+  ],
+  "parent": "customer_demographics",
+  "parent_cols": [
+   "cd_demo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 238,
+   "child_distinct": 36953,
+   "parent_rows": 1920800,
+   "parent_distinct": 1920800,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1883847
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 250,
+   "child_distinct": 37463,
+   "parent_rows": 1920800,
+   "parent_distinct": 1920800,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1883337
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "store_sales",
+  "child_cols": [
+   "ss_hdemo_sk"
+  ],
+  "parent": "household_demographics",
+  "parent_cols": [
+   "hd_demo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 667579,
+   "child_nulls": 295,
+   "child_distinct": 7161,
+   "parent_rows": 7200,
+   "parent_distinct": 7200,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 39
+  },
+  "data+refresh": {
+   "child_rows": 674211,
+   "child_nulls": 308,
+   "child_distinct": 7165,
+   "parent_rows": 7200,
+   "parent_distinct": 7200,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 35
+  }
+ },
+ {
+  "domain": "ventes-produits",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 17820,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 17859,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 141
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_bill_customer_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 37367,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 61633
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 37911,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 62089
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_ship_customer_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 39377,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 59623
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 39911,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 60089
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_sold_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 1808,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107765
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 1826,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107747
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_ship_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 1927,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107646
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 1945,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107628
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_sold_time_sk"
+  ],
+  "parent": "time_dim",
+  "parent_cols": [
+   "t_time_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 0,
+   "child_distinct": 55563,
+   "parent_rows": 86400,
+   "parent_distinct": 86400,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 30837
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 0,
+   "child_distinct": 55891,
+   "parent_rows": 86400,
+   "parent_distinct": 86400,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 30509
+  }
+ },
+ {
+  "domain": "ventes-magasins",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_web_site_sk"
+  ],
+  "parent": "web_site",
+  "parent_cols": [
+   "web_site_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 154,
+   "child_distinct": 30,
+   "parent_rows": 30,
+   "parent_distinct": 30,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 157,
+   "child_distinct": 30,
+   "parent_rows": 30,
+   "parent_distinct": 30,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-autres",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_web_page_sk"
+  ],
+  "parent": "web_page",
+  "parent_cols": [
+   "wp_web_page_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 164,
+   "child_distinct": 60,
+   "parent_rows": 60,
+   "parent_distinct": 60,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 166,
+   "child_distinct": 60,
+   "parent_rows": 60,
+   "parent_distinct": 60,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-autres",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_warehouse_sk"
+  ],
+  "parent": "warehouse",
+  "parent_cols": [
+   "w_warehouse_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 158,
+   "child_distinct": 5,
+   "parent_rows": 5,
+   "parent_distinct": 5,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 160,
+   "child_distinct": 5,
+   "parent_rows": 5,
+   "parent_distinct": 5,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-autres",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_ship_mode_sk"
+  ],
+  "parent": "ship_mode",
+  "parent_cols": [
+   "sm_ship_mode_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 170,
+   "child_distinct": 20,
+   "parent_rows": 20,
+   "parent_distinct": 20,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 171,
+   "child_distinct": 20,
+   "parent_rows": 20,
+   "parent_distinct": 20,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-autres",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_promo_sk"
+  ],
+  "parent": "promotion",
+  "parent_cols": [
+   "p_promo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 121,
+   "child_distinct": 300,
+   "parent_rows": 300,
+   "parent_distinct": 300,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 123,
+   "child_distinct": 300,
+   "parent_rows": 300,
+   "parent_distinct": 300,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "ventes-clients",
+  "child": "web_sales",
+  "child_cols": [
+   "ws_bill_addr_sk"
+  ],
+  "parent": "customer_address",
+  "parent_cols": [
+   "ca_address_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 668052,
+   "child_nulls": 272,
+   "child_distinct": 26208,
+   "parent_rows": 49500,
+   "parent_distinct": 49500,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 23292
+  },
+  "data+refresh": {
+   "child_rows": 674931,
+   "child_nulls": 282,
+   "child_distinct": 26584,
+   "parent_rows": 50000,
+   "parent_distinct": 50000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 23416
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "store_returns",
+  "child_cols": [
+   "sr_item_sk",
+   "sr_ticket_number"
+  ],
+  "parent": "store_sales",
+  "parent_cols": [
+   "ss_item_sk",
+   "ss_ticket_number"
+  ],
+  "child_types": [
+   "bigint",
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint",
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 37902,
+   "child_nulls": 0,
+   "child_distinct": 37744,
+   "parent_rows": 667579,
+   "parent_distinct": 663443,
+   "parent_duplicates": 4136,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 625699
+  },
+  "data+refresh": {
+   "child_rows": 38328,
+   "child_nulls": 0,
+   "child_distinct": 38168,
+   "parent_rows": 674211,
+   "parent_distinct": 670029,
+   "parent_duplicates": 4182,
+   "orphan_rows": 407,
+   "orphan_pct": 1.062,
+   "orphan_distinct": 407,
+   "orphan_examples": [
+    [
+     "10095",
+     "3483"
+    ],
+    [
+     "17866",
+     "3483"
+    ],
+    [
+     "14049",
+     "3483"
+    ],
+    [
+     "7131",
+     "3483"
+    ],
+    [
+     "4794",
+     "3483"
+    ]
+   ],
+   "parent_unused": 632268
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "store_returns",
+  "child_cols": [
+   "sr_customer_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 37902,
+   "child_nulls": 0,
+   "child_distinct": 6226,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 92774
+  },
+  "data+refresh": {
+   "child_rows": 38328,
+   "child_nulls": 0,
+   "child_distinct": 6306,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 93694
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "store_returns",
+  "child_cols": [
+   "sr_store_sk"
+  ],
+  "parent": "store",
+  "parent_cols": [
+   "s_store_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 37902,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 12,
+   "parent_distinct": 12,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 38328,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 12,
+   "parent_distinct": 12,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "store_returns",
+  "child_cols": [
+   "sr_returned_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 37902,
+   "child_nulls": 0,
+   "child_distinct": 2221,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107352
+  },
+  "data+refresh": {
+   "child_rows": 38328,
+   "child_nulls": 0,
+   "child_distinct": 2223,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107350
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "store_returns",
+  "child_cols": [
+   "sr_reason_sk"
+  ],
+  "parent": "reason",
+  "parent_cols": [
+   "r_reason_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 37902,
+   "child_nulls": 11,
+   "child_distinct": 35,
+   "parent_rows": 35,
+   "parent_distinct": 35,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 38328,
+   "child_nulls": 11,
+   "child_distinct": 35,
+   "parent_rows": 35,
+   "parent_distinct": 35,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "web_returns",
+  "child_cols": [
+   "wr_item_sk",
+   "wr_order_number"
+  ],
+  "parent": "web_sales",
+  "parent_cols": [
+   "ws_item_sk",
+   "ws_order_number"
+  ],
+  "child_types": [
+   "bigint",
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint",
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 38487,
+   "child_nulls": 0,
+   "child_distinct": 38337,
+   "parent_rows": 668052,
+   "parent_distinct": 663976,
+   "parent_duplicates": 4076,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 625639
+  },
+  "data+refresh": {
+   "child_rows": 38887,
+   "child_nulls": 0,
+   "child_distinct": 38734,
+   "parent_rows": 674931,
+   "parent_distinct": 670816,
+   "parent_duplicates": 4115,
+   "orphan_rows": 371,
+   "orphan_pct": 0.954,
+   "orphan_distinct": 371,
+   "orphan_examples": [
+    [
+     "1898",
+     "85134"
+    ],
+    [
+     "8512",
+     "41905"
+    ],
+    [
+     "1379",
+     "41905"
+    ],
+    [
+     "13649",
+     "41905"
+    ],
+    [
+     "16959",
+     "41905"
+    ]
+   ],
+   "parent_unused": 632453
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "web_returns",
+  "child_cols": [
+   "wr_returning_customer_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 38487,
+   "child_nulls": 0,
+   "child_distinct": 6437,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 92563
+  },
+  "data+refresh": {
+   "child_rows": 38887,
+   "child_nulls": 0,
+   "child_distinct": 6516,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 93484
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "web_returns",
+  "child_cols": [
+   "wr_returned_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 38487,
+   "child_nulls": 0,
+   "child_distinct": 2492,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107081
+  },
+  "data+refresh": {
+   "child_rows": 38887,
+   "child_nulls": 0,
+   "child_distinct": 2493,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107080
+  }
+ },
+ {
+  "domain": "retours-ventes",
+  "child": "web_returns",
+  "child_cols": [
+   "wr_reason_sk"
+  ],
+  "parent": "reason",
+  "parent_cols": [
+   "r_reason_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 38487,
+   "child_nulls": 7,
+   "child_distinct": 35,
+   "parent_rows": 35,
+   "parent_distinct": 35,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 38887,
+   "child_nulls": 7,
+   "child_distinct": 35,
+   "parent_rows": 35,
+   "parent_distinct": 35,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "stock",
+  "child": "inventory",
+  "child_cols": [
+   "inv_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 23255100,
+   "child_nulls": 0,
+   "child_distinct": 18000,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 232380,
+   "orphan_pct": 0.999,
+   "orphan_distinct": 180,
+   "orphan_examples": [
+    [
+     "17820"
+    ],
+    [
+     "17821"
+    ],
+    [
+     "17822"
+    ],
+    [
+     "17823"
+    ],
+    [
+     "17824"
+    ]
+   ],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 23490000,
+   "child_nulls": 0,
+   "child_distinct": 18000,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "stock",
+  "child": "inventory",
+  "child_cols": [
+   "inv_warehouse_sk"
+  ],
+  "parent": "warehouse",
+  "parent_cols": [
+   "w_warehouse_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 23255100,
+   "child_nulls": 0,
+   "child_distinct": 5,
+   "parent_rows": 5,
+   "parent_distinct": 5,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 23490000,
+   "child_nulls": 0,
+   "child_distinct": 5,
+   "parent_rows": 5,
+   "parent_distinct": 5,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "stock",
+  "child": "inventory",
+  "child_cols": [
+   "inv_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 23255100,
+   "child_nulls": 0,
+   "child_distinct": 259,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 109314
+  },
+  "data+refresh": {
+   "child_rows": 23490000,
+   "child_nulls": 0,
+   "child_distinct": 261,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 109312
+  }
+ },
+ {
+  "domain": "produits",
+  "child": "item_marketprices",
+  "child_cols": [
+   "imp_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89100,
+   "child_nulls": 0,
+   "child_distinct": 17820,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 90000,
+   "child_nulls": 0,
+   "child_distinct": 17827,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 173
+  }
+ },
+ {
+  "domain": "produits",
+  "child": "product_reviews",
+  "child_cols": [
+   "pr_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89991,
+   "child_nulls": 0,
+   "child_distinct": 16742,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1078
+  },
+  "data+refresh": {
+   "child_rows": 90900,
+   "child_nulls": 0,
+   "child_distinct": 16787,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1213
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "product_reviews",
+  "child_cols": [
+   "pr_user_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89991,
+   "child_nulls": 0,
+   "child_distinct": 39376,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 59624
+  },
+  "data+refresh": {
+   "child_rows": 90900,
+   "child_nulls": 0,
+   "child_distinct": 39892,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 60108
+  }
+ },
+ {
+  "domain": "produits",
+  "child": "web_clickstreams",
+  "child_cols": [
+   "wcs_item_sk"
+  ],
+  "parent": "item",
+  "parent_cols": [
+   "i_item_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 6770550,
+   "child_nulls": 0,
+   "child_distinct": 17820,
+   "parent_rows": 17820,
+   "parent_distinct": 17820,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 6839538,
+   "child_nulls": 0,
+   "child_distinct": 17997,
+   "parent_rows": 18000,
+   "parent_distinct": 18000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 3
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "web_clickstreams",
+  "child_cols": [
+   "wcs_user_sk"
+  ],
+  "parent": "customer",
+  "parent_cols": [
+   "c_customer_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 6770550,
+   "child_nulls": 2853461,
+   "child_distinct": 88695,
+   "parent_rows": 99000,
+   "parent_distinct": 99000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 10305
+  },
+  "data+refresh": {
+   "child_rows": 6839538,
+   "child_nulls": 2882628,
+   "child_distinct": 88980,
+   "parent_rows": 100000,
+   "parent_distinct": 100000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 11020
+  }
+ },
+ {
+  "domain": "ventes-dates",
+  "child": "web_clickstreams",
+  "child_cols": [
+   "wcs_click_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 6770550,
+   "child_nulls": 0,
+   "child_distinct": 1808,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107765
+  },
+  "data+refresh": {
+   "child_rows": 6839538,
+   "child_nulls": 0,
+   "child_distinct": 1826,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107747
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "customer",
+  "child_cols": [
+   "c_current_addr_sk"
+  ],
+  "parent": "customer_address",
+  "parent_cols": [
+   "ca_address_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 99000,
+   "child_nulls": 22,
+   "child_distinct": 42734,
+   "parent_rows": 49500,
+   "parent_distinct": 49500,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 6766
+  },
+  "data+refresh": {
+   "child_rows": 100000,
+   "child_nulls": 22,
+   "child_distinct": 42898,
+   "parent_rows": 50000,
+   "parent_distinct": 50000,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 7102
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "customer",
+  "child_cols": [
+   "c_current_cdemo_sk"
+  ],
+  "parent": "customer_demographics",
+  "parent_cols": [
+   "cd_demo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 99000,
+   "child_nulls": 18,
+   "child_distinct": 96438,
+   "parent_rows": 1920800,
+   "parent_distinct": 1920800,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1824362
+  },
+  "data+refresh": {
+   "child_rows": 100000,
+   "child_nulls": 18,
+   "child_distinct": 97383,
+   "parent_rows": 1920800,
+   "parent_distinct": 1920800,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 1823417
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "customer",
+  "child_cols": [
+   "c_current_hdemo_sk"
+  ],
+  "parent": "household_demographics",
+  "parent_cols": [
+   "hd_demo_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 99000,
+   "child_nulls": 29,
+   "child_distinct": 7200,
+   "parent_rows": 7200,
+   "parent_distinct": 7200,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 100000,
+   "child_nulls": 29,
+   "child_distinct": 7200,
+   "parent_rows": 7200,
+   "parent_distinct": 7200,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "customer",
+  "child_cols": [
+   "c_first_sales_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 99000,
+   "child_nulls": 18,
+   "child_distinct": 65187,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 44386
+  },
+  "data+refresh": {
+   "child_rows": 100000,
+   "child_nulls": 18,
+   "child_distinct": 65561,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 44012
+  }
+ },
+ {
+  "domain": "clients",
+  "child": "household_demographics",
+  "child_cols": [
+   "hd_income_band_sk"
+  ],
+  "parent": "income_band",
+  "parent_cols": [
+   "ib_income_band_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 7200,
+   "child_nulls": 2,
+   "child_distinct": 20,
+   "parent_rows": 20,
+   "parent_distinct": 20,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 7200,
+   "child_nulls": 2,
+   "child_distinct": 20,
+   "parent_rows": 20,
+   "parent_distinct": 20,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "a-confirmer",
+  "child": "product_reviews",
+  "child_cols": [
+   "pr_order_sk"
+  ],
+  "parent": "web_sales",
+  "parent_cols": [
+   "ws_order_number"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89991,
+   "child_nulls": 0,
+   "child_distinct": 89098,
+   "parent_rows": 668052,
+   "parent_distinct": 89100,
+   "parent_duplicates": 578952,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 2
+  },
+  "data+refresh": {
+   "child_rows": 90900,
+   "child_nulls": 0,
+   "child_distinct": 89107,
+   "parent_rows": 674931,
+   "parent_distinct": 90000,
+   "parent_duplicates": 584931,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 893
+  }
+ },
+ {
+  "domain": "a-confirmer",
+  "child": "product_reviews",
+  "child_cols": [
+   "pr_order_sk"
+  ],
+  "parent": "store_sales",
+  "parent_cols": [
+   "ss_ticket_number"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89991,
+   "child_nulls": 0,
+   "child_distinct": 89098,
+   "parent_rows": 667579,
+   "parent_distinct": 89100,
+   "parent_duplicates": 578479,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 2
+  },
+  "data+refresh": {
+   "child_rows": 90900,
+   "child_nulls": 0,
+   "child_distinct": 89107,
+   "parent_rows": 674211,
+   "parent_distinct": 90000,
+   "parent_duplicates": 584211,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 893
+  }
+ },
+ {
+  "domain": "a-confirmer",
+  "child": "web_clickstreams",
+  "child_cols": [
+   "wcs_sales_sk"
+  ],
+  "parent": "web_sales",
+  "parent_cols": [
+   "ws_order_number"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 6770550,
+   "child_nulls": 6102498,
+   "child_distinct": 89100,
+   "parent_rows": 668052,
+   "parent_distinct": 89100,
+   "parent_duplicates": 578952,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  },
+  "data+refresh": {
+   "child_rows": 6839538,
+   "child_nulls": 6164607,
+   "child_distinct": 90000,
+   "parent_rows": 674931,
+   "parent_distinct": 90000,
+   "parent_duplicates": 584931,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 0
+  }
+ },
+ {
+  "domain": "a-confirmer",
+  "child": "item_marketprices",
+  "child_cols": [
+   "imp_start_date"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 89100,
+   "child_nulls": 0,
+   "child_distinct": 1808,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107765
+  },
+  "data+refresh": {
+   "child_rows": 90000,
+   "child_nulls": 0,
+   "child_distinct": 1826,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 107747
+  }
+ },
+ {
+  "domain": "a-confirmer",
+  "child": "store",
+  "child_cols": [
+   "s_closed_date_sk"
+  ],
+  "parent": "date_dim",
+  "parent_cols": [
+   "d_date_sk"
+  ],
+  "child_types": [
+   "bigint"
+  ],
+  "parent_types": [
+   "bigint"
+  ],
+  "types_ok": true,
+  "data": {
+   "child_rows": 12,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 109561
+  },
+  "data+refresh": {
+   "child_rows": 12,
+   "child_nulls": 0,
+   "child_distinct": 12,
+   "parent_rows": 109573,
+   "parent_distinct": 109573,
+   "parent_duplicates": 0,
+   "orphan_rows": 0,
+   "orphan_pct": 0.0,
+   "orphan_distinct": 0,
+   "orphan_examples": [],
+   "parent_unused": 109561
+  }
+ }
+]

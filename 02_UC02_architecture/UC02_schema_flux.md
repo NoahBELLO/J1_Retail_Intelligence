@@ -13,27 +13,25 @@ flowchart LR
     GO --> KPI[KPI / tableaux de bord]
 ```
 
-Tous les flux sont en **batch** (par lots) : les données arrivent en fichiers, et les décisions sont prises chaque jour, semaine ou mois. Le temps réel n'est pas utile aujourd'hui. Seuls les clics web pourraient passer en continu plus tard, si on voulait par exemple faire des recommandations pendant la visite.
+Tous les flux sont en **batch** (par lots) : les données arrivent en fichiers, et les décisions sont prises chaque jour, semaine ou mois. Le temps réel n'est pas utile aujourd'hui.
 
-## 2. Les flux par type de données
+## 2. Les flux principaux
+
+Tous les flux passent par NiFi (ingestion) puis Spark (traitements), de Bronze vers Silver puis Gold.
 
 | # | Source | Format | Destination | Contrôles | Transformations | Résultat | Utilisé par |
 |---|---|---|---|---|---|---|---|
-| F1 | `store_sales`, `web_sales` | `.dat` | Bronze → Silver → Gold `ventes` | Nombre de colonnes, types, identifiants remplis, chaque vente a un produit/client/magasin/date qui existe, montants cohérents, pas de doublon avec le lot d'avant | Numéro de ligne ajouté, vides → -1, magasin + web réunis avec une colonne `canal`, transaction = canal + numéro, rangement par mois | Une table de ventes commune | P1, P2, P4, P6 |
-| F2 | `store_returns`, `web_returns` | `.dat` | Bronze → Silver → Gold `retours` (+ quarantaine) | Le retour correspond à une vente, pas plus d'articles rendus que vendus, retour après la vente | Rattachement à la vente (règle pour les 909 cas à deux lignes), retours sans vente → quarantaine | Une table des retours reliée aux ventes | P4, P6 |
-| F3 | `inventory` | `.dat` | Bronze → Silver → Gold `stocks par semaine` | Date + produit + entrepôt unique, produit existant (après chargement de `data_refresh/item`), quantité ≥ 0 | Comparaison avec les ventes de la semaine, repérage des ruptures (stock à 0) et des surstocks | Stock par semaine et par entrepôt | P5 |
-| F4 | Tables de référence fixes (dates, heures, magasins, entrepôts, promotions…) | `.dat` | Bronze → Silver → Gold `dimensions` | Identifiants uniques, colonnes inutilisables signalées | Membre -1 « Inconnu », colonnes inutilisables retirées | Dimensions propres | Tous |
-| F5 | Tables de référence qui changent (`item`, `customer`, `customer_address`) | `.dat` | Bronze → Silver → Gold | Identifiants uniques, emails en double, dates de naissance impossibles | Données personnelles masquées, historique des versions, date du premier achat recalculée | Dimensions avec historique, sans données personnelles en Gold | Analystes, P4 |
-| F6 | `web_clickstreams` | `.dat` | Bronze → Silver → Gold `clics` | Produit et page existants, lien avec les commandes web | Marquer les clics anonymes et les clics avec achat, total par produit et par jour | Consultations par produit (pas un taux de conversion) | Analystes, P4 |
-| F7 | `product_reviews` | `.dat` + texte libre | Bronze → Silver | Note entre 1 et 5, texte non vide, doublons | Nettoyage du texte (HTML), doublons enlevés | Avis utilisables | Analystes |
-| F8 | `item_marketprices` + `audit.csv` | `.dat` + CSV | Bronze → Silver | Produit existant, date de début ≤ date de fin | Conversion des numéros de date en vraies dates | Historique des prix concurrents | P4 |
-| F9 | Sources complémentaires (**hypothèses**) : jours fériés, devise, stock des magasins | À définir | Bronze → Silver | Format à vérifier à l'arrivée | Liaison avec les dates et les magasins | Combler les manques d'UC-01 | Selon la source |
+| F1 | Tables de référence : produits, clients, magasins, dates… | `.dat` | Gold `dimensions` | Identifiants uniques, colonnes inutilisables signalées | Noms de colonnes, espaces enlevés, données personnelles masquées, vides → -1 « Inconnu » | Tables de référence propres | Tous |
+| F2 | Ventes : `store_sales`, `web_sales` | `.dat` | Gold `ventes` | Chaque vente a un produit, un client, un magasin et une date qui existent. Montants cohérents. Pas de doublon avec le lot d'avant | Magasin + web réunis avec une colonne `canal`, numéro de ligne ajouté | Une table de ventes commune | P1, P2, P4, P6 |
+| F3 | Retours : `store_returns`, `web_returns` | `.dat` | Gold `retours` + quarantaine | Chaque retour correspond à une vente | Retours sans vente → quarantaine | Une table des retours | P4, P6 |
+| F4 | Stocks : `inventory` | `.dat` | Gold `stocks` | Produit existant (après chargement de `data_refresh/item`) | Repérage des ruptures et des surstocks | Stock par semaine et par entrepôt | P5 |
+| F5 | Web : clics, avis, prix concurrents | `.dat` + `.csv` | Silver (exploration) | Produits existants, doublons | Clics marqués « avec achat » ou non, texte des avis nettoyé | Données pour l'exploration | Analystes, P4 |
+
+Les sources complémentaires (jours fériés, devise, stock des magasins) sont des **hypothèses** : elles auraient leur propre flux, séparé de TPCx-BB.
 
 ## 3. Ordre de chargement d'un lot
 
-1. F4 : les tables de référence fixes.
-2. F5 : les produits et les clients (y compris ceux de `data_refresh`).
-3. F1 : les ventes.
-4. F2 : les retours.
-5. F3, F6, F7, F8 : stocks, clics, avis, prix.
-6. Recalcul des KPI de Gold pour **les périodes touchées par le lot**, car `data_refresh` modifie aussi le passé.
+1. F1 : les tables de référence (y compris les nouveaux produits et clients de `data_refresh`).
+2. F2 : les ventes.
+3. F3, F4, F5 : retours, stocks, données web.
+4. Recalcul des KPI pour **les périodes touchées par le lot**, car `data_refresh` modifie aussi le passé.

@@ -12,7 +12,10 @@ TP Jour 1 – Retail Intelligence Platform (IPSSI). Socle obligatoire : UC-01 et
 - `UC01_qualification_donnees.md` : qualité des données et relations entre tables
 - `UC01_limites_et_hypotheses.md` : limites et hypothèses
 - `UC01_schema_fonctionnel.md` : schéma utilisateurs → questions → KPI → données
-- `preuves/` : scripts d'exploration (Noah : `explorer_donnees.py`, `verifier_relations.py` ; Lorenzo : `etape_c_profilage.py`, `etape_d_relations.py`) et résultats
+- `preuves/` : scripts d'exploration et leurs résultats
+  - Noah : `explorer_donnees.py` → `inventaire_fichiers.csv`, `inventaire_colonnes.csv` ; `verifier_relations.py` → `resultats_relations.csv`
+  - Lorenzo : `etape_c_profilage.py` → `etape_c_profil.json` ; `etape_d_relations.py` → `etape_d_relations.json` (les deux utilisent `tpcxbb_schema.json`)
+  - `arborescence_donnees.txt`, `apercu_fichiers.txt` : liste des fichiers et aperçu de leur contenu
 
 ### 02_UC02_architecture – Architecture Data
 - `UC02_comparaison_architectures.md` : contraintes et comparaison DW / Data Lake / Lakehouse
@@ -34,8 +37,8 @@ Depuis `01_UC01_besoin_exploration/preuves/` :
 ```
 python explorer_donnees.py <chemin vers retail_project>
 python verifier_relations.py <chemin vers retail_project/data>
-python etape_c_profilage.py <chemin vers retail_project> <fichier_sortie.json>
-python etape_d_relations.py <chemin vers retail_project> <fichier_sortie.json>
+python etape_c_profilage.py <chemin vers retail_project> etape_c_profil.json
+python etape_d_relations.py <chemin vers retail_project> etape_d_relations.json
 ```
 
 Les données (`retail_project/`) ne sont pas dans le dépôt, à cause de leur taille.

@@ -86,8 +86,16 @@ def load(root, zone, table, cols):
             _cache[key] = None
         else:
             names = [c[0] for c in SCHEMA[table]]
-            _cache[key] = pd.read_csv(p, sep="|", header=None, names=names, usecols=cols,
-                                      dtype="Int64", quoting=3)
+            try:
+                _cache[key] = pd.read_csv(p, sep="|", header=None, names=names, usecols=cols,
+                                          dtype="Int64", quoting=3)
+            except ValueError:
+                # Certains fichiers (customer, customer_address) ont des valeurs
+                # entourees d'espaces : on enleve les espaces avant de convertir.
+                df = pd.read_csv(p, sep="|", header=None, names=names, usecols=cols,
+                                 dtype=str, quoting=3, keep_default_na=False)
+                _cache[key] = df.apply(lambda s: pd.to_numeric(
+                    s.str.strip().replace("", None), dtype_backend="numpy_nullable").astype("Int64"))
     return _cache[key]
 
 
