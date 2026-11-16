@@ -257,7 +257,7 @@ Un ticket est rattaché à un seul magasin, une seule date et un seul client (v�
 
 ## Étape D – Vérifier les relations possibles
 
-> Contrôles réalisés avec `scripts/etape_d_relations.py` (résultat complet : `scripts/etape_d_relations.json`), sur `data` seul puis sur `data` + `data_refresh`.
+> Contrôles réalisés avec `01_UC01_besoin_exploration/preuves/etape_d_relations.py` (résultat complet : `01_UC01_besoin_exploration/preuves/etape_d_relations.json`), sur `data` seul puis sur `data` + `data_refresh`.
 > Un **orphelin** est une valeur non nulle de la colonne enfant qui n'existe pas dans la table parente.
 
 ---
@@ -360,7 +360,7 @@ Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
 
 ## Étape E – Formaliser les limites
 
-> Chiffres issus des étapes C et D (`scripts/etape_c_profil.json`, `scripts/etape_d_relations.json`) et de contrôles complémentaires sur `data`.
+> Chiffres issus des étapes C et D (`01_UC01_besoin_exploration/preuves/etape_c_profil.json`, `01_UC01_besoin_exploration/preuves/etape_d_relations.json`) et de contrôles complémentaires sur `data`.
 > Pour chaque limite : **constat**, **impact** sur les indicateurs de l'étape B, **traitement proposé**.
 
 ---

@@ -2,7 +2,7 @@
 
 Nous avons utilisé deux scripts :
 - `preuves/verifier_relations.py` (Noah), dont les résultats sont dans `preuves/resultats_relations.csv` ;
-- `05_contribution_individuelle/scripts/etape_d_relations.py` (Lorenzo), qui fait aussi les tests avec `data_refresh`.
+- `preuves/etape_d_relations.py` (Lorenzo), qui fait aussi les tests avec `data_refresh`.
 
 ## 1. Qualité des données
 

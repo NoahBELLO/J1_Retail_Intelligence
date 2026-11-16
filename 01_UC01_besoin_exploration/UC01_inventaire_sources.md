@@ -2,7 +2,7 @@
 
 Nous avons utilisé deux scripts :
 - `preuves/explorer_donnees.py` (Noah), dont les résultats sont dans `preuves/inventaire_fichiers.csv` et `preuves/inventaire_colonnes.csv` ;
-- `05_contribution_individuelle/scripts/etape_c_profilage.py` (Lorenzo).
+- `preuves/etape_c_profilage.py` (Lorenzo).
 
 ## 1. Le kit de données
 
