@@ -2,7 +2,7 @@
 
 ## 1. Schéma
 
-![Architecture cible](../05_contribution_individuelle/images/architecture_tpcxbb_medallion.png)
+![Architecture cible](preuves/architecture_tpcxbb_medallion.png)
 
 Version texte du même schéma :
 

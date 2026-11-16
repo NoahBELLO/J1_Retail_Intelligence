@@ -515,7 +515,7 @@ Cohérence des relations sur `data` (orphelins = 0, mais valeurs à vérifier) :
 
 ### Étape C – Architecture logique cible
 
-![schema](./images/architecture_tpcxbb_medallion.png)
+![schema](../02_UC02_architecture/preuves/architecture_tpcxbb_medallion.png)
 
 **Rôle des zones dans cette proposition**
 

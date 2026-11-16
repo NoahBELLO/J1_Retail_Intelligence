@@ -4,7 +4,7 @@ UC-02 est un travail de conception : rien n'est encore déployé. Les preuves de
 
 | Preuve demandée | Où la trouver |
 |---|---|
-| Schéma d'architecture | `UC02_architecture_cible.md`, section 1 |
+| Schéma d'architecture | `architecture_tpcxbb_medallion.png` (ce dossier) et `UC02_architecture_cible.md`, section 1 |
 | Schéma des flux | `UC02_schema_flux.md`, section 1 |
 | Tableau de comparaison des architectures | `UC02_comparaison_architectures.md`, section 2 |
 | Matrice de positionnement des composants | `UC02_positionnement_composants.md` |
