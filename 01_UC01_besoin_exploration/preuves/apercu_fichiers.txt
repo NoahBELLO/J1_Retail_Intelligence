@@ -1,0 +1,20 @@
+== store_sales (3 premières lignes)
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+== web_sales (3 premières lignes)
+36890|26789|36993|794|85457|380790|2436|42649|29934|1583844|5251|525|2|14|1|3|120|0|93|32.62|81.22|59.29|2039.49|5513.97|3033.66|7553.46|330.84|0.00|1661.76|5513.97|5844.81|7175.73|7506.57|2480.31
+36890|26789|36953|9897|85457|380790|2436|42649|29934|1583844|5251|525|46|28|17|2|282|0|60|20.14|31.62|25.30|379.20|1518.00|1208.40|1897.20|31.42|470.58|796.82|1047.42|1078.84|1844.24|1875.66|-160.98
+36890|26789|36906|3725|85457|380790|2436|42649|29934|1583844|5251|525|20|29|2|3|283|0|93|50.82|139.25|137.86|129.27|12820.98|4726.26|12950.25|0.00|0.00|129.50|12820.98|12820.98|12950.48|12950.48|8094.
+== customer (3 premières lignes)
+    0| AAAAAAAAAAAAAAAA| 1824793| 3203|  2555|  28776|  14690| Ms. | Marisa     | Harrington   | N| 17|  4| 1988| UNITED ARAB EMIRATES| RRCyuY3XfE3a | Marisa.Harrington@lawyer.com             | gdMmGd
+    1| AAAAAAAAAAAAAAAB|  830976| 2600|  9191|  94658|  19931| Miss| Bessie     | Calderon     | N| 20| 10| 1945| MONACO              | aCJb9cc      | Bessie.Calderon@snail-mail.net           | hLQn0L
+    2| AAAAAAAAAAAAAAAC|  335540| 5527| 14091|  31783| 106195| Miss| Barbara    | Hoover       | Y|  3|  4| 1952| GREENLAND           | 59cfL9Fbpv   | Barbara.Hoover@lawyer.com                | vDVbSO
+== item (3 premières lignes)
+0|AAAAAAAAAAAAAAAA|2000-01-14||quickly even dinos beneath the frays must have to boost boldly careful bold escapades: stealthily even forges over the dependencies integrate always past the quiet sly d
+1|AAAAAAAAAAAAAAAB|2000-09-23||quietly quiet hockey players outside the furiously fluffy sauternes impress daringly silently quiet gifts? bold ruthless escapades run slyly epitaphs! warhorses of the c
+2|AAAAAAAAAAAAAAAC|2000-09-01||dogged dugouts need to maintain regularly in place of the furiously brave dinos! dugouts poach stealthily final escapades? sauternes will have to wake! tithes can use sl
+== web_clickstreams (3 premières lignes)
+36890|71470||4867|28|
+36890|27089||15465|47|
+36890|16847||3387|31|
