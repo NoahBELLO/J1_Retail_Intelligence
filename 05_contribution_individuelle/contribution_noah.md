@@ -35,7 +35,3 @@ J'ai relu, corrigé et fait des choix sur ce qu'il proposait (voir ci-dessous).
 - Un clic n'est pas un achat (90 % des clics sans vente).
 - Le stock est suivi par entrepôt et pas par magasin.
 - 180 produits du stock n'existent que dans `data_refresh`.
-
-## Ce que je dois encore approfondir
-
-<!-- À compléter par moi : les points que je dois revoir avant l'oral -->
