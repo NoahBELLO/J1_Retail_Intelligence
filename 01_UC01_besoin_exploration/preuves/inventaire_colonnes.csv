@@ -1,0 +1,523 @@
+﻿table;position;colonne;type_observe;nb_vides;pct_vides;nb_avec_espaces
+customer;1;c_customer_sk;entier;0;0.0;10000
+customer;2;c_customer_id;texte;0;0.0;99000
+customer;3;c_current_cdemo_sk;entier;18;0.02;99000
+customer;4;c_current_hdemo_sk;entier;29;0.03;99000
+customer;5;c_current_addr_sk;entier;22;0.02;99000
+customer;6;c_first_shipto_date_sk;entier;25;0.03;99000
+customer;7;c_first_sales_date_sk;entier;18;0.02;99000
+customer;8;c_salutation;texte;28;0.03;99000
+customer;9;c_first_name;texte;0;0.0;99000
+customer;10;c_last_name;texte;0;0.0;99000
+customer;11;c_preferred_cust_flag;texte;27;0.03;99000
+customer;12;c_birth_day;entier;18;0.02;99000
+customer;13;c_birth_month;entier;25;0.03;99000
+customer;14;c_birth_year;entier;30;0.03;99000
+customer;15;c_birth_country;texte;16;0.02;99000
+customer;16;c_login;texte (mixte);26;0.03;99000
+customer;17;c_email_address;texte;23;0.02;99000
+customer;18;c_last_review_date;texte (mixte);28;0.03;99000
+customer_address;1;ca_address_sk;entier;0;0.0;10000
+customer_address;2;ca_address_id;texte;0;0.0;49500
+customer_address;3;ca_street_number;entier;14;0.03;49500
+customer_address;4;ca_street_name;texte;10;0.02;49500
+customer_address;5;ca_street_type;texte;13;0.03;49500
+customer_address;6;ca_suite_number;texte (mixte);23;0.05;49500
+customer_address;7;ca_city;texte;0;0.0;49500
+customer_address;8;ca_county;texte;0;0.0;49500
+customer_address;9;ca_state;texte;0;0.0;49500
+customer_address;10;ca_zip;entier;14;0.03;49500
+customer_address;11;ca_country;texte;0;0.0;49500
+customer_address;12;ca_gmt_offset;entier;0;0.0;49500
+customer_address;13;ca_location_type;texte;0;0.0;49500
+customer_demographics;1;cd_demo_sk;entier;0;0.0;0
+customer_demographics;2;cd_gender;texte;486;0.03;0
+customer_demographics;3;cd_marital_status;texte;485;0.03;0
+customer_demographics;4;cd_education_status;texte;506;0.03;0
+customer_demographics;5;cd_purchase_estimate;entier;507;0.03;0
+customer_demographics;6;cd_credit_rating;texte;506;0.03;0
+customer_demographics;7;cd_dep_count;entier;544;0.03;0
+customer_demographics;8;cd_dep_employed_count;entier;488;0.03;0
+customer_demographics;9;cd_dep_college_count;entier;500;0.03;0
+date_dim;1;d_date_sk;entier;0;0.0;0
+date_dim;2;d_date_id;texte;0;0.0;0
+date_dim;3;d_date;date;0;0.0;0
+date_dim;4;d_month_seq;entier;0;0.0;0
+date_dim;5;d_week_seq;entier;0;0.0;0
+date_dim;6;d_quarter_seq;entier;0;0.0;0
+date_dim;7;d_year;entier;0;0.0;0
+date_dim;8;d_dow;entier;0;0.0;0
+date_dim;9;d_moy;entier;0;0.0;0
+date_dim;10;d_dom;entier;0;0.0;0
+date_dim;11;d_qoy;entier;0;0.0;0
+date_dim;12;d_fy_year;entier;0;0.0;0
+date_dim;13;d_fy_quarter_seq;entier;0;0.0;0
+date_dim;14;d_fy_week_seq;entier;0;0.0;0
+date_dim;15;d_day_name;texte;0;0.0;0
+date_dim;16;d_quarter_name;texte;0;0.0;0
+date_dim;17;d_holiday;texte;0;0.0;0
+date_dim;18;d_weekend;texte;0;0.0;0
+date_dim;19;d_following_holiday;texte;0;0.0;0
+date_dim;20;d_first_dom;entier;0;0.0;0
+date_dim;21;d_last_dom;entier;0;0.0;0
+date_dim;22;d_same_day_ly;entier;0;0.0;0
+date_dim;23;d_same_day_lq;entier;0;0.0;0
+date_dim;24;d_current_day;texte;0;0.0;0
+date_dim;25;d_current_week;texte;0;0.0;0
+date_dim;26;d_current_month;texte;0;0.0;0
+date_dim;27;d_current_quarter;texte;0;0.0;0
+date_dim;28;d_current_year;texte;0;0.0;0
+household_demographics;1;hd_demo_sk;entier;0;0.0;0
+household_demographics;2;hd_income_band_sk;entier;2;0.03;0
+household_demographics;3;hd_buy_potential;texte;1;0.01;0
+household_demographics;4;hd_dep_count;entier;2;0.03;0
+household_demographics;5;hd_vehicle_count;entier;2;0.03;0
+income_band;1;ib_income_band_sk;entier;0;0.0;0
+income_band;2;ib_lower_bound;entier;0;0.0;0
+income_band;3;ib_upper_bound;entier;0;0.0;0
+inventory;1;inv_date_sk;entier;0;0.0;0
+inventory;2;inv_item_sk;entier;0;0.0;0
+inventory;3;inv_warehouse_sk;entier;0;0.0;0
+inventory;4;inv_quantity_on_hand;entier;5999;0.03;0
+item;1;i_item_sk;entier;0;0.0;0
+item;2;i_item_id;texte;0;0.0;0
+item;3;i_rec_start_date;date;0;0.0;0
+item;4;i_rec_end_date;vide;17820;100.0;0
+item;5;i_item_desc;texte;4;0.02;2575
+item;6;i_current_price;décimal;0;0.0;0
+item;7;i_wholesale_cost;décimal;0;0.0;0
+item;8;i_brand_id;entier;8;0.04;0
+item;9;i_brand;texte (mixte);6;0.03;0
+item;10;i_class_id;entier;0;0.0;0
+item;11;i_class;texte;0;0.0;0
+item;12;i_category_id;entier;0;0.0;0
+item;13;i_category;texte;0;0.0;0
+item;14;i_manufact_id;entier;0;0.0;0
+item;15;i_manufact;texte (mixte);0;0.0;0
+item;16;i_size;texte;0;0.0;0
+item;17;i_formulation;texte (mixte);0;0.0;0
+item;18;i_color;texte;0;0.0;0
+item;19;i_units;texte;0;0.0;0
+item;20;i_container;texte;0;0.0;0
+item;21;i_manager_id;entier;0;0.0;0
+item;22;i_product_name;texte (mixte);0;0.0;0
+item_marketprices;1;imp_sk;entier;0;0.0;0
+item_marketprices;2;imp_item_sk;entier;0;0.0;0
+item_marketprices;3;imp_competitor;texte;0;0.0;0
+item_marketprices;4;imp_competitor_price;décimal;29;0.03;0
+item_marketprices;5;imp_start_date;entier;0;0.0;0
+item_marketprices;6;imp_end_date;entier;30;0.03;0
+product_reviews;1;pr_review_sk;entier;0;0.0;0
+product_reviews;2;pr_review_date;date;0;0.0;0
+product_reviews;3;pr_review_time;heure;0;0.0;0
+product_reviews;4;pr_review_rating;entier;0;0.0;0
+product_reviews;5;pr_item_sk;entier;0;0.0;0
+product_reviews;6;pr_user_sk;entier;0;0.0;0
+product_reviews;7;pr_order_sk;entier;0;0.0;0
+product_reviews;8;pr_review_content;texte;5;0.01;0
+promotion;1;p_promo_sk;entier;0;0.0;0
+promotion;2;p_promo_id;texte;0;0.0;0
+promotion;3;p_start_date_sk;entier;0;0.0;0
+promotion;4;p_end_date_sk;entier;0;0.0;0
+promotion;5;p_item_sk;entier;0;0.0;0
+promotion;6;p_cost;décimal;0;0.0;0
+promotion;7;p_response_target;entier;0;0.0;0
+promotion;8;p_promo_name;texte;0;0.0;0
+promotion;9;p_channel_dmail;texte;0;0.0;0
+promotion;10;p_channel_email;texte;0;0.0;0
+promotion;11;p_channel_catalog;texte;0;0.0;0
+promotion;12;p_channel_tv;texte;0;0.0;0
+promotion;13;p_channel_radio;texte;1;0.33;0
+promotion;14;p_channel_press;texte;0;0.0;0
+promotion;15;p_channel_event;texte;0;0.0;0
+promotion;16;p_channel_demo;texte;0;0.0;0
+promotion;17;p_channel_details;texte;0;0.0;58
+promotion;18;p_purpose;texte;0;0.0;0
+promotion;19;p_discount_active;texte;0;0.0;0
+reason;1;r_reason_sk;entier;0;0.0;0
+reason;2;r_reason_id;texte;0;0.0;0
+reason;3;r_reason_desc;texte;0;0.0;4
+ship_mode;1;sm_ship_mode_sk;entier;0;0.0;0
+ship_mode;2;sm_ship_mode_id;texte;0;0.0;0
+ship_mode;3;sm_type;texte;0;0.0;0
+ship_mode;4;sm_code;texte (mixte);0;0.0;0
+ship_mode;5;sm_carrier;texte;0;0.0;0
+ship_mode;6;sm_contract;texte;0;0.0;0
+store;1;s_store_sk;entier;0;0.0;0
+store;2;s_store_id;texte;0;0.0;0
+store;3;s_rec_start_date;date;0;0.0;0
+store;4;s_rec_end_date;vide;12;100.0;0
+store;5;s_closed_date_sk;entier;0;0.0;0
+store;6;s_store_name;texte;0;0.0;0
+store;7;s_number_employees;entier;0;0.0;0
+store;8;s_floor_space;entier;0;0.0;0
+store;9;s_hours;texte;0;0.0;0
+store;10;s_manager;texte;0;0.0;0
+store;11;s_market_id;entier;0;0.0;0
+store;12;s_geography_class;texte;0;0.0;0
+store;13;s_market_desc;texte;0;0.0;1
+store;14;s_market_manager;texte;0;0.0;0
+store;15;s_division_id;entier;0;0.0;0
+store;16;s_division_name;texte;0;0.0;0
+store;17;s_company_id;entier;0;0.0;0
+store;18;s_company_name;texte;0;0.0;0
+store;19;s_street_number;entier;0;0.0;0
+store;20;s_street_name;texte;0;0.0;0
+store;21;s_street_type;texte;0;0.0;0
+store;22;s_suite_number;texte;0;0.0;0
+store;23;s_city;texte;0;0.0;0
+store;24;s_county;texte;0;0.0;0
+store;25;s_state;texte;0;0.0;0
+store;26;s_zip;entier;0;0.0;0
+store;27;s_country;texte;0;0.0;0
+store;28;s_gmt_offset;entier;0;0.0;0
+store;29;s_tax_precentage;décimal;0;0.0;0
+store_returns;1;sr_returned_date_sk;entier;0;0.0;0
+store_returns;2;sr_return_time_sk;entier;0;0.0;0
+store_returns;3;sr_item_sk;entier;0;0.0;0
+store_returns;4;sr_customer_sk;entier;0;0.0;0
+store_returns;5;sr_cdemo_sk;entier;21;0.06;0
+store_returns;6;sr_hdemo_sk;entier;15;0.04;0
+store_returns;7;sr_addr_sk;entier;42;0.11;0
+store_returns;8;sr_store_sk;entier;0;0.0;0
+store_returns;9;sr_reason_sk;entier;11;0.03;0
+store_returns;10;sr_ticket_number;entier;0;0.0;0
+store_returns;11;sr_return_quantity;entier;0;0.0;0
+store_returns;12;sr_return_amt;décimal;0;0.0;0
+store_returns;13;sr_return_tax;décimal;0;0.0;0
+store_returns;14;sr_return_amt_inc_tax;décimal;0;0.0;0
+store_returns;15;sr_fee;décimal;0;0.0;0
+store_returns;16;sr_return_ship_cost;décimal;0;0.0;0
+store_returns;17;sr_refunded_cash;décimal;0;0.0;0
+store_returns;18;sr_reversed_charge;décimal;0;0.0;0
+store_returns;19;sr_store_credit;décimal;0;0.0;0
+store_returns;20;sr_net_loss;décimal;0;0.0;0
+store_sales;1;ss_sold_date_sk;entier;0;0.0;0
+store_sales;2;ss_sold_time_sk;entier;0;0.0;0
+store_sales;3;ss_item_sk;entier;0;0.0;0
+store_sales;4;ss_customer_sk;entier;0;0.0;0
+store_sales;5;ss_cdemo_sk;entier;238;0.04;0
+store_sales;6;ss_hdemo_sk;entier;295;0.04;0
+store_sales;7;ss_addr_sk;entier;448;0.07;0
+store_sales;8;ss_store_sk;entier;0;0.0;0
+store_sales;9;ss_promo_sk;entier;158;0.02;0
+store_sales;10;ss_ticket_number;entier;0;0.0;0
+store_sales;11;ss_quantity;entier;0;0.0;0
+store_sales;12;ss_wholesale_cost;décimal;0;0.0;0
+store_sales;13;ss_list_price;décimal;0;0.0;0
+store_sales;14;ss_sales_price;décimal;0;0.0;0
+store_sales;15;ss_ext_discount_amt;décimal;0;0.0;0
+store_sales;16;ss_ext_sales_price;décimal;0;0.0;0
+store_sales;17;ss_ext_wholesale_cost;décimal;0;0.0;0
+store_sales;18;ss_ext_list_price;décimal;0;0.0;0
+store_sales;19;ss_ext_tax;décimal;0;0.0;0
+store_sales;20;ss_coupon_amt;décimal;0;0.0;0
+store_sales;21;ss_net_paid;décimal;0;0.0;0
+store_sales;22;ss_net_paid_inc_tax;décimal;0;0.0;0
+store_sales;23;ss_net_profit;décimal;0;0.0;0
+time_dim;1;t_time_sk;entier;0;0.0;0
+time_dim;2;t_time_id;texte;0;0.0;0
+time_dim;3;t_time;entier;0;0.0;0
+time_dim;4;t_hour;entier;0;0.0;0
+time_dim;5;t_minute;entier;0;0.0;0
+time_dim;6;t_second;entier;0;0.0;0
+time_dim;7;t_am_pm;texte;0;0.0;0
+time_dim;8;t_shift;texte;0;0.0;0
+time_dim;9;t_sub_shift;texte;0;0.0;0
+time_dim;10;t_meal_time;texte;50400;58.33;0
+warehouse;1;w_warehouse_sk;entier;0;0.0;0
+warehouse;2;w_warehouse_id;texte;0;0.0;0
+warehouse;3;w_warehouse_name;texte;0;0.0;1
+warehouse;4;w_warehouse_sq_ft;entier;0;0.0;0
+warehouse;5;w_street_number;entier;0;0.0;0
+warehouse;6;w_street_name;texte;0;0.0;0
+warehouse;7;w_street_type;texte;0;0.0;0
+warehouse;8;w_suite_number;texte;0;0.0;0
+warehouse;9;w_city;texte;0;0.0;0
+warehouse;10;w_county;texte;0;0.0;0
+warehouse;11;w_state;texte;0;0.0;0
+warehouse;12;w_zip;entier;0;0.0;0
+warehouse;13;w_country;texte;0;0.0;0
+warehouse;14;w_gmt_offset;entier;0;0.0;0
+web_clickstreams;1;wcs_click_date_sk;entier;0;0.0;0
+web_clickstreams;2;wcs_click_time_sk;entier;0;0.0;0
+web_clickstreams;3;wcs_sales_sk;entier;6102498;90.13;0
+web_clickstreams;4;wcs_item_sk;entier;0;0.0;0
+web_clickstreams;5;wcs_web_page_sk;entier;164;0.0;0
+web_clickstreams;6;wcs_user_sk;entier;2853461;42.15;0
+web_page;1;wp_web_page_sk;entier;0;0.0;0
+web_page;2;wp_web_page_id;texte;0;0.0;0
+web_page;3;wp_rec_start_date;date;0;0.0;0
+web_page;4;wp_rec_end_date;vide;60;100.0;0
+web_page;5;wp_creation_date_sk;entier;0;0.0;0
+web_page;6;wp_access_date_sk;entier;0;0.0;0
+web_page;7;wp_autogen_flag;entier;0;0.0;0
+web_page;8;wp_customer_sk;entier;0;0.0;0
+web_page;9;wp_url;texte;0;0.0;0
+web_page;10;wp_type;texte;0;0.0;0
+web_page;11;wp_char_count;entier;0;0.0;0
+web_page;12;wp_link_count;entier;0;0.0;0
+web_page;13;wp_image_count;entier;0;0.0;0
+web_page;14;wp_max_ad_count;entier;0;0.0;0
+web_returns;1;wr_returned_date_sk;entier;0;0.0;0
+web_returns;2;wr_returned_time_sk;entier;0;0.0;0
+web_returns;3;wr_item_sk;entier;0;0.0;0
+web_returns;4;wr_refunded_customer_sk;entier;0;0.0;0
+web_returns;5;wr_refunded_cdemo_sk;entier;40;0.1;0
+web_returns;6;wr_refunded_hdemo_sk;entier;19;0.05;0
+web_returns;7;wr_refunded_addr_sk;entier;42;0.11;0
+web_returns;8;wr_returning_customer_sk;entier;0;0.0;0
+web_returns;9;wr_returning_cdemo_sk;entier;63;0.16;0
+web_returns;10;wr_returning_hdemo_sk;entier;33;0.09;0
+web_returns;11;wr_returning_addr_sk;entier;57;0.15;0
+web_returns;12;wr_web_page_sk;entier;10;0.03;0
+web_returns;13;wr_reason_sk;entier;7;0.02;0
+web_returns;14;wr_order_number;entier;0;0.0;0
+web_returns;15;wr_return_quantity;entier;0;0.0;0
+web_returns;16;wr_return_amt;décimal;0;0.0;0
+web_returns;17;wr_return_tax;décimal;0;0.0;0
+web_returns;18;wr_return_amt_inc_tax;décimal;0;0.0;0
+web_returns;19;wr_fee;décimal;0;0.0;0
+web_returns;20;wr_return_ship_cost;décimal;0;0.0;0
+web_returns;21;wr_refunded_cash;décimal;0;0.0;0
+web_returns;22;wr_reversed_charge;décimal;0;0.0;0
+web_returns;23;wr_account_credit;décimal;0;0.0;0
+web_returns;24;wr_net_loss;décimal;0;0.0;0
+web_sales;1;ws_sold_date_sk;entier;0;0.0;0
+web_sales;2;ws_sold_time_sk;entier;0;0.0;0
+web_sales;3;ws_ship_date_sk;entier;0;0.0;0
+web_sales;4;ws_item_sk;entier;0;0.0;0
+web_sales;5;ws_bill_customer_sk;entier;0;0.0;0
+web_sales;6;ws_bill_cdemo_sk;entier;309;0.05;0
+web_sales;7;ws_bill_hdemo_sk;entier;288;0.04;0
+web_sales;8;ws_bill_addr_sk;entier;272;0.04;0
+web_sales;9;ws_ship_customer_sk;entier;0;0.0;0
+web_sales;10;ws_ship_cdemo_sk;entier;492;0.07;0
+web_sales;11;ws_ship_hdemo_sk;entier;495;0.07;0
+web_sales;12;ws_ship_addr_sk;entier;398;0.06;0
+web_sales;13;ws_web_page_sk;entier;164;0.02;0
+web_sales;14;ws_web_site_sk;entier;154;0.02;0
+web_sales;15;ws_ship_mode_sk;entier;170;0.03;0
+web_sales;16;ws_warehouse_sk;entier;158;0.02;0
+web_sales;17;ws_promo_sk;entier;121;0.02;0
+web_sales;18;ws_order_number;entier;0;0.0;0
+web_sales;19;ws_quantity;entier;0;0.0;0
+web_sales;20;ws_wholesale_cost;décimal;0;0.0;0
+web_sales;21;ws_list_price;décimal;0;0.0;0
+web_sales;22;ws_sales_price;décimal;0;0.0;0
+web_sales;23;ws_ext_discount_amt;décimal;0;0.0;0
+web_sales;24;ws_ext_sales_price;décimal;0;0.0;0
+web_sales;25;ws_ext_wholesale_cost;décimal;0;0.0;0
+web_sales;26;ws_ext_list_price;décimal;0;0.0;0
+web_sales;27;ws_ext_tax;décimal;0;0.0;0
+web_sales;28;ws_coupon_amt;décimal;0;0.0;0
+web_sales;29;ws_ext_ship_cost;décimal;0;0.0;0
+web_sales;30;ws_net_paid;décimal;0;0.0;0
+web_sales;31;ws_net_paid_inc_tax;décimal;0;0.0;0
+web_sales;32;ws_net_paid_inc_ship;décimal;0;0.0;0
+web_sales;33;ws_net_paid_inc_ship_tax;décimal;0;0.0;0
+web_sales;34;ws_net_profit;décimal;0;0.0;0
+web_site;1;web_site_sk;entier;0;0.0;0
+web_site;2;web_site_id;texte;0;0.0;0
+web_site;3;web_rec_start_date;date;0;0.0;0
+web_site;4;web_rec_end_date;vide;30;100.0;0
+web_site;5;web_name;texte;0;0.0;0
+web_site;6;web_open_date_sk;entier;0;0.0;0
+web_site;7;web_close_date_sk;entier;0;0.0;0
+web_site;8;web_class;texte;0;0.0;0
+web_site;9;web_manager;texte;0;0.0;0
+web_site;10;web_mkt_id;entier;0;0.0;0
+web_site;11;web_mkt_class;texte;0;0.0;4
+web_site;12;web_mkt_desc;texte;0;0.0;4
+web_site;13;web_market_manager;texte;0;0.0;0
+web_site;14;web_company_id;entier;0;0.0;0
+web_site;15;web_company_name;texte;0;0.0;0
+web_site;16;web_street_number;entier;0;0.0;0
+web_site;17;web_street_name;texte;0;0.0;0
+web_site;18;web_street_type;texte;0;0.0;0
+web_site;19;web_suite_number;texte;0;0.0;0
+web_site;20;web_city;texte;0;0.0;0
+web_site;21;web_county;texte;0;0.0;0
+web_site;22;web_state;texte;0;0.0;0
+web_site;23;web_zip;entier;0;0.0;0
+web_site;24;web_country;texte;0;0.0;0
+web_site;25;web_gmt_offset;entier;0;0.0;0
+web_site;26;web_tax_percentage;décimal;0;0.0;0
+customer (refresh);1;c_customer_sk;entier;0;0.0;0
+customer (refresh);2;c_customer_id;texte;0;0.0;0
+customer (refresh);3;c_current_cdemo_sk;entier;0;0.0;0
+customer (refresh);4;c_current_hdemo_sk;entier;0;0.0;0
+customer (refresh);5;c_current_addr_sk;entier;0;0.0;0
+customer (refresh);6;c_first_shipto_date_sk;entier;0;0.0;0
+customer (refresh);7;c_first_sales_date_sk;entier;0;0.0;0
+customer (refresh);8;c_salutation;texte;0;0.0;0
+customer (refresh);9;c_first_name;texte;0;0.0;0
+customer (refresh);10;c_last_name;texte;0;0.0;0
+customer (refresh);11;c_preferred_cust_flag;texte;0;0.0;0
+customer (refresh);12;c_birth_day;entier;0;0.0;0
+customer (refresh);13;c_birth_month;entier;0;0.0;0
+customer (refresh);14;c_birth_year;entier;0;0.0;0
+customer (refresh);15;c_birth_country;texte;0;0.0;0
+customer (refresh);16;c_login;texte (mixte);0;0.0;0
+customer (refresh);17;c_email_address;texte;0;0.0;0
+customer (refresh);18;c_last_review_date;texte (mixte);0;0.0;0
+customer_address (refresh);1;ca_address_sk;entier;0;0.0;0
+customer_address (refresh);2;ca_address_id;texte;0;0.0;0
+customer_address (refresh);3;ca_street_number;entier;0;0.0;0
+customer_address (refresh);4;ca_street_name;texte;0;0.0;0
+customer_address (refresh);5;ca_street_type;texte;0;0.0;0
+customer_address (refresh);6;ca_suite_number;texte (mixte);0;0.0;0
+customer_address (refresh);7;ca_city;texte;0;0.0;0
+customer_address (refresh);8;ca_county;texte;0;0.0;0
+customer_address (refresh);9;ca_state;texte;0;0.0;0
+customer_address (refresh);10;ca_zip;entier;0;0.0;0
+customer_address (refresh);11;ca_country;texte;0;0.0;0
+customer_address (refresh);12;ca_gmt_offset;entier;0;0.0;0
+customer_address (refresh);13;ca_location_type;texte;0;0.0;0
+inventory (refresh);1;inv_date_sk;entier;0;0.0;0
+inventory (refresh);2;inv_item_sk;entier;0;0.0;0
+inventory (refresh);3;inv_warehouse_sk;entier;0;0.0;0
+inventory (refresh);4;inv_quantity_on_hand;entier;63;0.03;0
+item (refresh);1;i_item_sk;entier;0;0.0;0
+item (refresh);2;i_item_id;texte;0;0.0;0
+item (refresh);3;i_rec_start_date;date;0;0.0;0
+item (refresh);4;i_rec_end_date;vide;180;100.0;0
+item (refresh);5;i_item_desc;texte;0;0.0;37
+item (refresh);6;i_current_price;décimal;0;0.0;0
+item (refresh);7;i_wholesale_cost;décimal;0;0.0;0
+item (refresh);8;i_brand_id;entier;0;0.0;0
+item (refresh);9;i_brand;texte (mixte);0;0.0;0
+item (refresh);10;i_class_id;entier;0;0.0;0
+item (refresh);11;i_class;texte;0;0.0;0
+item (refresh);12;i_category_id;entier;0;0.0;0
+item (refresh);13;i_category;texte;0;0.0;0
+item (refresh);14;i_manufact_id;entier;0;0.0;0
+item (refresh);15;i_manufact;texte;0;0.0;0
+item (refresh);16;i_size;texte;0;0.0;0
+item (refresh);17;i_formulation;texte (mixte);0;0.0;0
+item (refresh);18;i_color;texte;0;0.0;0
+item (refresh);19;i_units;texte;0;0.0;0
+item (refresh);20;i_container;texte;0;0.0;0
+item (refresh);21;i_manager_id;entier;0;0.0;0
+item (refresh);22;i_product_name;texte;0;0.0;0
+item_marketprices (refresh);1;imp_sk;entier;0;0.0;0
+item_marketprices (refresh);2;imp_item_sk;entier;0;0.0;0
+item_marketprices (refresh);3;imp_competitor;texte;0;0.0;0
+item_marketprices (refresh);4;imp_competitor_price;décimal;0;0.0;0
+item_marketprices (refresh);5;imp_start_date;entier;0;0.0;0
+item_marketprices (refresh);6;imp_end_date;entier;0;0.0;0
+product_reviews (refresh);1;pr_review_sk;entier;0;0.0;0
+product_reviews (refresh);2;pr_review_date;date;0;0.0;0
+product_reviews (refresh);3;pr_review_time;heure;0;0.0;0
+product_reviews (refresh);4;pr_review_rating;entier;0;0.0;0
+product_reviews (refresh);5;pr_item_sk;entier;0;0.0;0
+product_reviews (refresh);6;pr_user_sk;entier;0;0.0;0
+product_reviews (refresh);7;pr_order_sk;entier;0;0.0;0
+product_reviews (refresh);8;pr_review_content;texte;0;0.0;0
+store_returns (refresh);1;sr_returned_date_sk;entier;0;0.0;0
+store_returns (refresh);2;sr_return_time_sk;entier;0;0.0;0
+store_returns (refresh);3;sr_item_sk;entier;0;0.0;0
+store_returns (refresh);4;sr_customer_sk;entier;0;0.0;0
+store_returns (refresh);5;sr_cdemo_sk;entier;0;0.0;0
+store_returns (refresh);6;sr_hdemo_sk;entier;0;0.0;0
+store_returns (refresh);7;sr_addr_sk;entier;0;0.0;0
+store_returns (refresh);8;sr_store_sk;entier;0;0.0;0
+store_returns (refresh);9;sr_reason_sk;entier;0;0.0;0
+store_returns (refresh);10;sr_ticket_number;entier;0;0.0;0
+store_returns (refresh);11;sr_return_quantity;entier;0;0.0;0
+store_returns (refresh);12;sr_return_amt;décimal;0;0.0;0
+store_returns (refresh);13;sr_return_tax;décimal;0;0.0;0
+store_returns (refresh);14;sr_return_amt_inc_tax;décimal;0;0.0;0
+store_returns (refresh);15;sr_fee;décimal;0;0.0;0
+store_returns (refresh);16;sr_return_ship_cost;décimal;0;0.0;0
+store_returns (refresh);17;sr_refunded_cash;décimal;0;0.0;0
+store_returns (refresh);18;sr_reversed_charge;décimal;0;0.0;0
+store_returns (refresh);19;sr_store_credit;décimal;0;0.0;0
+store_returns (refresh);20;sr_net_loss;décimal;0;0.0;0
+store_sales (refresh);1;ss_sold_date_sk;entier;0;0.0;0
+store_sales (refresh);2;ss_sold_time_sk;entier;0;0.0;0
+store_sales (refresh);3;ss_item_sk;entier;0;0.0;0
+store_sales (refresh);4;ss_customer_sk;entier;0;0.0;0
+store_sales (refresh);5;ss_cdemo_sk;entier;12;0.18;0
+store_sales (refresh);6;ss_hdemo_sk;entier;13;0.2;0
+store_sales (refresh);7;ss_addr_sk;entier;14;0.21;0
+store_sales (refresh);8;ss_store_sk;entier;0;0.0;0
+store_sales (refresh);9;ss_promo_sk;entier;1;0.02;0
+store_sales (refresh);10;ss_ticket_number;entier;0;0.0;0
+store_sales (refresh);11;ss_quantity;entier;0;0.0;0
+store_sales (refresh);12;ss_wholesale_cost;décimal;0;0.0;0
+store_sales (refresh);13;ss_list_price;décimal;0;0.0;0
+store_sales (refresh);14;ss_sales_price;décimal;0;0.0;0
+store_sales (refresh);15;ss_ext_discount_amt;décimal;0;0.0;0
+store_sales (refresh);16;ss_ext_sales_price;décimal;0;0.0;0
+store_sales (refresh);17;ss_ext_wholesale_cost;décimal;0;0.0;0
+store_sales (refresh);18;ss_ext_list_price;décimal;0;0.0;0
+store_sales (refresh);19;ss_ext_tax;décimal;0;0.0;0
+store_sales (refresh);20;ss_coupon_amt;décimal;0;0.0;0
+store_sales (refresh);21;ss_net_paid;décimal;0;0.0;0
+store_sales (refresh);22;ss_net_paid_inc_tax;décimal;0;0.0;0
+store_sales (refresh);23;ss_net_profit;décimal;0;0.0;0
+web_clickstreams (refresh);1;wcs_click_date_sk;entier;0;0.0;0
+web_clickstreams (refresh);2;wcs_click_time_sk;entier;0;0.0;0
+web_clickstreams (refresh);3;wcs_sales_sk;entier;62109;90.03;0
+web_clickstreams (refresh);4;wcs_item_sk;entier;0;0.0;0
+web_clickstreams (refresh);5;wcs_web_page_sk;entier;2;0.0;0
+web_clickstreams (refresh);6;wcs_user_sk;entier;29167;42.28;0
+web_returns (refresh);1;wr_returned_date_sk;entier;0;0.0;0
+web_returns (refresh);2;wr_returned_time_sk;entier;0;0.0;0
+web_returns (refresh);3;wr_item_sk;entier;0;0.0;0
+web_returns (refresh);4;wr_refunded_customer_sk;entier;0;0.0;0
+web_returns (refresh);5;wr_refunded_cdemo_sk;entier;0;0.0;0
+web_returns (refresh);6;wr_refunded_hdemo_sk;entier;0;0.0;0
+web_returns (refresh);7;wr_refunded_addr_sk;entier;0;0.0;0
+web_returns (refresh);8;wr_returning_customer_sk;entier;0;0.0;0
+web_returns (refresh);9;wr_returning_cdemo_sk;entier;0;0.0;0
+web_returns (refresh);10;wr_returning_hdemo_sk;entier;0;0.0;0
+web_returns (refresh);11;wr_returning_addr_sk;entier;0;0.0;0
+web_returns (refresh);12;wr_web_page_sk;entier;0;0.0;0
+web_returns (refresh);13;wr_reason_sk;entier;0;0.0;0
+web_returns (refresh);14;wr_order_number;entier;0;0.0;0
+web_returns (refresh);15;wr_return_quantity;entier;0;0.0;0
+web_returns (refresh);16;wr_return_amt;décimal;0;0.0;0
+web_returns (refresh);17;wr_return_tax;décimal;0;0.0;0
+web_returns (refresh);18;wr_return_amt_inc_tax;décimal;0;0.0;0
+web_returns (refresh);19;wr_fee;décimal;0;0.0;0
+web_returns (refresh);20;wr_return_ship_cost;décimal;0;0.0;0
+web_returns (refresh);21;wr_refunded_cash;décimal;0;0.0;0
+web_returns (refresh);22;wr_reversed_charge;décimal;0;0.0;0
+web_returns (refresh);23;wr_account_credit;décimal;0;0.0;0
+web_returns (refresh);24;wr_net_loss;décimal;0;0.0;0
+web_sales (refresh);1;ws_sold_date_sk;entier;0;0.0;0
+web_sales (refresh);2;ws_sold_time_sk;entier;0;0.0;0
+web_sales (refresh);3;ws_ship_date_sk;entier;0;0.0;0
+web_sales (refresh);4;ws_item_sk;entier;0;0.0;0
+web_sales (refresh);5;ws_bill_customer_sk;entier;0;0.0;0
+web_sales (refresh);6;ws_bill_cdemo_sk;entier;0;0.0;0
+web_sales (refresh);7;ws_bill_hdemo_sk;entier;13;0.19;0
+web_sales (refresh);8;ws_bill_addr_sk;entier;10;0.15;0
+web_sales (refresh);9;ws_ship_customer_sk;entier;0;0.0;0
+web_sales (refresh);10;ws_ship_cdemo_sk;entier;0;0.0;0
+web_sales (refresh);11;ws_ship_hdemo_sk;entier;13;0.19;0
+web_sales (refresh);12;ws_ship_addr_sk;entier;10;0.15;0
+web_sales (refresh);13;ws_web_page_sk;entier;2;0.03;0
+web_sales (refresh);14;ws_web_site_sk;entier;3;0.04;0
+web_sales (refresh);15;ws_ship_mode_sk;entier;1;0.01;0
+web_sales (refresh);16;ws_warehouse_sk;entier;2;0.03;0
+web_sales (refresh);17;ws_promo_sk;entier;2;0.03;0
+web_sales (refresh);18;ws_order_number;entier;0;0.0;0
+web_sales (refresh);19;ws_quantity;entier;0;0.0;0
+web_sales (refresh);20;ws_wholesale_cost;décimal;0;0.0;0
+web_sales (refresh);21;ws_list_price;décimal;0;0.0;0
+web_sales (refresh);22;ws_sales_price;décimal;0;0.0;0
+web_sales (refresh);23;ws_ext_discount_amt;décimal;0;0.0;0
+web_sales (refresh);24;ws_ext_sales_price;décimal;0;0.0;0
+web_sales (refresh);25;ws_ext_wholesale_cost;décimal;0;0.0;0
+web_sales (refresh);26;ws_ext_list_price;décimal;0;0.0;0
+web_sales (refresh);27;ws_ext_tax;décimal;0;0.0;0
+web_sales (refresh);28;ws_coupon_amt;décimal;0;0.0;0
+web_sales (refresh);29;ws_ext_ship_cost;décimal;0;0.0;0
+web_sales (refresh);30;ws_net_paid;décimal;0;0.0;0
+web_sales (refresh);31;ws_net_paid_inc_tax;décimal;0;0.0;0
+web_sales (refresh);32;ws_net_paid_inc_ship;décimal;0;0.0;0
+web_sales (refresh);33;ws_net_paid_inc_ship_tax;décimal;0;0.0;0
+web_sales (refresh);34;ws_net_profit;décimal;0;0.0;0
