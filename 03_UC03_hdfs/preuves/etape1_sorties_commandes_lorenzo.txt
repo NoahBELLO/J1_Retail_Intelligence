@@ -1,0 +1,132 @@
+$hadoop version
+Hadoop 3.5.0
+Source code repository https://github.com/apache/hadoop.git -r dbcc7cd797100e6b32cd84f85b53a5193a5f9af0
+Compiled by cnauroth on 2026-03-24T16:56Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.25.5
+From source with checksum 64582ed0a62a169c39a19c734a8f33b5
+This command was run using /opt/hadoop/share/hadoop/common/hadoop-common-3.5.0.jar
+
+----
+
+$jps
+21141 NiFi
+19303 DataNode
+28247 Jps
+21117 BootstrapProcess
+19149 NameNode
+19583 SecondaryNameNode
+
+---
+
+$hdfs dfsadmin -report
+Configured Capacity: 501809635328 (467.35 GB)
+Present Capacity: 391512190976 (364.62 GB)
+DFS Remaining: 391512158208 (364.62 GB)
+DFS Used: 32768 (32 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+Erasure Coded Block Groups: 
+	Low redundancy block groups: 0
+	Block groups with corrupt internal blocks: 0
+	Missing block groups: 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:9866 (localhost)
+Hostname: dev-pro-ubuntu
+Decommission Status : Normal
+Configured Capacity: 501809635328 (467.35 GB)
+DFS Used: 32768 (32 KB)
+Non DFS Used: 84731641856 (78.91 GB)
+DFS Remaining: 391512158208 (364.62 GB)
+DFS Used%: 0.00%
+DFS Remaining%: 78.02%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 0
+Last contact: Tue Nov 17 14:43:21 CET 2026
+Last Block Report: Tue Nov 17 12:24:22 CET 2026
+Num of Blocks: 0
+
+==================================================
+ÉTAPE B — Informations relevées
+==================================================
+
+— Version de Hadoop :
+  Hadoop 3.5.0 (compilé le 2026-03-24, plateforme linux-x86_64).
+
+— Chemin d'installation :
+  /opt/hadoop
+  (jar utilisé : /opt/hadoop/share/hadoop/common/hadoop-common-3.5.0.jar)
+  Configuration dans /opt/hadoop/etc/hadoop/
+
+— Configuration utilisée (core-site.xml / hdfs-site.xml) :
+  - fs.defaultFS            = hdfs://localhost:9000
+  - dfs.replication         = 1
+  - dfs.namenode.name.dir   = file:///home/lolorigolo/hadoop-data/namenode
+  - dfs.datanode.data.dir   = file:///home/lolorigolo/hadoop-data/datanode
+  => Mode pseudo-distribué : tous les démons tournent sur la même machine.
+
+— État du NameNode :
+  Démarré (jps : PID 19149 NameNode).
+  SecondaryNameNode également actif (PID 19583).
+
+— État des DataNodes :
+  1 DataNode actif (Live datanodes (1)) : 127.0.0.1:9866, hostname dev-pro-ubuntu.
+  Decommission Status : Normal, dernier contact OK.
+  Capacité configurée : 467.35 GB — DFS Remaining : 364.62 GB (78.02 %)
+  DFS Used : 32 KB, 0 bloc. Aucun bloc manquant, corrompu ou sous-répliqué.
+
+— Erreurs de démarrage rencontrées (logs /opt/hadoop/logs/) :
+  1) 12:09 et 12:10 — NameNode : "Invalid URI for NameNode address
+     (check fs.defaultFS): file:/// has no authority."
+     -> fs.defaultFS non défini dans core-site.xml.
+     DataNode : "No services to connect, missing NameNode address."
+     (conséquence de la même erreur). SecondaryNameNode : échec idem.
+     Correction : ajout de fs.defaultFS = hdfs://localhost:9000.
+  2) 12:16 — NameNode : "NameNode is not formatted."
+     Correction : hdfs namenode -format.
+  3) 12:17 — SIGTERM sur les 3 démons : arrêt volontaire (stop-dfs.sh)
+     avant redémarrage.
+  Après corrections : démarrage OK, aucune erreur au moment des relevés.
+
+--------------------------------------------------
+Rôle du NameNode et des DataNodes
+--------------------------------------------------
+- NameNode : nœud maître de HDFS. Il gère l'espace de noms (arborescence
+  des répertoires et fichiers, droits) et les métadonnées : découpage des
+  fichiers en blocs et emplacement de chaque bloc sur les DataNodes.
+  Il ne stocke pas les données elles-mêmes. Les clients l'interrogent
+  pour savoir où lire / écrire.
+- DataNodes : nœuds esclaves qui stockent physiquement les blocs de
+  données sur leurs disques. Ils exécutent les lectures/écritures,
+  envoient des heartbeats et des block reports au NameNode, et assurent
+  la réplication des blocs selon ses instructions.
+- SecondaryNameNode : fusionne périodiquement le fsimage et les edits
+  du NameNode (checkpoint). Ce n'est PAS un NameNode de secours.
+
+--------------------------------------------------
+Type de déploiement
+--------------------------------------------------
+Déploiement LOCAL MONO-NŒUD (mode pseudo-distribué), et non une
+architecture distribuée multi-machines :
+  - NameNode, SecondaryNameNode et DataNode tournent sur la même
+    machine (dev-pro-ubuntu), visibles ensemble dans jps ;
+  - fs.defaultFS pointe sur localhost:9000 ;
+  - un seul DataNode, à l'adresse 127.0.0.1 (localhost) ;
+  - facteur de réplication = 1 (pas d'autre nœud sur lequel répliquer).
