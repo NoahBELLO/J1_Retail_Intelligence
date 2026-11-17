@@ -1,0 +1,129 @@
+UC-03 - Etape 3 - Creation de l'arborescence du Data Lake
+Date : mardi 17 novembre 2026 (14h57 - 14h58)
+Machine : dev-pro-ubuntu, Ubuntu 24.04.5 LTS, utilisateur lolorigolo
+HDFS : hdfs://localhost:9000 (Hadoop 3.5.0, mono-noeud)
+Le repertoire /retail-lake a ete cree a l'etape 2.
+
+==================================================
+COMMANDES EXECUTEES
+==================================================
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/initial
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/refresh
+$ hdfs dfs -mkdir -p /retail-lake/bronze/tpcxbb
+$ hdfs dfs -mkdir -p /retail-lake/silver
+$ hdfs dfs -mkdir -p /retail-lake/gold
+$ hdfs dfs -mkdir -p /retail-lake/quality
+$ hdfs dfs -mkdir -p /retail-lake/logs
+(aucune sortie : toutes les commandes ont reussi)
+
+$ hdfs dfs -ls -R /retail-lake
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/bronze
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/bronze/tpcxbb
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/gold
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/logs
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/quality
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw/tpcxbb
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw/tpcxbb/initial
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/silver
+
+$ hdfs dfs -count -h /retail-lake
+          11            0                  0 /retail-lake
+(colonnes : nb repertoires, nb fichiers, taille, chemin)
+
+==================================================
+SCHEMA EXPLICATIF
+==================================================
+
+/retail-lake/
+|
+|-- raw/                  Copie exacte des fichiers recus, jamais modifiee
+|   `-- tpcxbb/           Source : kit TPCx-BB (une source = un dossier)
+|       |-- initial/      Lot de chargement initial (data/)
+|       `-- refresh/      Lots de mise a jour (data_refresh/)
+|
+|-- bronze/               Memes donnees, lisibles et tracees (pas nettoyees)
+|   `-- tpcxbb/           Schema applique, colonnes nommees,
+|                         + load_id, fichier source, date de chargement
+|
+|-- silver/               Donnees propres et controlees (Parquet)
+|                         types corriges, doublons enleves,
+|                         donnees personnelles masquees
+|
+|-- gold/                 Donnees pretes pour le metier (Parquet)
+|                         modele en etoile (faits + dimensions) et KPI
+|
+|-- quality/              Resultats des controles qualite
+|                         (quality_report) et lignes rejetees (quarantaine)
+|
+`-- logs/                 Journaux des traitements (run_log) :
+                          flux, lot, debut/fin, statut, lignes lues/ecrites/rejetees
+
+
+Flux des donnees :
+
+  Kit TPCx-BB --NiFi--> raw --Spark--> bronze --Spark--> silver --Spark--> gold --> KPI / tableaux de bord
+                                                           |
+                                                           `--> quality (rejets + rapport)
+
+  logs : chaque traitement (NiFi, Spark) y ecrit une ligne, a chaque etape.
+
+==================================================
+EXPLICATIONS
+==================================================
+
+1. Pourquoi les donnees sources sont conservees
+   - Pouvoir refaire tous les traitements si on se trompe dans un
+     nettoyage ou si une regle metier change, sans redemander les
+     fichiers a la source.
+   - Avoir une preuve de ce qu'on a recu exactement (audit) : on peut
+     comparer un chiffre de Gold avec le fichier d'origine.
+   - Les fichiers TPCx-BB sont petits : les garder coute peu.
+
+2. Difference entre Raw et Bronze
+   - Raw : les fichiers .dat tels qu'ils ont ete recus, octet pour
+     octet. Ajout seulement, aucune modification. Ranges par source
+     et par lot (initial / refresh).
+   - Bronze : les memes donnees, sans nettoyage, mais rendues
+     exploitables : schema applique (noms de colonnes a partir de
+     tpcxbb_schema.json), et ajout des colonnes techniques de
+     provenance (load_id, fichier source, date de chargement).
+   - Si Bronze est mal construit, on le reconstruit depuis Raw.
+   NB : dans UC-02, la zone Bronze contenait les fichiers d'origine.
+   Ici on suit l'arborescence proposee : Raw garde l'original,
+   Bronze en est la premiere version lisible.
+
+3. Role des zones Silver et Gold
+   - Silver : donnees propres et fiables. Types corriges, espaces et
+     doublons enleves, identifiants vides remplaces par -1, donnees
+     personnelles masquees. Lue par l'equipe Data et les analystes.
+   - Gold : donnees organisees pour le metier. Modele en etoile
+     (faits : ventes, retours, stocks, clics ; dimensions : produit,
+     client, magasin, date) et KPI deja calcules. Aucune donnee
+     personnelle. Lue par les profils metier et les tableaux de bord.
+
+4. Interet de separer donnees metier, controles qualite et journaux
+   - Les zones metier (raw -> gold) ne contiennent que des donnees :
+     on ne melange pas des rapports techniques avec les tables.
+   - Droits differents : les profils metier lisent Gold, mais n'ont
+     pas besoin des rejets ni des journaux (qui peuvent contenir des
+     donnees sensibles ou techniques).
+   - Durees de conservation differentes : les journaux et la
+     quarantaine peuvent etre purges sans toucher aux donnees.
+   - On peut suivre la qualite et les traitements dans le temps,
+     independamment des donnees, et alerter si un traitement echoue.
+
+5. Comment la provenance sera conservee
+   - Chaque lot a un identifiant load_id (date + initial ou refresh),
+     visible aussi dans le chemin Raw (raw/tpcxbb/initial, .../refresh).
+   - A l'arrivee dans Raw : une fiche de controle par lot (nom du
+     fichier, taille, nombre de lignes, empreinte SHA-256, date de
+     reception).
+   - De Bronze a Gold : chaque ligne garde load_id, le fichier
+     d'origine et la date de chargement.
+   - logs/run_log : pour chaque traitement, quel lot a ete lu, ce qui
+     a ete ecrit, combien de lignes ont ete rejetees.
+   => On peut remonter de n'importe quel chiffre de Gold jusqu'au
+      fichier recu dans Raw.
