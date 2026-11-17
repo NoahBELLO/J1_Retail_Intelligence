@@ -1,0 +1,160 @@
+UC-03 - Etape 5 - Rapport de verification du stockage HDFS
+HDFS : hdfs://localhost:9000 (Hadoop 3.5.0, mono-noeud, replication 1)
+
+Fichier controle :
+  Source locale : ~/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+  Fichier HDFS  : /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+  (depose a l'etape 4, le 17/11/2026 a 15h08)
+
+Dans les sorties ci-dessous :
+  $L     = ~/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+  $H     = /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+  $VERIF = dossier temporaire de verification
+
+==================================================
+SYNTHESE
+==================================================
+
+| Controle                          | Methode                              | Resultat |
+|-----------------------------------|--------------------------------------|----------|
+| Repertoires attendus              | hdfs dfs -test -d (12 dossiers)      | OK       |
+| Presence du fichier               | hdfs dfs -test -f, hdfs dfs -ls -R   | OK       |
+| Taille                            | hdfs dfs -stat %b vs stat -c %s      | OK (92 764 700 = 92 764 700) |
+| Permissions                       | hdfs dfs -ls -d, hdfs dfs -getfacl   | OK (-rw-r--r-- lolorigolo:supergroup) |
+| Recuperation controlee            | hdfs dfs -get vers $VERIF            | OK       |
+| Comparaison source / stocke       | sha256sum, md5sum, cmp               | OK (identiques octet par octet) |
+| Etat des blocs                    | hdfs fsck -files -blocks -locations  | OK (HEALTHY, 1 bloc, 0 corrompu) |
+
+Conclusion : le fichier stocke dans HDFS est une copie exacte de la
+source locale. Aucune erreur, aucune perte, aucune corruption.
+
+==================================================
+SORTIES DES COMMANDES
+==================================================
+
+$ hdfs dfs -test -d /retail-lake
+$ hdfs dfs -test -d /retail-lake/raw
+$ hdfs dfs -test -d /retail-lake/raw/tpcxbb
+$ hdfs dfs -test -d /retail-lake/raw/tpcxbb/initial
+
+$ hdfs dfs -test -d /retail-lake/raw/tpcxbb/refresh
+
+$ hdfs dfs -test -d /retail-lake/bronze
+
+$ hdfs dfs -test -d /retail-lake/bronze/tpcxbb
+
+$ hdfs dfs -test -d /retail-lake/silver
+
+$ hdfs dfs -test -d /retail-lake/gold
+
+$ hdfs dfs -test -d /retail-lake/quality
+$ hdfs dfs -test -d /retail-lake/logs
+$ hdfs dfs -test -d /retail-lake/raw/tpcxbb/initial/store_sales
+
+$ hdfs dfs -ls -R /retail-lake
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/bronze
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/bronze/tpcxbb
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/gold
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/logs
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/quality
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw/tpcxbb
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 15:08 /retail-lake/raw/tpcxbb/initial
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 15:08 /retail-lake/raw/tpcxbb/initial/store_sales
+-rw-r--r--   1 lolorigolo supergroup   92764700 2026-11-17 15:08 $H
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake/silver
+
+$ hdfs dfs -test -f $H
+
+$ hdfs dfs -stat %b octets $H
+92764700 octets
+
+$ stat -c %s octets $L
+92764700 octets
+
+$ hdfs dfs -du -s $H
+92764700  92764700  $H
+
+$ hdfs dfs -ls -d /retail-lake /retail-lake/raw/tpcxbb/initial/store_sales
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:57 /retail-lake
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 15:08 /retail-lake/raw/tpcxbb/initial/store_sales
+
+$ hdfs dfs -getfacl $H
+# file: $H
+# owner: lolorigolo
+# group: supergroup
+user::rw-
+group::r--
+other::r--
+
+
+$ hdfs dfs -get $H $VERIF/store_sales_hdfs.dat
+
+$ ls -l $VERIF/store_sales_hdfs.dat
+-rw-r--r-- 1 lolorigolo lolorigolo 92764700 Nov 17 16:10 $VERIF/store_sales_hdfs.dat
+
+$ sha256sum $L $VERIF/store_sales_hdfs.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  $L
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  $VERIF/store_sales_hdfs.dat
+
+$ md5sum $L $VERIF/store_sales_hdfs.dat
+d57080160fa6a31671d1274e2c53f9e7  $L
+d57080160fa6a31671d1274e2c53f9e7  $VERIF/store_sales_hdfs.dat
+
+$ cmp $L $VERIF/store_sales_hdfs.dat
+
+$ hdfs dfs -checksum $H
+$H	MD5-of-0MD5-of-512CRC32C	000002000000000000000000cb3d39d54ed8213ba08dfa4be2768183
+
+$ hdfs dfs -checksum -v $H
+$H	MD5-of-0MD5-of-512CRC32C	000002000000000000000000cb3d39d54ed8213ba08dfa4be2768183	BlockSize=134217728
+
+$ hdfs fsck $H -files -blocks -locations
+Connecting to namenode via http://localhost:9870/fsck?ugi=lolorigolo&files=1&blocks=1&locations=1&path=%2Fretail-lake%2Fraw%2Ftpcxbb%2Finitial%2Fstore_sales%2Fstore_sales.dat
+FSCK started by lolorigolo (auth:SIMPLE) from /127.0.0.1 for path $H at Tue Nov 17 16:10:31 CET 2026
+
+$H 92764700 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1838689999-10.74.2.126-1794914239776:blk_1073741825_1001 len=92764700 Live_repl=1  [DatanodeInfoWithStorage[127.0.0.1:9866,DS-75eb76a5-7320-4e4c-8250-2a05e8d47218,DISK]]
+
+
+Status: HEALTHY
+ Number of data-nodes:	1
+ Number of racks:		1
+ Total dirs:			0
+ Total symlinks:		0
+
+Replicated Blocks:
+ Total size:	92764700 B
+ Total files:	1
+ Total blocks (validated):	1 (avg. block size 92764700 B)
+ Minimally replicated blocks:	1 (100.0 %)
+ Over-replicated blocks:	0 (0.0 %)
+ Under-replicated blocks:	0 (0.0 %)
+ Mis-replicated blocks:		0 (0.0 %)
+ Default replication factor:	1
+ Average block replication:	1.0
+ Missing blocks:		0
+ Corrupt blocks:		0
+ Missing replicas:		0 (0.0 %)
+ Blocks queued for replication:	0
+
+Erasure Coded Block Groups:
+ Total size:	0 B
+ Total files:	0
+ Total block groups (validated):	0
+ Minimally erasure-coded block groups:	0
+ Over-erasure-coded block groups:	0
+ Under-erasure-coded block groups:	0
+ Unsatisfactory placement block groups:	0
+ Average block group size:	0.0
+ Missing block groups:		0
+ Corrupt block groups:		0
+ Missing internal blocks:	0
+ Blocks queued for replication:	0
+FSCK ended at Tue Nov 17 16:10:31 CET 2026 in 11 milliseconds
+
+
+The filesystem under path '$H' is HEALTHY
+
+$ rm $VERIF/store_sales_hdfs.dat
