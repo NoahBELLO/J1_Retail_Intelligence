@@ -89,7 +89,6 @@ Status: HEALTHY
 
 --- Accessible ---
 $ hdfs dfs -test -r /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
-(code retour : 0 -> lisible)
 
 $ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | head -3
 36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
