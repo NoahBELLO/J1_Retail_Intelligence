@@ -1,0 +1,172 @@
+UC-03 - Etape 2 - Decouverte des commandes HDFS
+
+==================================================
+1. ETAT DU SYSTEME HDFS
+2. INFORMATIONS SUR LES NOEUDS
+3. LISTE DES REPERTOIRES
+4. CREATION DU REPERTOIRE DE TRAVAIL
+5. PERMISSIONS
+6. TAILLE DES DONNEES
+==================================================
+
+$ hdfs dfsadmin -safemode get
+Safe mode is OFF
+
+----
+
+$ hdfs dfsadmin -report
+Configured Capacity: 501809635328 (467.35 GB)
+Present Capacity: 391491993600 (364.61 GB)
+DFS Remaining: 391491960832 (364.61 GB)
+DFS Used: 32768 (32 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+Erasure Coded Block Groups: 
+	Low redundancy block groups: 0
+	Block groups with corrupt internal blocks: 0
+	Missing block groups: 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:9866 (localhost)
+Hostname: dev-pro-ubuntu
+Decommission Status : Normal
+Configured Capacity: 501809635328 (467.35 GB)
+DFS Used: 32768 (32 KB)
+Non DFS Used: 84751839232 (78.93 GB)
+DFS Remaining: 391491960832 (364.61 GB)
+DFS Used%: 0.00%
+DFS Remaining%: 78.02%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 0
+Last contact: Tue Nov 17 14:53:57 CET 2026
+Last Block Report: Tue Nov 17 12:24:22 CET 2026
+Num of Blocks: 0
+
+
+
+----
+
+$ hdfs dfsadmin -printTopology
+Rack: /default-rack
+   127.0.0.1:9866 (localhost) In Service
+
+
+----
+
+$ hdfs dfs -ls /
+
+----
+
+$ hdfs dfs -mkdir -p /retail-lake
+
+----
+
+$ hdfs dfs -ls /
+Found 1 items
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:54 /retail-lake
+
+----
+
+$ hdfs dfs -ls -d /retail-lake
+drwxr-xr-x   - lolorigolo supergroup          0 2026-11-17 14:54 /retail-lake
+
+----
+
+$ hdfs dfs -ls /retail-lake
+
+----
+
+$ hdfs dfs -du -h /retail-lake
+
+----
+
+$ hdfs dfs -du -s -h /
+0  0  /
+
+----
+
+$ hdfs dfs -df -h /
+Filesystem                Size  Used  Available  Use%
+hdfs://localhost:9000  467.3 G  32 K    364.6 G    0%
+
+----
+
+$ hdfs fsck /
+Connecting to namenode via http://localhost:9870/fsck?ugi=lolorigolo&path=%2F
+FSCK started by lolorigolo (auth:SIMPLE) from /127.0.0.1 for path / at Tue Nov 17 14:54:26 CET 2026
+
+Status: HEALTHY
+ Number of data-nodes:	1
+ Number of racks:		1
+ Total dirs:			2
+ Total symlinks:		0
+
+Replicated Blocks:
+ Total size:	0 B
+ Total files:	0
+ Total blocks (validated):	0
+ Under-replicated blocks:	0
+ Default replication factor:	1
+ Missing blocks:		0
+ Corrupt blocks:		0
+ Missing replicas:		0
+(...)
+FSCK ended at Tue Nov 17 14:54:26 CET 2026 in 62 milliseconds
+
+The filesystem under path '/' is HEALTHY
+
+----
+
+$ hdfs getconf -confKey dfs.permissions.enabled
+true
+
+$ hdfs getconf -confKey dfs.permissions.superusergroup
+supergroup
+
+==================================================
+CE QU'ON EN RETIENT
+==================================================
+
+1. Etat du systeme :
+   - Safe mode OFF : HDFS accepte les lectures et les ecritures.
+   - fsck : "HEALTHY", aucun bloc manquant, corrompu ou sous-replique.
+
+2. Noeuds :
+   - 1 DataNode actif (127.0.0.1:9866, dev-pro-ubuntu), "In Service",
+     dans le rack /default-rack.
+   - Capacite 467.35 GB, libre 364.61 GB (78.02 %), utilise 32 KB.
+
+3. Repertoires :
+   - Avant creation, "hdfs dfs -ls /" ne renvoie rien : HDFS etait vide.
+
+4. Repertoire de travail :
+   - "hdfs dfs -mkdir -p /retail-lake" a reussi (aucune sortie).
+   - /retail-lake apparait ensuite dans "hdfs dfs -ls /".
+
+5. Permissions :
+   - /retail-lake : drwxr-xr-x, proprietaire lolorigolo, groupe supergroup.
+     Le proprietaire peut lire/ecrire/entrer ; groupe et autres peuvent
+     seulement lire et entrer (pas ecrire).
+   - Les permissions HDFS sont actives (dfs.permissions.enabled = true).
+   - Pas d'erreur de droits : lolorigolo a lance le NameNode, il est donc
+     super-utilisateur HDFS.
+
+6. Taille des donnees :
+   - /retail-lake : vide (aucune sortie de du).
+   - Total sous / : 0 octet. HDFS utilise : 32 K sur 467.3 G (0 %).
