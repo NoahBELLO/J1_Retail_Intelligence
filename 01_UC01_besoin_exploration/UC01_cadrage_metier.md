@@ -1,5 +1,21 @@
 # Cadrage métier
 
+## Contexte
+
+Retail Intelligence est une enseigne de distribution qui vend à la fois en magasin (12 magasins) et sur un site web. Ses données viennent de plusieurs systèmes : ventes, produits, clients, magasins, stocks, mais aussi navigation web et avis clients. Les directions commerciale et financière veulent des indicateurs cohérents pour comparer les performances et comprendre l'évolution de l'activité.
+
+Les données utilisées viennent du jeu TPCx-BB : ce sont des données **fictives**, qui servent de support au projet.
+
+## Objectifs métier
+
+- Suivre les ventes et leur évolution dans le temps.
+- Comparer les magasins et les canaux (magasin et web).
+- Connaître les produits et les catégories qui se vendent le mieux.
+- Suivre les remises, les retours et les stocks.
+- Disposer de données fiables pour toutes ces analyses.
+
+## Utilisateurs concernés
+
 | # | Profil | Ce qu'il fait | Ce qu'il regarde | À quelle fréquence |
 |---|---|---|---|---|
 | P1 | Direction générale | Décide de la stratégie de l'entreprise, choisit où investir (magasins ou site web) et fixe les objectifs de l'année | Toute l'entreprise, magasin et web | Chaque mois et chaque année |
