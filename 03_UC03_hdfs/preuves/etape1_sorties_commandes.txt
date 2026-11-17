@@ -1,0 +1,146 @@
+UC-03 - Etape 1 - Verification de l'environnement Hadoop
+Date : mardi 17 novembre 2026
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL (Windows 11)
+Utilisateur Linux : noah
+
+######################################################################
+# Partie A - Commandes demandees par le TP (lancees vers 12h35)
+######################################################################
+
+$ hadoop version
+Hadoop 3.5.0
+Source code repository https://github.com/apache/hadoop.git -r dbcc7cd797100e6b32cd84f85b53a5193a5f9af0
+Compiled by cnauroth on 2026-03-24T16:56Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.25.5
+From source with checksum 64582ed0a62a169c39a19c734a8f33b5
+This command was run using /opt/hadoop/share/hadoop/common/hadoop-common-3.5.0.jar
+
+$ jps
+11569 SecondaryNameNode
+11393 DataNode
+12738 NiFi
+11282 NameNode
+12714 BootstrapProcess
+15211 Jps
+
+$ hdfs dfsadmin -report
+Configured Capacity: 1081101176832 (1006.85 GB)
+Present Capacity: 998536253440 (929.96 GB)
+DFS Remaining: 998536224768 (929.96 GB)
+DFS Used: 28672 (28 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+        Under replicated blocks: 0
+        Blocks with corrupt replicas: 0
+        Missing blocks: 0
+        Missing blocks (with replication factor 1): 0
+        Badly Distributed Blocks: 0
+        Low redundancy blocks with highest priority to recover: 0
+        Pending deletion blocks: 0
+Erasure Coded Block Groups:
+        Low redundancy block groups: 0
+        Block groups with corrupt internal blocks: 0
+        Missing block groups: 0
+        Badly Distributed Blocks: 0
+        Low redundancy blocks with highest priority to recover: 0
+        Pending deletion blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:9866 (localhost)
+Hostname: DESKTOP-DCTNJ6T.
+Decommission Status : Normal
+Configured Capacity: 1081101176832 (1006.85 GB)
+DFS Used: 28672 (28 KB)
+Non DFS Used: 27572568064 (25.68 GB)
+DFS Remaining: 998536224768 (929.96 GB)
+DFS Used%: 0.00%
+DFS Remaining%: 92.36%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 0
+Last contact: Tue Nov 17 12:35:21 CET 2026
+Last Block Report: Tue Nov 17 12:21:38 CET 2026
+Num of Blocks: 0
+
+######################################################################
+# Partie B - Configuration et journaux (lances a 12h47)
+######################################################################
+
+$ date
+Tue Nov 17 12:47:29 CET 2026
+
+$ cat /etc/os-release | head -2
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+
+$ echo $HADOOP_HOME ; echo $HADOOP_CONF_DIR
+HADOOP_HOME=/opt/hadoop
+HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+
+$ grep "^export JAVA_HOME" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+$ cat $HADOOP_CONF_DIR/core-site.xml   (en-tete de licence retire)
+<configuration>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>hdfs://localhost:9000</value>
+	</property>
+</configuration>
+
+$ cat $HADOOP_CONF_DIR/hdfs-site.xml   (en-tete de licence retire)
+<configuration>
+	<property>
+		<name>dfs.replication</name>
+		<value>1</value>
+	</property>
+	<property>
+		<name>dfs.namenode.name.dir</name>
+		<value>file:///home/noah/hadoop-data/namenode</value>
+	</property>
+	<property>
+		<name>dfs.datanode.data.dir</name>
+		<value>file:///home/noah/hadoop-data/datanode</value>
+	</property>
+</configuration>
+
+$ hdfs getconf -confKey fs.defaultFS
+hdfs://localhost:9000
+$ hdfs getconf -confKey dfs.replication
+1
+$ hdfs getconf -confKey dfs.blocksize
+134217728
+
+$ hdfs dfsadmin -safemode get
+Safe mode is OFF
+
+$ ls $HADOOP_HOME/logs/
+SecurityAuth-noah.audit
+hadoop-noah-datanode-DESKTOP-DCTNJ6T.log
+hadoop-noah-datanode-DESKTOP-DCTNJ6T.out
+hadoop-noah-namenode-DESKTOP-DCTNJ6T.log
+hadoop-noah-namenode-DESKTOP-DCTNJ6T.out
+hadoop-noah-secondarynamenode-DESKTOP-DCTNJ6T.log
+hadoop-noah-secondarynamenode-DESKTOP-DCTNJ6T.out
+
+$ grep -iE "ERROR|FATAL" $HADOOP_HOME/logs/*namenode*.log | tail -n 10
+(aucune ligne)
+$ grep -iE "ERROR|FATAL" $HADOOP_HOME/logs/*datanode*.log | tail -n 10
+(aucune ligne)
+$ grep -iE "ERROR|FATAL" $HADOOP_HOME/logs/*secondarynamenode*.log | tail -n 5
+(aucune ligne)
+
+$ grep -h WARN $HADOOP_HOME/logs/*namenode-*.log   (lignes coupees a 220 caracteres)
+2026-11-17 12:21:20,521 WARN org.apache.hadoop.security.authentication.server.AuthenticationFilter: Unable to initialize FileSignerSecretProvider, falling back to use random secrets. Reason: Could not read signature secr
+2026-11-17 12:21:21,084 WARN org.apache.hadoop.security.authentication.server.AuthenticationFilter: Unable to initialize FileSignerSecretProvider, falling back to use random secrets. Reason: Could not read signature secr
+2026-11-17 12:21:28,935 WARN org.apache.hadoop.hdfs.server.namenode.FSNamesystem: Only one image storage directory (dfs.namenode.name.dir) configured. Beware of data loss due to lack of redundant storage directories!
+2026-11-17 12:21:28,935 WARN org.apache.hadoop.hdfs.server.namenode.FSNamesystem: Only one namespace edits storage directory (dfs.namenode.edits.dir) configured. Beware of data loss due to lack of redundant storage direc
+2026-11-17 12:21:41,436 WARN org.apache.hadoop.security.authentication.server.AuthenticationFilter: Unable to initialize FileSignerSecretProvider, falling back to use random secrets. Reason: Could not read signature secr
+2026-11-17 12:21:41,909 WARN org.apache.hadoop.security.authentication.server.AuthenticationFilter: Unable to initialize FileSignerSecretProvider, falling back to use random secrets. Reason: Could not read signature secr
+2026-11-17 12:46:17,356 WARN org.apache.hadoop.hdfs.server.namenode.SecondaryNameNode: Checkpoint done. New Image Size: 399
