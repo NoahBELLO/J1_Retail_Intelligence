@@ -117,3 +117,58 @@ Les données vont dans cet ordre : raw → bronze → silver → gold.
 #### Différence avec le Jour 1
 
 Au Jour 1, on avait appelé « Bronze » la zone qui garde les fichiers d'origine. Au Jour 2, cette zone s'appelle **`raw`**, et `bronze` devient une étape en plus. La zone « Quarantaine » du Jour 1 (les lignes refusées) va dans **`quality`**. Le document `UC02_architecture_cible.md` sera à mettre à jour lors de la mise en commun.
+
+---
+
+### Étape 4 – Dépôt des données TPCx-BB
+
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape4_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape4_sorties_commandes.txt).
+
+#### Fichier choisi
+
+`store_sales.dat` (les ventes en magasin). C'est la table principale pour nos indicateurs du Jour 1, comme le chiffre d'affaires.
+
+#### Avant le dépôt : examen du fichier
+
+| Élément | Résultat | Commande |
+|---|---|---|
+| Chemin local | `retail_project/data/store_sales/store_sales.dat` | `ls -l` |
+| Format | Fichier texte, colonnes séparées par `\|`, pas de ligne de titres | `file`, `head -n 3` |
+| Taille | 92 764 700 octets (environ 89 Mo) | `ls -l`, `ls -lh` |
+| Structure | 23 colonnes | `head -n 1` + `awk` |
+| Nombre de lignes | 667 579 | `wc -l` |
+| Provenance | Kit TPCx-BB fourni pour le projet, dossier `data/` (premier envoi) | — |
+| Lisible | Oui, les premières lignes s'affichent | `head -n 3` |
+
+La taille, le nombre de colonnes et le nombre de lignes sont les mêmes que dans l'inventaire du Jour 1.
+
+#### Le dépôt
+
+```bash
+hdfs dfs -put retail_project/data/store_sales/store_sales.dat /retail-lake/raw/tpcxbb/initial/
+```
+
+Le fichier va dans `raw/tpcxbb/initial`, car il vient du dossier `data/`, c'est-à-dire du premier envoi de données.
+
+#### Après le dépôt : vérifications
+
+| Vérification | Résultat |
+|---|---|
+| Le fichier apparaît dans HDFS | Oui : `hdfs dfs -ls` montre `store_sales.dat` |
+| La taille est cohérente | Oui : **92 764 700 octets** dans HDFS comme en local |
+| Le fichier est accessible | Oui : `hdfs dfs -cat … \| head -n 3` affiche les mêmes 3 lignes qu'en local |
+| Le chemin est correct | Oui : `/retail-lake/raw/tpcxbb/initial/store_sales.dat` |
+| La source est conservée | Oui : le fichier local est toujours là, avec la même taille (`-put` copie le fichier, il ne le déplace pas) |
+
+#### Fiche d'inventaire mise à jour
+
+| Fichier | Format | Taille | Lignes | Colonnes | Chemin local | Chemin HDFS | Remarques |
+|---|---|---|---|---|---|---|---|
+| `store_sales.dat` | Texte, séparateur `\|` | 92 764 700 octets | 667 579 | 23 | `retail_project/data/store_sales/` | `/retail-lake/raw/tpcxbb/initial/` | Pas de ligne de titres. Fins de ligne Windows (voir plus bas) |
+
+#### Points à retenir et erreurs
+
+- **Fins de ligne Windows** : `file` indique `with CRLF line terminators`. Chaque ligne se termine par un caractère invisible en plus, comme les fichiers créés sous Windows. Ce n'est pas un problème pour le dépôt, car on copie le fichier tel quel. Il faudra y penser au Jour 3 au moment de lire les données, sinon la dernière colonne aura un caractère en trop.
+- **Taille affichée différente (89M en local, 88.5 M dans HDFS)** : les deux outils n'arrondissent pas de la même façon. La taille exacte en octets est la même : 92 764 700.
+- **`wc: invalid option -- 'r'`** : erreur de frappe, il manquait un espace entre `-l` et le nom du fichier. Corrigé en relançant `wc -l "$F"`.
+- **`cat: Unable to write to output stream`** : ce n'est pas une erreur du dépôt. `head` s'arrête après 3 lignes et coupe la lecture, donc `cat` ne peut plus écrire la suite. C'est normal.
