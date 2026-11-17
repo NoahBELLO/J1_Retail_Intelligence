@@ -4,103 +4,116 @@
 
 ### Étape 1 – Environnement Hadoop
 
-Relevés faits le 17 novembre 2026. Les sorties complètes des commandes sont dans [preuves/etape1_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape1_sorties_commandes.txt).
+Fait le 17 novembre 2026. Les résultats complets des commandes sont dans [preuves/etape1_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape1_sorties_commandes.txt).
 
-#### 1. Commandes lancées
+#### Commandes lancées
 
-| Commande | Pour quoi faire |
+- `hadoop version` : voir la version de Hadoop.
+- `jps` : voir les services qui tournent.
+- `hdfs dfsadmin -report` : voir l'état de HDFS et des DataNodes.
+- lecture des fichiers de configuration `core-site.xml` et `hdfs-site.xml`.
+- recherche des erreurs dans les journaux (fichiers de log) de Hadoop.
+
+#### Ce qu'on a relevé
+
+| Élément | Valeur |
 |---|---|
-| `hadoop version` | Connaître la version et le dossier d'installation |
-| `jps` | Voir les programmes Java (services) qui tournent |
-| `hdfs dfsadmin -report` | Voir l'état de HDFS et des DataNodes |
-| `cat core-site.xml`, `cat hdfs-site.xml`, `hdfs getconf` | Lire la configuration |
-| `hdfs dfsadmin -safemode get` | Vérifier que le NameNode accepte les écritures |
-| `grep ERROR/FATAL/WARN` sur les journaux | Chercher des erreurs au démarrage |
+| Système | Ubuntu 24.04 dans WSL (Linux dans Windows 11) |
+| Version de Hadoop | 3.5.0 |
+| Chemin d'installation | `/opt/hadoop` |
+| Configuration | Fichiers dans `/opt/hadoop/etc/hadoop`. HDFS est à l'adresse `hdfs://localhost:9000`, chaque fichier est gardé en **1 seul exemplaire**, découpé en blocs de **128 Mo** |
+| NameNode | Démarré |
+| DataNode | 1 seul DataNode, démarré et en état normal |
+| Espace | Environ 930 Go libres, presque rien d'utilisé (HDFS est vide) |
+| Erreurs au démarrage | Aucune erreur. Seulement quelques avertissements sans gravité |
 
-#### 2. Informations relevées
+#### Rôle du NameNode et des DataNodes
 
-| Élément | Valeur constatée |
-|---|---|
-| Système | Ubuntu 24.04.5 LTS sous WSL (Windows 11), machine `DESKTOP-DCTNJ6T` |
-| Version de Hadoop | **3.5.0** |
-| Chemin d'installation | `/opt/hadoop` (`HADOOP_HOME`) |
-| Dossier de configuration | `/opt/hadoop/etc/hadoop` (`HADOOP_CONF_DIR`) |
-| Java utilisé par Hadoop | Java 17 : `/usr/lib/jvm/java-17-openjdk-amd64` (dans `hadoop-env.sh`) |
-| Adresse de HDFS | `hdfs://localhost:9000` (`fs.defaultFS`) |
-| Facteur de réplication | **1** (`dfs.replication`) |
-| Taille d'un bloc | 134 217 728 octets = **128 Mo** (valeur par défaut) |
-| Dossier du NameNode | `/home/noah/hadoop-data/namenode` |
-| Dossier du DataNode | `/home/noah/hadoop-data/datanode` |
-| Journaux | `/opt/hadoop/logs/` |
-| Interface web du NameNode | http://localhost:9870 |
+- **NameNode** : c'est le « chef ». Il ne garde pas les données, mais il sait où elles sont : la liste des dossiers et des fichiers, et sur quel DataNode se trouve chaque morceau de fichier. Si le NameNode est arrêté, on ne peut plus utiliser HDFS.
+- **DataNode** : c'est un « ouvrier ». Il garde réellement les données sur son disque. Les fichiers sont découpés en morceaux (des **blocs**), et chaque DataNode stocke une partie de ces blocs. Il prévient régulièrement le NameNode qu'il fonctionne.
 
-#### 3. État des services
+#### Une seule machine ou plusieurs ?
 
-| Service | État | Preuve |
-|---|---|---|
-| NameNode | **Démarré**, mode sans écriture (safe mode) **désactivé** | `jps` (processus 11282), `Safe mode is OFF` |
-| SecondaryNameNode | **Démarré**, il a fait une sauvegarde de l'index à 12h46 | `jps` (processus 11569), journal `Checkpoint done` |
-| DataNode | **1 DataNode actif**, statut `Normal` | `jps` (processus 11393), `Live datanodes (1)` à l'adresse `127.0.0.1:9866` |
-| HDFS | Sain : 0 bloc manquant, 0 bloc abîmé, 0 bloc pas assez copié | `hdfs dfsadmin -report` |
-| Espace | 1006,85 Go configurés, 929,96 Go libres, 28 Ko utilisés, 0 bloc | `hdfs dfsadmin -report` |
-
-`jps` montre aussi `NiFi` et `BootstrapProcess`. NiFi est donc déjà démarré, il servira pour l'UC-04.
-
-Remarque : les 1006 Go correspondent au disque virtuel de WSL, pas à un vrai espace réservé à HDFS.
-
-#### 4. Erreurs de démarrage
-
-- **Aucune ligne `ERROR` ni `FATAL`** dans les journaux du NameNode, du DataNode et du SecondaryNameNode.
-- Quelques avertissements (`WARN`) qui ne bloquent pas :
-  - `Unable to initialize FileSignerSecretProvider` : aucun fichier secret n'est configuré pour l'interface web, Hadoop en génère un au hasard. Sans conséquence dans notre cas.
-  - `Only one image storage directory configured. Beware of data loss` : l'index du NameNode n'est enregistré qu'à un seul endroit. Si ce dossier est perdu, tout HDFS est perdu. C'est normal sur une seule machine, mais ce serait un risque en production.
-
-#### 5. Rôle du NameNode et des DataNodes
-
-- **NameNode** : c'est le « chef ». Il ne stocke pas les données mais l'**index** : l'arborescence des dossiers, les noms des fichiers, les droits, et la liste des blocs de chaque fichier avec leur emplacement. Toute commande `hdfs dfs` passe d'abord par lui. S'il s'arrête, HDFS n'est plus utilisable.
-- **DataNode** : c'est un « ouvrier ». Il stocke les **blocs** (morceaux de 128 Mo) sur son disque, les envoie quand on lit un fichier, et signale régulièrement au NameNode qu'il est vivant et quels blocs il possède (ligne `Last Block Report` dans le rapport).
-- **SecondaryNameNode** : il aide le NameNode en fusionnant de temps en temps son index avec le journal des modifications (checkpoint). Ce **n'est pas** un NameNode de secours : il ne prend pas le relais si le NameNode tombe.
-
-#### 6. Type de déploiement
-
-C'est un déploiement **local sur une seule machine** (mode pseudo-distribué) :
-- le NameNode, le SecondaryNameNode et l'unique DataNode tournent sur la même machine (`localhost`) ;
-- la réplication est à 1, donc chaque bloc n'existe qu'en un seul exemplaire.
-
-C'est un **environnement pédagogique**, pas un cluster de production : si la machine ou le disque tombe en panne, aucune copie ne permet de récupérer les données, et il n'y a aucun NameNode de secours.
+Notre environnement tourne sur **une seule machine** : le NameNode et le seul DataNode sont sur le même ordinateur. C'est un environnement pour apprendre, pas un vrai système d'entreprise : chaque fichier n'existe qu'en un seul exemplaire, donc si le disque tombe en panne, les données sont perdues.
 
 ---
 
 ### Étape 2 – Découverte des commandes HDFS
 
-Commandes lancées le 17 novembre 2026, entre 12h53 et 12h57. Les sorties complètes sont dans [preuves/etape2_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape2_sorties_commandes.txt).
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape2_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape2_sorties_commandes.txt).
 
-#### 1. Les 6 opérations demandées
+#### Les 6 opérations demandées
 
 | # | Opération | Commande | Résultat |
 |---|---|---|---|
-| 1 | Consulter l'état du système HDFS | `hdfs fsck /` | `Status: HEALTHY` : 1 DataNode, 2 dossiers (`/` et `/retail-lake`), 0 fichier, 0 bloc manquant ou abîmé |
-| 2 | Informations sur les nœuds | `hdfs dfsadmin -report` | Lancée à l'étape 1 : 1 DataNode actif (`127.0.0.1:9866`, statut `Normal`) |
-| 3 | Lister les répertoires | `hdfs dfs -ls /` | Avant le `mkdir` : rien (HDFS vide). Après : `/retail-lake` |
-| 4 | Créer un répertoire de travail | `hdfs dfs -mkdir -p /retail-lake` | Aucun message, donc la commande a réussi |
-| 5 | Vérifier les permissions | `hdfs dfs -ls -d /retail-lake` | `drwxr-xr-x   - noah supergroup   0 2026-11-17 12:53 /retail-lake` |
-| 6 | Taille des données stockées | `hdfs dfs -du -s -h /retail-lake` | `0  0  /retail-lake` |
+| 1 | État de HDFS | `hdfs fsck /` | `HEALTHY` : HDFS est en bon état |
+| 2 | Informations sur les nœuds | `hdfs dfsadmin -report` | 1 DataNode actif (déjà vu à l'étape 1) |
+| 3 | Lister les dossiers | `hdfs dfs -ls /` | Au début : rien. Après la création : `/retail-lake` |
+| 4 | Créer un dossier de travail | `hdfs dfs -mkdir -p /retail-lake` | Aucun message, donc ça a marché |
+| 5 | Vérifier les permissions | `hdfs dfs -ls -d /retail-lake` | `drwxr-xr-x   noah supergroup` |
+| 6 | Taille des données | `hdfs dfs -du -s -h /retail-lake` | `0` : le dossier est vide |
 
-#### 2. Lecture des résultats
+#### Lire les permissions `drwxr-xr-x`
 
-- **Permissions `drwxr-xr-x`** :
-  - `d` : c'est un dossier ;
-  - `rwx` : le propriétaire (`noah`) peut lire, écrire et entrer dans le dossier ;
-  - `r-x` : le groupe (`supergroup`) peut lire et entrer, mais pas écrire ;
-  - `r-x` : les autres utilisateurs peuvent lire et entrer, mais pas écrire.
-  - Le `-` à la place du facteur de réplication est normal : un dossier n'a pas de blocs, donc pas de copies.
-- **Taille `0  0`** : la première colonne est la taille des fichiers, la deuxième la place réellement prise sur les disques (taille × nombre de copies). Les deux valent 0 car le dossier est vide. Avec une réplication à 1, ces deux nombres seront toujours égaux.
-- **`fsck`** vérifie que tous les blocs des fichiers sont présents et en bon état. Il ne trouve aucun problème, mais c'est normal puisqu'il n'y a encore aucun fichier.
+- `d` : c'est un dossier.
+- `rwx` : le propriétaire (`noah`) peut lire, écrire et ouvrir le dossier.
+- `r-x` : le groupe (`supergroup`) peut lire et ouvrir, mais pas écrire.
+- `r-x` : les autres utilisateurs peuvent lire et ouvrir, mais pas écrire.
 
-#### 3. Erreurs rencontrées
+#### Erreurs rencontrées
 
-Aucune erreur. Un seul point a pu surprendre :
+Aucune vraie erreur. Mais au début, plusieurs commandes n'affichaient rien :
+- `hdfs dfs -ls /` : HDFS était encore vide, il n'y avait rien à afficher.
+- `hdfs dfs -mkdir` : cette commande n'affiche rien quand elle réussit.
+- `hdfs dfs -du -h` : le dossier était vide. Avec l'option `-s`, la commande affiche quand même le total (`0`).
 
-| Constat | Explication |
-|---|---|
-| `hdfs dfs -ls /`, `-mkdir` et `-du -h` n'affichent rien | Ce n'est pas une erreur. `ls /` a été lancée quand HDFS était encore vide. `mkdir` n'écrit rien quand il réussit. `du` sans `-s` n'affiche que le contenu du dossier, ici vide. On utilise `-du -s` pour avoir le total. |
+---
+
+### Étape 3 – Création de l'arborescence du Data Lake
+
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape3_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape3_sorties_commandes.txt).
+
+#### Commandes lancées
+
+```bash
+hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/initial
+hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/refresh
+hdfs dfs -mkdir -p /retail-lake/bronze/tpcxbb
+hdfs dfs -mkdir -p /retail-lake/silver
+hdfs dfs -mkdir -p /retail-lake/gold
+hdfs dfs -mkdir -p /retail-lake/quality
+hdfs dfs -mkdir -p /retail-lake/logs
+hdfs dfs -ls -R /retail-lake
+```
+
+La dernière commande affiche tous les dossiers créés : les 10 dossiers sont bien là. On a gardé l'arborescence proposée par le TP.
+
+#### Schéma
+
+```
+/retail-lake/
+├── raw/                 Les fichiers reçus, tels quels
+│   └── tpcxbb/          Source : les données TPCx-BB
+│       ├── initial/     Premier envoi de données (dossier data/)
+│       └── refresh/     Envoi de mise à jour (dossier data_refresh/)
+├── bronze/              Les mêmes données, rangées pour être lues
+│   └── tpcxbb/
+├── silver/              Les données nettoyées
+├── gold/                Les données prêtes pour les indicateurs
+├── quality/             Les résultats des contrôles et les lignes refusées
+└── logs/                Les journaux : ce qui a été fait, quand, et si ça a marché
+```
+
+Les données vont dans cet ordre : raw → bronze → silver → gold.
+
+#### Explications
+
+- **Pourquoi garder les données sources ?** Si on fait une erreur plus tard dans un traitement, on peut tout refaire à partir des fichiers d'origine. Et on peut toujours retrouver d'où vient un chiffre.
+- **Différence entre Raw et Bronze** : dans **Raw**, on met le fichier exactement comme on l'a reçu, et on n'y touche plus jamais. Dans **Bronze**, on a les mêmes données, mais rangées pour pouvoir les lire facilement (une table par dossier, avec la date du chargement). On ne corrige encore rien.
+- **Rôle de Silver et Gold** : **Silver** contient les données nettoyées (sans doublons, avec les bons types, sans valeurs incorrectes). **Gold** contient les données organisées pour répondre aux questions du métier, par exemple le chiffre d'affaires par mois.
+- **Pourquoi séparer les données, `quality` et `logs` ?** Pour ne pas mélanger les données avec les informations sur les traitements. Comme ça, on retrouve plus facilement une erreur, et on peut donner des droits différents : par exemple, les équipes métier peuvent lire `gold` sans voir `logs`.
+- **Comment garder la provenance (l'origine des données) ?** Un dossier par source (`tpcxbb`) et par envoi (`initial`, `refresh`). On ne modifie jamais les fichiers de `raw`. Pour chaque fichier déposé, on note son nom, d'où il vient, sa taille, son nombre de lignes et la date du dépôt.
+
+#### Différence avec le Jour 1
+
+Au Jour 1, on avait appelé « Bronze » la zone qui garde les fichiers d'origine. Au Jour 2, cette zone s'appelle **`raw`**, et `bronze` devient une étape en plus. La zone « Quarantaine » du Jour 1 (les lignes refusées) va dans **`quality`**. Le document `UC02_architecture_cible.md` sera à mettre à jour lors de la mise en commun.
