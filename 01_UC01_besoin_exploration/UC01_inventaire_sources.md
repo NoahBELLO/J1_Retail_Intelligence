@@ -161,3 +161,24 @@ Ce sont les mêmes tables, mais avec **de nouvelles données à ajouter** : nouv
 | Objectifs de vente | Absent |
 | Coûts (loyers, salaires) | Absent |
 | Documentation des colonnes | Absente |
+
+## 9. Fichiers déposés dans HDFS (UC-03, étape 4)
+
+Preuves : `03_UC03_hdfs/preuves/etape4_depot_donnees_lorenzo.txt`.
+
+| Information | Valeur |
+|---|---|
+| Kit d'origine | `retail_project.zip` (SHA-256 `dc1634e95cb3192487cad0b935a4e8dbd9ae44ca9078ac0b28513575943ed86c`) |
+| Fichier | `store_sales.dat` |
+| Chemin dans le kit | `retail_project/data/store_sales/store_sales.dat` |
+| Chemin local | `~/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat` |
+| Chemin HDFS | `/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat` |
+| Lot (`load_id`) | `2026-11-17_initial` |
+| Format | Texte `.dat`, séparateur `|`, sans titres, fins de ligne CRLF |
+| Taille | 92 764 700 octets (88,5 Mo), identique en local et dans HDFS |
+| Lignes / colonnes | 667 579 / 23, identiques en local et dans HDFS |
+| SHA-256 du fichier | `7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e`, identique en local et dans HDFS |
+| Réplication / blocs | 1 / 1 bloc, état HEALTHY |
+| Propriétaire HDFS | `lolorigolo:supergroup`, `-rw-r--r--` |
+| Date de dépôt | 17/11/2026 15:08 |
+| Source conservée | Oui : fichier local et zip d'origine inchangés |
