@@ -1,0 +1,65 @@
+UC-03 - Etape 4 - Depot des donnees TPCx-BB
+Date : mardi 17 novembre 2026 (vers 14h44)
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL, utilisateur noah
+Dossier courant : /mnt/c/Users/Noah/Documents/Document de cours/Cours Master 2 Informatique/Architecture DATA LAKE, DATE WAREHOUSE, DATA LAKEHOUSE
+
+######################################################################
+# 1. Avant le depot : examen du fichier
+######################################################################
+
+$ F=retail_project/data/store_sales/store_sales.dat
+
+$ ls -l "$F"
+-rwxrwxrwx 1 noah noah 92764700 Nov 16 12:35 retail_project/data/store_sales/store_sales.dat
+
+$ ls -lh "$F"
+-rwxrwxrwx 1 noah noah 89M Nov 16 12:35 retail_project/data/store_sales/store_sales.dat
+
+$ file "$F"
+retail_project/data/store_sales/store_sales.dat: ASCII text, with CRLF line terminators
+
+$ head -n 3 "$F"
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+
+$ head -n 1 "$F" | awk -F'|' '{print NF}'
+23
+
+$ wc -l"$F"
+wc: invalid option -- 'r'
+Try 'wc --help' for more information.
+(erreur de frappe : espace manquant entre -l et "$F")
+
+$ wc -l "$F"
+667579 retail_project/data/store_sales/store_sales.dat
+
+######################################################################
+# 2. Depot
+######################################################################
+
+$ hdfs dfs -put "$F" /retail-lake/raw/tpcxbb/initial/
+(aucune sortie : la commande n'affiche rien quand elle reussit ;
+ le fichier apparait bien dans HDFS a 14:44, voir ci-dessous)
+
+######################################################################
+# 3. Apres le depot : verifications
+######################################################################
+
+$ hdfs dfs -ls -h /retail-lake/raw/tpcxbb/initial
+Found 1 items
+-rw-r--r--   1 noah supergroup     88.5 M 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial/store_sales.dat
+
+$ hdfs dfs -ls /retail-lake/raw/tpcxbb/initial
+Found 1 items
+-rw-r--r--   1 noah supergroup   92764700 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial/store_sales.dat
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales.dat | head -n 3
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+cat: Unable to write to output stream.
+(normal : head s'arrete apres 3 lignes et ferme la sortie)
+
+$ ls -l "$F"
+-rwxrwxrwx 1 noah noah 92764700 Nov 16 12:35 retail_project/data/store_sales/store_sales.dat
