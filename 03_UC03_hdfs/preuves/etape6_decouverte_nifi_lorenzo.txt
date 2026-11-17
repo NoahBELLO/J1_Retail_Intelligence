@@ -1,0 +1,200 @@
+UC-03 - Etape 6 - Fiche de decouverte de NiFi
+Date : mardi 17 novembre 2026 (16h35)
+Machine : dev-pro-ubuntu, Ubuntu 24.04.5 LTS, utilisateur lolorigolo
+Installation locale : /opt/nifi
+
+==================================================
+1. COMMANDES EXECUTEES
+==================================================
+
+$ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+$ /opt/nifi/bin/nifi.sh status
+
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+NIFI_HOME=/opt/nifi
+
+2026-11-17 16:35:24,113 INFO [main] org.apache.nifi.bootstrap.Command Application Process [21141] Command Status [SUCCESS] HTTP 200
+2026-11-17 16:35:24,118 INFO [main] org.apache.nifi.bootstrap.Command Status: UP
+
+$ /usr/lib/jvm/java-21-openjdk-amd64/bin/java -version
+openjdk version "21.0.13.0.3" 2026-10-24
+
+$ ls /opt/nifi/lib | grep -E "nifi-runtime|nifi-framework-nar"
+nifi-framework-nar-2.12.0.nar
+nifi-runtime-2.12.0.jar
+
+$ grep -E "Started Server|Started Application" /opt/nifi/logs/nifi-app.log
+2026-11-17 12:29:11,493 INFO [main] org.apache.nifi.web.server.JettyServer Started Server on https://localhost:8443/nifi
+2026-11-17 12:29:11,515 INFO [main] org.apache.nifi.runtime.Application Started Application in 18.394 seconds
+
+$ grep -c " ERROR " /opt/nifi/logs/nifi-app.log
+0
+
+$ grep -E "^nifi\.(web|security|cluster|provenance|flowfile|content|remote|sensitive)..." /opt/nifi/conf/nifi.properties
+nifi.flow.configuration.file=./conf/flow.json.gz
+nifi.flowfile.repository.directory=./flowfile_repository
+nifi.content.repository.directory.default=./content_repository
+nifi.provenance.repository.implementation=org.apache.nifi.provenance.WriteAheadProvenanceRepository
+nifi.provenance.repository.directory.default=./provenance_repository
+nifi.provenance.repository.max.storage.time=30 days
+nifi.remote.input.secure=true
+nifi.web.http.host=
+nifi.web.http.port=
+nifi.web.https.host=localhost
+nifi.web.https.port=8443
+nifi.sensitive.props.algorithm=NIFI_PBKDF2_AES_GCM_256
+nifi.security.keystoreType=PKCS12
+nifi.security.user.authorizer=single-user-authorizer
+nifi.security.user.login.identity.provider=single-user-provider
+nifi.cluster.is.node=false
+
+$ curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/nifi/
+200
+$ curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/nifi-api/flow/about
+401
+$ curl -s -o /dev/null -w '%{http_code}' http://localhost:8443/
+000
+
+$ openssl s_client -connect localhost:8443 | openssl x509 -noout -subject -issuer -dates
+subject=CN = localhost
+issuer=CN = localhost
+notBefore=Nov 17 11:26:44 2026 GMT
+notAfter=Jan 16 11:26:44 2027 GMT
+
+$ ls /opt/nifi/lib/*.nar | wc -l
+119
+
+$ ls /opt/nifi/lib /opt/nifi/extensions | grep -i -E "hadoop|hdfs"
+
+$ zcat /opt/nifi/conf/flow.json.gz | (comptage du rootGroup)
+processors 0 groups 0 connections 0 controllerServices 0
+
+==================================================
+2. INFORMATIONS RELEVEES
+==================================================
+
+— Version de NiFi :
+  Apache NiFi 2.12.0, Java 21 (OpenJDK 21.0.13).
+
+— Adresse d'acces a l'interface :
+  https://localhost:8443/nifi (HTTPS uniquement, HTTP desactive).
+  Connexion avec les identifiants generes au premier demarrage
+  (Generated Username / Generated Password dans logs/nifi-app.log).
+  Les identifiants ne sont pas recopies ici.
+
+— Etat general de l'instance :
+  - Status: UP (processus 21141), demarree le 17/11 a 12h29 en 18 s.
+  - Interface joignable (HTTP 200), API protegee (401 sans jeton).
+  - Aucune erreur dans nifi-app.log.
+  - Instance seule (nifi.cluster.is.node=false), pas de cluster.
+  - Canvas vide : 0 processor, 0 groupe, 0 connexion, 0 service.
+
+— Composants disponibles :
+  119 extensions (.nar) installees dans /opt/nifi/lib, dont :
+  - nifi-standard-nar : processors de base (ListFile, FetchFile,
+    GetFile, PutFile, UpdateAttribute, RouteOnAttribute,
+    CryptographicHashContent, LogAttribute, SplitText...) ;
+  - nifi-record-serialization-services-nar : lecteurs/ecrivains
+    CSV, JSON, Avro, Parquet (CSVReader, JsonRecordSetWriter...) ;
+  - nifi-update-attribute-nar, nifi-compress-nar,
+    nifi-dbcp-service-nar, nifi-kafka-nar ;
+  - connecteurs cloud : nifi-azure-nar, nifi-aws-nar, nifi-gcp-nar ;
+  - nifi-provenance-repository-nar.
+
+  ATTENTION : aucun NAR Hadoop (nifi-hadoop-nar). Les processors
+  PutHDFS / ListHDFS / FetchHDFS ne sont donc PAS disponibles :
+  depuis NiFi 2.x ils ne sont plus livres dans la distribution de base.
+
+— Services necessaires a l'ingestion (TPCx-BB -> HDFS) :
+  - HDFS demarre (NameNode + DataNode, etapes 1-2) et accessible
+    sur hdfs://localhost:9000 ;
+  - fichiers de config Hadoop lisibles par NiFi :
+    /opt/hadoop/etc/hadoop/core-site.xml et hdfs-site.xml
+    (propriete "Hadoop Configuration Resources" de PutHDFS) ;
+  - le NAR nifi-hadoop-nar-2.12.0 a ajouter dans /opt/nifi/extensions
+    pour avoir PutHDFS ;
+  - Controller Services utiles : CSVReader (separateur "|", sans
+    titres) et un RecordSetWriter si on valide/convertit les lignes.
+
+— Contraintes de securite :
+  - HTTPS obligatoire, certificat auto-signe (CN=localhost, valable
+    jusqu'au 16/01/2027) : le navigateur affiche un avertissement.
+  - Authentification "single-user" : un seul compte, pas de roles
+    (pas de separation des droits entre utilisateurs).
+  - API REST protegee : jeton obligatoire (401 sinon).
+  - Proprietes sensibles (mots de passe des services) chiffrees
+    (NIFI_PBKDF2_AES_GCM_256).
+  - Interface ecoute uniquement sur localhost : pas d'acces depuis
+    une autre machine.
+  - NiFi ecrit dans HDFS avec l'utilisateur systeme qui le lance
+    (lolorigolo) : les droits HDFS de /retail-lake s'appliquent.
+
+==================================================
+3. CONCEPTS NIFI
+==================================================
+
+— FlowFile
+  L'unite de donnee qui circule dans NiFi. Il a deux parties :
+  le contenu (les octets, ex. store_sales.dat) et les attributs
+  (cle/valeur : filename, path, file.size, uuid, hash...).
+  Role : transporter un fichier et ses metadonnees d'une etape a
+  l'autre. Le contenu est stocke dans content_repository, les
+  attributs dans flowfile_repository.
+
+— Processor
+  Un bloc qui fait une action sur les FlowFiles : lire, transformer,
+  router, ecrire. Ex. ListFile + FetchFile (lire les .dat),
+  CryptographicHashContent (calculer le SHA-256), UpdateAttribute
+  (ajouter load_id), PutHDFS (ecrire dans /retail-lake/raw).
+  Role : chaque etape du flux est un processor configure et planifie.
+
+— Connection
+  Le lien entre deux processors. C'est une file d'attente : les
+  FlowFiles y attendent le processor suivant. Elle est liee a une
+  relation (success, failure...), et a une limite (back pressure)
+  pour ne pas saturer la suite du flux.
+  Role : relier les etapes et separer les cas OK / erreur.
+
+— Process Group
+  Un dossier qui regroupe des processors et connexions. On peut en
+  faire un par flux (ex. "Ingestion TPCx-BB initial") avec des ports
+  d'entree/sortie.
+  Role : organiser le canvas, reutiliser, gerer les droits et les
+  versions d'un flux complet.
+
+— Controller Service
+  Un service partage, configure une fois et utilise par plusieurs
+  processors : lecteur CSV, connexion base de donnees, contexte SSL,
+  cache...
+  Role : eviter de repeter la meme configuration (ex. un CSVReader
+  "| sans titres" commun a toutes les tables TPCx-BB).
+
+— Provenance Repository
+  Le journal de tout ce qui arrive a chaque FlowFile : reception,
+  modification d'attributs, envoi, suppression, avec date, processor
+  et taille. Ici : WriteAheadProvenanceRepository dans
+  /opt/nifi/provenance_repository, conserve 30 jours.
+  Role : tracer la provenance (d'ou vient le fichier, ce qui lui a
+  ete fait, ou il a ete ecrit) et rejouer un FlowFile si besoin.
+  C'est la base de la provenance demandee en UC-02 (load_id,
+  fichier source, date de chargement).
+
+==================================================
+4. ROLE DE CHAQUE COMPOSANT DANS LE FLUX PREVU
+==================================================
+
+  [ListFile]  ~/DEV/tpcxbb_source/retail_project/data/*/*.dat
+      | success                                  (Connection)
+  [FetchFile] lit le contenu -> FlowFile
+      | success
+  [CryptographicHashContent] SHA-256 en attribut
+      | success
+  [UpdateAttribute] load_id=2026-11-17_initial, source=tpcxbb
+      | success
+  [PutHDFS] /retail-lake/raw/tpcxbb/initial/${table}/
+      | success -> [LogAttribute]     failure -> file d'erreur
+
+  Le tout dans un Process Group "Ingestion TPCx-BB".
+  Controller Service : CSVReader si on valide les lignes.
+  Provenance Repository : garde la trace de chaque fichier
+  (taille, hash, destination HDFS).
