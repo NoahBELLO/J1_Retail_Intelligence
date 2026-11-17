@@ -1,0 +1,55 @@
+UC-03 - Etape 5 - Verification du stockage
+Date : mardi 17 novembre 2026 (vers 15h06)
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL, utilisateur noah
+Dossier courant : /mnt/c/Users/Noah/Documents/Document de cours/Cours Master 2 Informatique/Architecture DATA LAKE, DATE WAREHOUSE, DATA LAKEHOUSE
+
+$ F=retail_project/data/store_sales/store_sales.dat
+$ H=/retail-lake/raw/tpcxbb/initial/store_sales.dat
+
+$ hdfs dfs -ls -R /retail-lake
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/bronze
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/bronze/tpcxbb
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/gold
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/logs
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/quality
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:21 /retail-lake/raw
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:21 /retail-lake/raw/tpcxbb
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial
+-rw-r--r--   1 noah supergroup   92764700 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial/store_sales.dat
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:21 /retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 /retail-lake/silver
+
+$ hdfs dfs -ls $H
+-rw-r--r--   1 noah supergroup   92764700 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial/store_sales.dat
+
+$ ls -l "$F"
+-rwxrwxrwx 1 noah noah 92764700 Nov 16 12:35 retail_project/data/store_sales/store_sales.dat
+
+$ hdfs dfs -get $H /tmp/store_sales_depuis_hdfs.dat
+(aucune sortie : la commande a reussi)
+
+$ ls -l /tmp/store_sales_depuis_hdfs.dat
+-rw-r--r-- 1 noah noah 92764700 Nov 17 15:06 /tmp/store_sales_depuis_hdfs.dat
+
+$ sha256sum "$F" /tmp/store_sales_depuis_hdfs.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  retail_project/data/store_sales/store_sales.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  /tmp/store_sales_depuis_hdfs.dat
+
+$ wc -l "$F" /tmp.store_sales_depuis_hdfs.dat
+  667579 retail_project/data/store_sales/store_sales.dat
+wc: /tmp.store_sales_depuis_hdfs.dat: No such file or directory
+  667579 total
+(erreur de frappe : "/tmp." au lieu de "/tmp/")
+
+$ cmp "$F" /tmp/store_sales_depuis_hdfs.dat && echo "IDENTIQUES"
+IDENTIQUES
+
+$ rm /tmp/store_sales_depuis_hdfs.dat
+(menage : copie temporaire supprimee)
+
+######################################################################
+# Comptage des lignes relance directement sur HDFS (15h09)
+######################################################################
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales.dat | wc -l
+667579

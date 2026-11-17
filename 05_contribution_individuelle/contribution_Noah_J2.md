@@ -166,9 +166,46 @@ Le fichier va dans `raw/tpcxbb/initial`, car il vient du dossier `data/`, c'est-
 |---|---|---|---|---|---|---|---|
 | `store_sales.dat` | Texte, séparateur `\|` | 92 764 700 octets | 667 579 | 23 | `retail_project/data/store_sales/` | `/retail-lake/raw/tpcxbb/initial/` | Pas de ligne de titres. Fins de ligne Windows (voir plus bas) |
 
-#### Points à retenir et erreurs
+#### Observations
 
 - **Fins de ligne Windows** : `file` indique `with CRLF line terminators`. Chaque ligne se termine par un caractère invisible en plus, comme les fichiers créés sous Windows. Ce n'est pas un problème pour le dépôt, car on copie le fichier tel quel. Il faudra y penser au Jour 3 au moment de lire les données, sinon la dernière colonne aura un caractère en trop.
 - **Taille affichée différente (89M en local, 88.5 M dans HDFS)** : les deux outils n'arrondissent pas de la même façon. La taille exacte en octets est la même : 92 764 700.
-- **`wc: invalid option -- 'r'`** : erreur de frappe, il manquait un espace entre `-l` et le nom du fichier. Corrigé en relançant `wc -l "$F"`.
 - **`cat: Unable to write to output stream`** : ce n'est pas une erreur du dépôt. `head` s'arrête après 3 lignes et coupe la lecture, donc `cat` ne peut plus écrire la suite. C'est normal.
+
+---
+
+### Étape 5 – Vérification du stockage
+
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape5_sorties_commandes.txt](../03_UC03_hdfs/preuves/etape5_sorties_commandes.txt).
+
+#### Les contrôles
+
+| Contrôle | Commande | Résultat |
+|---|---|---|
+| Les dossiers attendus sont là | `hdfs dfs -ls -R /retail-lake` | Oui, les 10 dossiers de l'étape 3 |
+| Le fichier est là | `hdfs dfs -ls` | Oui, `store_sales.dat` dans `raw/tpcxbb/initial` |
+| La taille est la même | `hdfs dfs -ls` et `ls -l` | Oui, 92 764 700 octets des deux côtés |
+| Les permissions | `hdfs dfs -ls` | `-rw-r--r--` : `noah` peut lire et écrire, les autres peuvent seulement lire |
+| On peut récupérer le fichier | `hdfs dfs -get` vers `/tmp` | Oui, la copie récupérée fait 92 764 700 octets |
+| Le fichier est identique à l'original | `sha256sum`, `cmp`, `wc -l` | Oui (détail ci-dessous) |
+
+#### Méthode de comparaison utilisée
+
+On a récupéré le fichier depuis HDFS dans `/tmp` (en dehors du projet, pour ne pas toucher aux données d'origine), puis on l'a comparé au fichier local de 3 façons :
+
+1. **Empreinte SHA-256** (`sha256sum`) : un code calculé à partir de tout le contenu du fichier. Si un seul caractère change, le code change. Les deux fichiers ont le même code :
+   `7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e`
+2. **Comparaison octet par octet** (`cmp`) : aucune différence, la commande affiche `IDENTIQUES`.
+3. **Nombre de lignes** (`wc -l`) : 667 579 lignes en local et dans HDFS.
+
+Ensuite, on a supprimé la copie de `/tmp`.
+
+**Conclusion** : le fichier stocké dans HDFS est exactement le même que le fichier d'origine. Rien n'a été perdu ni modifié pendant le dépôt.
+
+#### Erreurs rencontrées
+
+Aucune.
+
+#### Limite de la méthode
+
+On compare le fichier avec sa copie récupérée. C'est fiable, mais il faut récupérer tout le fichier, ce qui serait long avec de très gros fichiers. Ici, avec 89 Mo, ça va vite.
