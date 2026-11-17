@@ -1,0 +1,94 @@
+UC-04 - Etapes 9, 10 et 11
+Date : mardi 17 novembre 2026 (16h30 - 16h34)
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL
+
+######################################################################
+# Etape 9 - Demarrer et tester le flux
+######################################################################
+
+Avant le test :
+- /data/nifi/input contient store.dat (3386 octets, copie de travail)
+- /retail-lake/raw/nifi existe et est vide
+
+Interface NiFi :
+16:30:29  PutHDFS demarre (Start)
+16:30:3x  GetFile demarre (Start)
+Compteurs apres le passage du fichier (capture etape9_flux_execute.jpg) :
+  GetFile  : Read/Write 3.31 KB / 3.31 KB, Out 1 (3.31 KB)
+  PutHDFS  : In 1 (3.31 KB), Read/Write 3.31 KB / 0 bytes
+  file success : Queued 0 ; file failure : Queued 0
+
+Journal NiFi :
+2026-11-17 16:30:29,472 INFO [NiFi Web Server-164] o.a.n.c.s.StandardProcessScheduler Starting PutHDFS[id=ea1a4d4d-01a1-1000-bb0b-1a7f742e4b14]
+2026-11-17 16:30:31,703 INFO [Timer-Driven Process Thread-8] o.a.n.c.s.TimerDrivenSchedulingAgent Scheduled PutHDFS[id=ea1a4d4d-01a1-1000-bb0b-1a7f742e4b14] to run with 1 threads
+
+Verification dans le terminal :
+$ hdfs dfs -ls -h /retail-lake/raw/nifi
+Found 1 items
+-rw-r--r--   1 noah supergroup      3.3 K 2026-11-17 16:30 /retail-lake/raw/nifi/store.dat
+$ hdfs dfs -du -h /retail-lake/raw/nifi
+3.3 K  3.3 K  /retail-lake/raw/nifi/store.dat
+$ hdfs dfs -ls /retail-lake/raw/nifi
+-rw-r--r--   1 noah supergroup       3386 2026-11-17 16:30 /retail-lake/raw/nifi/store.dat
+$ ls -l /data/nifi/input
+total 0
+(le fichier a ete retire du dossier d'entree par GetFile, Keep Source File = false)
+
+Comparaison avec l'original :
+$ hdfs dfs -cat /retail-lake/raw/nifi/store.dat | sha256sum
+a936bc38692bdddc222cf86d08ed9d0feb761af26769212d789cf6729d1808ef  -
+$ sha256sum < retail_project/data/store/store.dat
+a936bc38692bdddc222cf86d08ed9d0feb761af26769212d789cf6729d1808ef  -
+$ hdfs dfs -cat /retail-lake/raw/nifi/store.dat | wc -l
+12
+$ ls -l retail_project/data/store/store.dat
+-rwxrwxrwx 1 noah noah 3386 Nov 16 12:35 retail_project/data/store/store.dat
+(l'original est toujours la)
+
+######################################################################
+# Etape 10 - Erreur controlee
+######################################################################
+
+16:32  GetFile arrete (Stop)
+       Input Directory : /data/nifi/input  ->  /data/nifi/dossier_inexistant  (Apply)
+Resultat : GetFile passe en "Invalid" (triangle jaune), message :
+  'Input Directory' validated against '/data/nifi/dossier_inexistant' is invalid because Directory does not exist
+Le menu clic droit de GetFile ne propose plus "Start" : NiFi refuse de demarrer le processeur.
+(capture etape10_erreur_dossier_inexistant.jpg)
+
+16:33  Input Directory remis a /data/nifi/input (Apply) : GetFile redevient valide (carre rouge = arrete).
+
+######################################################################
+# Etape 11 - Provenance (menu > Data Provenance)
+######################################################################
+
+Event Time                    Type                 FlowFile UUID                          Size     Component
+11/17/2026 16:30:36.889 CET   RECEIVE              172e23a0-8a82-42c2-a0cc-54ce79146c6c   3.31 KB  GetFile
+11/17/2026 16:30:40.169 CET   SEND                 172e23a0-8a82-42c2-a0cc-54ce79146c6c   3.31 KB  PutHDFS
+11/17/2026 16:30:40.178 CET   DROP                 172e23a0-8a82-42c2-a0cc-54ce79146c6c   3.31 KB  PutHDFS
+11/17/2026 16:30:40.179 CET   ATTRIBUTES_MODIFIED  172e23a0-8a82-42c2-a0cc-54ce79146c6c   3.31 KB  PutHDFS
+
+Detail de l'evenement SEND :
+Time              11/17/2026 16:30:40.169 CET
+Event Duration    00:00:03.057
+Lineage Duration  00:00:03.317
+Type              SEND
+FlowFile UUID     172e23a0-8a82-42c2-a0cc-54ce79146c6c
+File Size         3.31 KB
+Component Name    PutHDFS
+Transit Uri       hdfs://localhost:9000/retail-lake/raw/nifi/store.dat
+
+Attributs du FlowFile (onglet Attributes) :
+filename            store.dat
+absolute.path       /data/nifi/input/
+path                /
+file.owner          noah
+file.group          noah
+file.permissions    rwxr-xr-x
+file.lastModifiedTime  2026-11-17T16:06:38+0100
+absolute.hdfs.path  /retail-lake/raw/nifi
+hadoop.file.url     hdfs://localhost:9000/retail-lake/raw/nifi/store.dat
+target.dir.created  false
+uuid                172e23a0-8a82-42c2-a0cc-54ce79146c6c
+
+Fin : PutHDFS arrete (16h34). Les 3 processeurs sont arretes.
