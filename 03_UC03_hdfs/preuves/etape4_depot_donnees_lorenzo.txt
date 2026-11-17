@@ -1,0 +1,116 @@
+UC-03 - Etape 4 - Depot des donnees TPCx-BB
+HDFS : hdfs://localhost:9000 (Hadoop 3.5.0, mono-noeud, replication 1)
+
+==================================================
+0. RECUPERATION DU KIT
+==================================================
+
+$ mkdir ~/DEV/tpcxbb_source && cd ~/DEV/tpcxbb_source
+$ unzip -q ~/Downloads/retail_project.zip
+(extraction hors du depot Git et hors de ~/hadoop-data, qui contient
+ le stockage interne du NameNode et du DataNode)
+
+==================================================
+1. VERIFICATIONS AVANT LE DEPOT
+==================================================
+
+KPI de ventes
+
+--- Chemin local ---
+$ ls -l /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+-rw-rw-rw- 1 lolorigolo lolorigolo 92764700 Nov 15 23:34 /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+
+--- Nom et format ---
+$ file /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+/home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat: ASCII text, with CRLF line terminators
+
+--- Taille ---
+$ du -h /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+89M	/home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+
+
+--- Structure ---
+$ wc -l /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+667579 /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+
+$ head -3 /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+
+$ awk -F'|' '{print NF}' /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat | sort | uniq -c
+ 667579 23 -> 667 579 lignes, 23 colonnes
+
+--- Provenance ---
+   Kit : retail_project.zip, donne par le formateur
+   (SHA-256 dc1634e9...943ed86c)
+   Chemin dans le kit : retail_project/data/store_sales/store_sales.dat
+   Lot : initial (dossier data/, et non data_refresh/)
+   Date du fichier dans le kit : 15/11/2026 23:34
+
+--- Lisibilite ---
+$ test -r /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat && echo lisible
+lisible
+
+--- Empreinte (pour comparer apres le depot) ---
+$ sha256sum /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+
+==================================================
+2. DEPOT DANS HDFS
+==================================================
+
+Destination : /retail-lake/raw/tpcxbb/initial/store_sales/
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/initial/store_sales
+
+$ hdfs dfs -put /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat /retail-lake/raw/tpcxbb/initial/store_sales/
+
+==================================================
+3. VERIFICATIONS APRES LE DEPOT
+==================================================
+
+--- Le fichier apparait dans HDFS / le chemin est correct ---
+$ hdfs dfs -ls /retail-lake/raw/tpcxbb/initial/store_sales
+Found 1 items
+-rw-r--r--   1 lolorigolo supergroup   92764700 2026-11-17 15:08 /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+
+--- Taille coherente ---
+$ hdfs dfs -du -h /retail-lake/raw/tpcxbb/initial/store_sales
+88.5 M  88.5 M  /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+
+$ hdfs dfs -stat "%n|%b|%r|%u:%g|%y" /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+store_sales.dat|92764700|1|lolorigolo:supergroup|2026-11-17 15:08:39 -> 92 764 700 octets
+
+$ hdfs fsck /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat -files -blocks
+/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat 92764700 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1838689999-10.74.2.126-1794914239776:blk_1073741825_1001 len=92764700 Live_repl=1
+Status: HEALTHY
+
+--- Accessible ---
+$ hdfs dfs -test -r /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+(code retour : 0 -> lisible)
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | head -3
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | wc -l
+667579
+
+--- Contenu identique a l'original ---
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | sha256sum
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  -> Empreinte OK
+
+
+--- Source originale conservee ---
+$ ls -l /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat && sha256sum /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+-rw-rw-rw- 1 lolorigolo lolorigolo 92764700 Nov 15 23:34 /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  /home/lolorigolo/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat
+
+==================================================
+BILAN
+==================================================
+Depot reussi, aucune erreur.
+Fichier : /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
