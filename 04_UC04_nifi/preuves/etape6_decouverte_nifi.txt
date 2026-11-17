@@ -1,0 +1,85 @@
+UC-04 - Etape 6 - Decouverte de l'environnement NiFi
+Date : mardi 17 novembre 2026
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL, utilisateur noah
+
+######################################################################
+# 1. Probleme au demarrage (15h00 - 15h49)
+######################################################################
+
+$ /opt/nifi/bin/nifi.sh status
+Application Process STOPPED
+
+Journal /opt/nifi/logs/nifi-app.log :
+2026-11-17 15:00:49,156 ERROR [main] org.apache.nifi.web.server.JettyServer Failed to start Server
+java.lang.IllegalStateException: Invalid port configuration in nifi.properties: Both nifi.web.https.port and nifi.web.http.port specified
+(meme erreur a 15:02:14)
+
+Configuration en cause (/opt/nifi/conf/nifi.properties) :
+nifi.web.http.host=0.0.0.0
+nifi.web.http.port=8443
+nifi.web.https.host=localhost
+nifi.web.https.port=8443
+
+Correction 1 : lignes http videes
+nifi.web.http.host=
+nifi.web.http.port=
+
+$ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+$ /opt/nifi/bin/nifi.sh start
+$ /opt/nifi/bin/nifi.sh status
+2026-11-17 15:34:35,057 INFO [main] org.apache.nifi.bootstrap.Command Application Process [38899] Command Status [SUCCESS] HTTP 200
+2026-11-17 15:34:35,079 INFO [main] org.apache.nifi.bootstrap.Command Status: UP
+$ grep "Started Server on" /opt/nifi/logs/nifi-app.log | tail -1
+2026-11-17 15:31:14,473 INFO [main] org.apache.nifi.web.server.JettyServer Started Server on https://localhost:8443/nifi
+
+Mais https://localhost:8443/nifi ne s'ouvre pas dans le navigateur Windows :
+$ ss -ltn | grep 8443                      (dans WSL)
+LISTEN 0      50     [::ffff:127.0.0.1]:8443             *:*
+curl depuis WSL    : 200
+curl depuis Windows : 000 (pas de reponse)
+Comparaison : Hadoop ecoute sur 0.0.0.0:9870 et est accessible depuis Windows (302).
+
+Correction 2 : nifi.web.https.host vide (NiFi ecoute sur toutes les adresses de WSL)
+(copie de l'ancienne configuration : /opt/nifi/conf/nifi.properties.avant_host_vide)
+nifi.web.https.host=
+nifi.web.https.port=8443
+
+$ /opt/nifi/bin/nifi.sh restart
+$ ss -ltn | grep 8443
+LISTEN 0      50                  *:8443             *:*
+2026-11-17 15:49:08,833 INFO [main] org.apache.nifi.web.server.JettyServer Started Server on https://localhost:8443/nifi
+curl depuis WSL                         : 200
+curl depuis Windows (localhost)         : 200
+curl depuis Windows (IP interne de WSL) : 400  (NiFi refuse une autre adresse que localhost)
+
+######################################################################
+# 2. Interface NiFi : menu > About / System Diagnostics
+######################################################################
+
+NiFi Version      2.12.0  (Tag rel/nifi-2.12.0)
+Java              21.0.13.0.3 (Ubuntu)
+Systeme           Linux 5.15.167.4-microsoft-standard-WSL2, amd64
+Coeurs            2
+Charge moyenne    0,18
+FlowFile Repository Usage    8.0% (76.99 GB of 1,006.85 GB)
+Content Repository Usage     8.0% (76.99 GB of 1,006.85 GB)
+Provenance Repository Usage  8.0% (76.99 GB of 1,006.85 GB)
+Heap              44.0% - Max 1,024 MB, Used 447.5 MB, Free 576.5 MB
+Uptime            00:04:28
+
+######################################################################
+# 3. Modules installes (recherche de PutHDFS)
+######################################################################
+
+$ ls /opt/nifi/lib/*.nar | wc -l
+119
+$ ls /opt/nifi/lib | grep -iE "hadoop"
+(aucun resultat)
+$ find /opt/nifi -iname "*hdfs*"
+/opt/nifi/docs/html/images/puthdfs-properties.png
+/opt/nifi/docs/html/images/puthdfs-no-kerberosCS.png
+/opt/nifi/docs/html/images/puthdfs-permissions.png
+/opt/nifi/docs/html/images/puthdfs-properties_2.png
+(seulement des images de documentation, aucun module)
+$ ls /opt/nifi/extensions
+(vide)

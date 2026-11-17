@@ -209,3 +209,78 @@ Aucune.
 #### Limite de la méthode
 
 On compare le fichier avec sa copie récupérée. C'est fiable, mais il faut récupérer tout le fichier, ce qui serait long avec de très gros fichiers. Ici, avec 89 Mo, ça va vite.
+
+---
+
+## UC-04
+
+### Étape 6 – Découverte de l'environnement NiFi
+
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape6_decouverte_nifi.txt](../04_UC04_nifi/preuves/etape6_decouverte_nifi.txt).
+
+#### Ce qu'on a relevé
+
+| Élément | Valeur |
+|---|---|
+| Version de NiFi | 2.12.0 (menu ☰ → *About*) |
+| Java utilisé par NiFi | Java 21 |
+| Adresse de l'interface | https://localhost:8443/nifi |
+| État général | Démarré (`nifi.sh status` → `UP`). 2 cœurs, environ 45 % de la mémoire utilisée, 8 % du disque utilisé |
+| Composants disponibles | `GetFile` et `LogAttribute` sont présents. **`PutHDFS` est absent** : aucun module Hadoop n'est installé dans NiFi |
+| Services nécessaires à l'ingestion | HDFS démarré, fichiers de configuration Hadoop (`core-site.xml`, `hdfs-site.xml`) lisibles par NiFi, et le module Hadoop de NiFi (manquant) |
+| Contraintes de sécurité | Connexion en HTTPS avec un certificat créé par NiFi (le navigateur affiche un avertissement), identifiant et mot de passe obligatoires, accès seulement depuis la machine (`localhost`) |
+
+Capture : [preuves/etape6_puthdfs_absent.jpg](../04_UC04_nifi/preuves/etape6_puthdfs_absent.jpg). Dans la fenêtre *Add Processor*, la recherche « PutHDFS » donne « Showing 0 of 294 » : aucun des 294 processeurs installés ne s'appelle PutHDFS.
+
+Les identifiants de connexion ne sont pas recopiés ici (consigne du TP : pas de mot de passe dans le rendu).
+
+#### Les notions de NiFi
+
+- **FlowFile** : un fichier qui circule dans NiFi. Il contient les données (le contenu du fichier) et des informations sur ces données, appelées **attributs** (nom du fichier, chemin, date…).
+- **Processor** : une étape du traitement, qui fait une seule action. Par exemple, `GetFile` lit un fichier dans un dossier et `PutHDFS` l'écrit dans HDFS.
+- **Connection** : le lien entre deux processeurs. Elle transporte les FlowFiles de l'un à l'autre et sert de **file d'attente** quand le processeur suivant n'a pas encore traité les FlowFiles.
+- **Process Group** : une « boîte » qui regroupe plusieurs processeurs et connexions, pour ranger un flux et le rendre plus lisible.
+- **Controller Service** : un réglage partagé, que plusieurs processeurs peuvent utiliser. Par exemple, une connexion à une base de données, configurée une seule fois.
+- **Provenance Repository** : l'historique de chaque FlowFile. NiFi y note tout ce qui lui est arrivé (créé, envoyé, supprimé…), avec l'heure. On peut ainsi retrouver le parcours d'un fichier.
+
+Dans notre flux : `GetFile` (Processor) lit le fichier et crée un FlowFile, la Connection l'amène à `PutHDFS` (Processor), qui l'écrit dans HDFS. Tout ce parcours est noté dans le Provenance Repository.
+
+#### Erreurs rencontrées
+
+| Erreur | Cause | Correction |
+|---|---|---|
+| NiFi ne démarre plus : `Both nifi.web.https.port and nifi.web.http.port specified` | Dans `nifi.properties`, les ports `http` et `https` étaient tous les deux remplis (8443). NiFi n'accepte qu'un seul des deux | Lignes `nifi.web.http.host` et `nifi.web.http.port` vidées, puis redémarrage avec `nifi.sh start` |
+| NiFi démarré, mais la page ne s'ouvre pas dans le navigateur Windows | NiFi écoutait seulement sur `localhost` *à l'intérieur* de WSL, et WSL ne transmettait pas cette adresse à Windows (alors que Hadoop, qui écoute sur toutes les adresses, était accessible) | `nifi.web.https.host` vidé pour que NiFi écoute sur toutes les adresses de WSL, puis redémarrage. L'interface s'ouvre. NiFi reste accessible seulement depuis le PC : il refuse toute autre adresse que `localhost` |
+| `PutHDFS` n'existe pas dans NiFi | Depuis NiFi 2, le module Hadoop n'est plus installé de base | **Pas encore corrigé.** Formateur à prévenir, comme le demande le TP (ne pas remplacer le transfert par une commande) |
+
+---
+
+### Préparation et étape 7 – Comprendre les éléments de l'interface NiFi
+
+Fait le 17 novembre 2026. Les résultats complets sont dans [preuves/etape7_preparation.txt](../04_UC04_nifi/preuves/etape7_preparation.txt).
+
+#### Préparation
+
+| Action | Commande | Résultat |
+|---|---|---|
+| Dossier d'arrivée dans HDFS pour NiFi | `hdfs dfs -mkdir -p /retail-lake/raw/nifi` | Créé. Il est séparé du dépôt de l'UC-03 pour ne pas l'écraser et pouvoir comparer les deux méthodes |
+| Dossiers locaux pour NiFi | `sudo mkdir -p /data/nifi/input /data/nifi/archive /data/nifi/error` puis `sudo chown -R noah:noah /data/nifi` | Créés, et `noah` (l'utilisateur qui fait tourner NiFi) en est propriétaire pour pouvoir les lire |
+| Fichier de test | `cp …/retail_project/data/store/store.dat /data/nifi/input/` | Copie de `store.dat` : 3 386 octets, 12 lignes, même empreinte que l'original |
+
+On a choisi `store.dat` (la liste des magasins) parce que le TP demande un **petit fichier** pour le premier test. C'est une **copie** : GetFile va supprimer le fichier du dossier d'entrée après l'avoir lu, donc on ne met jamais l'original dans ce dossier.
+
+#### Les éléments de l'interface
+
+| Élément | Où on le voit |
+|---|---|
+| **Processor** | Le rectangle `GetFile` placé sur le canvas. On l'ajoute en faisant glisser le bouton *Processor* de la barre d'outils, puis en le cherchant dans la fenêtre *Add Processor* |
+| **Process Group** | On travaille dans le groupe principal, appelé « NiFi Flow » (écrit en bas à gauche) |
+| **FlowFile** | Il apparaîtra quand GetFile lira `store.dat` : le contenu du fichier plus ses attributs (nom, chemin, date) |
+| **Connection** et **Queue** | Pas encore visibles : elles apparaissent quand on relie deux processeurs (GetFile → PutHDFS, étape 8). La Queue est le nombre de FlowFiles en attente affiché sur la flèche |
+
+#### Erreurs rencontrées
+
+| Erreur | Cause | Correction |
+|---|---|---|
+| GetFile affiche un triangle jaune : `'Input Directory' … is invalid because Directory does not exist` | Le dossier `/data/nifi/input` n'existait pas encore | Création du dossier (voir préparation) |
+| `sudo: a password is required` | Créer un dossier dans `/data` demande les droits administrateur | Commande lancée avec les droits administrateur |

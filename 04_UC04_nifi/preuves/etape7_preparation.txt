@@ -1,0 +1,32 @@
+UC-04 - Preparation (12.3.2) et Etape 7
+Date : mardi 17 novembre 2026 (16h01 - 16h06)
+Machine : DESKTOP-DCTNJ6T, Ubuntu 24.04.5 LTS sous WSL
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/nifi
+$ hdfs dfs -ls -d /retail-lake/raw/nifi
+drwxr-xr-x   - noah supergroup          0 2026-11-17 16:01 /retail-lake/raw/nifi
+
+$ sudo mkdir -p /data/nifi/input /data/nifi/archive /data/nifi/error
+$ sudo chown -R noah:noah /data/nifi
+(lance en administrateur avec : wsl -u root)
+$ ls -ld /data/nifi /data/nifi/*
+drwxr-xr-x 5 noah noah 4096 Nov 17 16:06 /data/nifi
+drwxr-xr-x 2 noah noah 4096 Nov 17 16:06 /data/nifi/archive
+drwxr-xr-x 2 noah noah 4096 Nov 17 16:06 /data/nifi/error
+drwxr-xr-x 2 noah noah 4096 Nov 17 16:06 /data/nifi/input
+
+Fichier de test : copie de travail de store.dat (l'original reste dans retail_project)
+$ cp ".../retail_project/data/store/store.dat" /data/nifi/input/
+$ ls -l /data/nifi/input/
+-rwxr-xr-x 1 noah noah 3386 Nov 17 16:06 store.dat
+$ sha256sum .../retail_project/data/store/store.dat /data/nifi/input/store.dat
+a936bc38692bdddc222cf86d08ed9d0feb761af26769212d789cf6729d1808ef  .../retail_project/data/store/store.dat
+a936bc38692bdddc222cf86d08ed9d0feb761af26769212d789cf6729d1808ef  /data/nifi/input/store.dat
+$ wc -l /data/nifi/input/store.dat
+12 /data/nifi/input/store.dat
+
+Interface NiFi (canvas "NiFi Flow")
+- Bouton "Processor" de la barre d'outils glisse sur le canvas -> fenetre "Add Processor"
+- Recherche "GetFile" -> GetFile 2.12.0 (nifi-standard-nar) ajoute au canvas
+- Avant creation de /data/nifi/input, GetFile etait invalide :
+  'Input Directory' validated against '/data/nifi/input' is invalid because Directory does not exist
