@@ -251,7 +251,7 @@ Dans notre flux : `GetFile` (Processor) lit le fichier et crée un FlowFile, la 
 |---|---|---|
 | NiFi ne démarre plus : `Both nifi.web.https.port and nifi.web.http.port specified` | Dans `nifi.properties`, les ports `http` et `https` étaient tous les deux remplis (8443). NiFi n'accepte qu'un seul des deux | Lignes `nifi.web.http.host` et `nifi.web.http.port` vidées, puis redémarrage avec `nifi.sh start` |
 | NiFi démarré, mais la page ne s'ouvre pas dans le navigateur Windows | NiFi écoutait seulement sur `localhost` *à l'intérieur* de WSL, et WSL ne transmettait pas cette adresse à Windows (alors que Hadoop, qui écoute sur toutes les adresses, était accessible) | `nifi.web.https.host` vidé pour que NiFi écoute sur toutes les adresses de WSL, puis redémarrage. L'interface s'ouvre. NiFi reste accessible seulement depuis le PC : il refuse toute autre adresse que `localhost` |
-| `PutHDFS` n'existe pas dans NiFi | Depuis NiFi 2, le module Hadoop n'est plus installé de base | **Pas encore corrigé.** Formateur à prévenir, comme le demande le TP (ne pas remplacer le transfert par une commande) |
+| `PutHDFS` n'existe pas dans NiFi | Depuis NiFi 2, le module Hadoop n'est plus installé de base | Corrigé à l'étape 8 en installant le module Hadoop de NiFi (on n'a pas remplacé le transfert par une commande, comme le demande le TP) |
 
 ---
 
@@ -284,3 +284,195 @@ On a choisi `store.dat` (la liste des magasins) parce que le TP demande un **pet
 |---|---|---|
 | GetFile affiche un triangle jaune : `'Input Directory' … is invalid because Directory does not exist` | Le dossier `/data/nifi/input` n'existait pas encore | Création du dossier (voir préparation) |
 | `sudo: a password is required` | Créer un dossier dans `/data` demande les droits administrateur | Commande lancée avec les droits administrateur |
+
+---
+
+### Étape 8 – Construire le flux GetFile vers PutHDFS
+
+Fait le 17 novembre 2026, dans l'interface NiFi. Captures : [flux complet](../04_UC04_nifi/preuves/etape8_flux_getfile_puthdfs.jpg), [propriétés de PutHDFS](../04_UC04_nifi/preuves/etape8_proprietes_puthdfs.jpg), [PutHDFS disponible après installation](../04_UC04_nifi/preuves/etape8_puthdfs_disponible.jpg).
+
+#### Le flux construit
+
+```
+GetFile  --success-->  PutHDFS  --failure-->  LogAttribute
+(lit le fichier local)  (écrit dans HDFS)      (note l'erreur dans les journaux)
+```
+
+#### A. GetFile
+
+| Propriété | Valeur | Pourquoi |
+|---|---|---|
+| Input Directory | `/data/nifi/input` | Le dossier où on dépose le fichier à envoyer |
+| Keep Source File | `false` | Le fichier est retiré du dossier après lecture (on a gardé l'original ailleurs) |
+| Recurse Subdirectories | `false` | On ne lit pas les sous-dossiers (la valeur par défaut était `true`, on l'a changée) |
+
+#### B. PutHDFS
+
+| Propriété | Valeur | Pourquoi |
+|---|---|---|
+| Hadoop Configuration Resources | `/opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml` | Pour que NiFi sache où se trouve HDFS (`hdfs://localhost:9000`) |
+| Directory | `/retail-lake/raw/nifi` | Le dossier d'arrivée, séparé de celui de l'UC-03 |
+| Conflict Resolution Strategy | `fail` | Si un fichier du même nom existe déjà, NiFi n'écrase rien : le FlowFile part en `failure` |
+
+#### C. Les relations
+
+| Processeur | Relation | Où elle va |
+|---|---|---|
+| GetFile | `success` | Vers PutHDFS (la flèche entre les deux) |
+| PutHDFS | `success` | Terminée automatiquement : le fichier est déposé, le FlowFile n'a plus besoin d'aller ailleurs |
+| PutHDFS | `failure` | Vers LogAttribute, pour voir l'erreur dans les journaux de NiFi |
+| LogAttribute | `success` | Terminée automatiquement après avoir écrit dans les journaux |
+
+À la fin, les 3 processeurs sont valides (aucun triangle jaune) et arrêtés. Le flux n'est pas encore démarré (c'est l'étape 9).
+
+#### Erreurs rencontrées
+
+| Erreur | Cause | Correction |
+|---|---|---|
+| `PutHDFS` absent de la liste des processeurs (« Showing 0 of 294 ») | Depuis NiFi 2, le module Hadoop n'est plus installé de base | Installation des 2 modules officiels `nifi-hadoop-libraries-nar` et `nifi-hadoop-nar` (version 2.12.0, depuis Maven Central) dans `/opt/nifi/extensions`. NiFi les charge tout seul (`Loaded extensions … nifi-hadoop-nar:2.12.0`). Après rechargement de la page : 304 processeurs, dont PutHDFS |
+| PutHDFS toujours absent juste après l'installation | La page NiFi gardait l'ancienne liste en mémoire | Rechargement complet de la page (F5) |
+
+---
+
+### Étape 9 – Démarrer et tester le flux
+
+Fait le 17 novembre 2026 vers 16h30. Les résultats complets sont dans [preuves/etapes9_10_11_sorties.txt](../04_UC04_nifi/preuves/etapes9_10_11_sorties.txt). Capture : [flux après le transfert](../04_UC04_nifi/preuves/etape9_flux_execute.jpg).
+
+#### Ce qu'on a fait
+
+1. Vérifié que `store.dat` était bien dans `/data/nifi/input` et que `/retail-lake/raw/nifi` existait dans HDFS.
+2. Démarré **PutHDFS d'abord**, puis **GetFile**. Comme ça, quand GetFile envoie le fichier, PutHDFS est déjà prêt à le recevoir.
+3. Regardé le canvas : un FlowFile de 3,31 Ko est passé dans la file `success`, puis PutHDFS l'a traité.
+
+#### Ce qu'on a observé dans NiFi
+
+| Élément | Résultat |
+|---|---|
+| GetFile | A lu 3,31 Ko et envoyé 1 FlowFile (`Out 1`) |
+| PutHDFS | A reçu 1 FlowFile (`In 1`) et l'a écrit dans HDFS |
+| File `success` | Vide à la fin : le FlowFile est bien passé |
+| File `failure` | Vide : aucune erreur |
+
+#### Vérification dans le terminal
+
+```bash
+hdfs dfs -ls -h /retail-lake/raw/nifi
+hdfs dfs -du -h /retail-lake/raw/nifi
+```
+
+| Vérification | Résultat |
+|---|---|
+| Le fichier est dans HDFS | Oui : `/retail-lake/raw/nifi/store.dat` |
+| La taille est la même | Oui : 3 386 octets, comme l'original |
+| Le contenu est le même | Oui : même empreinte SHA-256 (`a936bc38…08ef`) et 12 lignes |
+| Le dossier d'entrée est vide | Oui : GetFile a retiré la copie (`Keep Source File = false`) |
+| L'original est conservé | Oui : `retail_project/data/store/store.dat` est toujours là |
+| Le dépôt de l'UC-03 n'est pas touché | Oui : NiFi a écrit dans `raw/nifi`, pas dans `raw/tpcxbb/initial` |
+
+Ce dépôt a été fait **par NiFi**, sans `hdfs dfs -put`.
+
+#### Erreurs rencontrées
+
+Aucune.
+
+---
+
+### Étape 10 – Tester une erreur simple
+
+Fait le 17 novembre 2026 vers 16h32. Capture : [message d'erreur](../04_UC04_nifi/preuves/etape10_erreur_dossier_inexistant.jpg).
+
+#### Le test
+
+On a choisi l'erreur « dossier source qui n'existe pas » :
+
+1. Arrêt de GetFile.
+2. Changement de `Input Directory` : `/data/nifi/input` remplacé par `/data/nifi/dossier_inexistant`.
+3. Observation du résultat.
+4. Remise de la bonne valeur tout de suite après.
+
+On n'a pas touché aux droits des dossiers HDFS, comme le demande le TP.
+
+#### Ce qu'on a observé
+
+- GetFile passe en **Invalid** (triangle jaune).
+- Le message affiché est : `'Input Directory' validated against '/data/nifi/dossier_inexistant' is invalid because Directory does not exist`.
+- Dans le menu du clic droit, le bouton **Start n'apparaît plus** : NiFi refuse de démarrer un processeur mal configuré. L'erreur est donc repérée **avant** de lancer le flux, et aucun fichier n'est perdu.
+
+#### La correction
+
+`Input Directory` remis à `/data/nifi/input`. GetFile redevient valide (carré rouge = arrêté, sans triangle).
+
+---
+
+### Étape 11 – Traçabilité et provenance
+
+Fait le 17 novembre 2026 (menu ☰ → *Data Provenance*). Captures : [liste des événements](../04_UC04_nifi/preuves/etape11_provenance_evenements.jpg), [détail de l'envoi vers HDFS](../04_UC04_nifi/preuves/etape11_provenance_detail_send.jpg).
+
+#### Ce qu'on a relevé
+
+| Élément | Valeur |
+|---|---|
+| Identifiant du FlowFile (UUID) | `172e23a0-8a82-42c2-a0cc-54ce79146c6c` |
+| Nom du fichier | `store.dat` |
+| Taille | 3,31 Ko |
+| Dossier d'origine | `/data/nifi/input/` |
+| Destination | `hdfs://localhost:9000/retail-lake/raw/nifi/store.dat` |
+| Durée totale du parcours | environ 3,3 secondes |
+
+#### Les événements, dans l'ordre
+
+| Heure | Événement | Processeur | Ce que ça veut dire |
+|---|---|---|---|
+| 16:30:36.889 | `RECEIVE` | GetFile | NiFi a lu le fichier dans le dossier local et créé le FlowFile |
+| 16:30:40.169 | `SEND` | PutHDFS | Le fichier a été envoyé dans HDFS |
+| 16:30:40.178 | `DROP` | PutHDFS | Le FlowFile est terminé (relation `success` terminée automatiquement) |
+| 16:30:40.179 | `ATTRIBUTES_MODIFIED` | PutHDFS | PutHDFS a ajouté des informations au FlowFile (par exemple le chemin dans HDFS) |
+
+#### Commentaire
+
+Les 4 événements ont le **même identifiant**. On peut donc suivre le fichier du début à la fin : d'où il vient (`/data/nifi/input/store.dat`), à quelle heure il a été lu, par quel processeur il est passé, où il a été écrit dans HDFS et à quelle heure. S'il y avait un problème, par exemple un fichier manquant ou en double dans HDFS, on pourrait retrouver grâce à ces informations quand et par où il est passé.
+
+---
+
+### Reproduire l'ingestion (README)
+
+#### Versions utilisées
+
+| Composant | Version |
+|---|---|
+| Système | Ubuntu 24.04 dans WSL (Windows 11) |
+| Hadoop | 3.5.0 (Java 17) |
+| NiFi | 2.12.0 (Java 21) + modules `nifi-hadoop-nar` et `nifi-hadoop-libraries-nar` 2.12.0 |
+
+#### Démarrage
+
+```bash
+start-dfs.sh                                   # HDFS (Java 17)
+jps                                            # NameNode, DataNode, SecondaryNameNode
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+/opt/nifi/bin/nifi.sh start                    # NiFi (Java 21)
+/opt/nifi/bin/nifi.sh status                   # doit afficher UP
+```
+
+Interface : https://localhost:8443/nifi (identifiants générés au premier démarrage, non recopiés ici).
+
+#### Chemins
+
+| Chemin | Rôle |
+|---|---|
+| `/retail-lake/raw/tpcxbb/initial/store_sales.dat` | Dépôt manuel (UC-03) |
+| `/retail-lake/raw/nifi/` | Dépôt par NiFi (UC-04) |
+| `/data/nifi/input` | Dossier lu par GetFile (y mettre une **copie**) |
+| `/data/nifi/archive`, `/data/nifi/error` | Créés, pas encore utilisés |
+
+#### Paramètres NiFi
+
+- GetFile : `Input Directory = /data/nifi/input`, `Keep Source File = false`, `Recurse Subdirectories = false`.
+- PutHDFS : `Hadoop Configuration Resources = /opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml`, `Directory = /retail-lake/raw/nifi`, `Conflict Resolution Strategy = fail`.
+- `nifi.properties` : `nifi.web.https.host` vide et `nifi.web.https.port=8443` (pour accéder à l'interface depuis Windows).
+
+#### Arrêt (dans cet ordre)
+
+1. Arrêter les processeurs dans NiFi (clic droit → *Stop*).
+2. Arrêter NiFi : `/opt/nifi/bin/nifi.sh stop`
+3. Arrêter HDFS : `stop-dfs.sh`
