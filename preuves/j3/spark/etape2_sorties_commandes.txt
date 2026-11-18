@@ -1,0 +1,142 @@
+TP Jour 3 – UC-06 – Étape 2 : Inventorier les sources disponibles (Noah)
+Sources retenues : store_sales et item (zone raw de HDFS)
+Date : 18/11/2026
+
+==================================================================
+1. Terminal WSL : taille, format, encodage, premières lignes
+==================================================================
+
+(.venv) noah@DESKTOP-DCTNJ6T:~/retail-intelligence/tp3$ hdfs dfs -ls -h /retail-lake/raw/tpcxbb/initial/store_sales /retail-lake/raw/tpcxbb/initial/item
+Found 1 items
+-rw-r--r--   1 noah supergroup     88.5 M 2026-11-17 14:44 /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+Found 1 items
+-rw-r--r--   1 noah supergroup      6.5 M 2026-11-18 12:46 /retail-lake/raw/tpcxbb/initial/item/item.dat
+
+(.venv) noah@DESKTOP-DCTNJ6T:~/retail-intelligence/tp3$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | head -c 200000 | file -
+cat: Unable to write to output stream.
+/dev/stdin: ASCII text, with CRLF line terminators
+
+(.venv) noah@DESKTOP-DCTNJ6T:~/retail-intelligence/tp3$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/item/item.dat | head -c 200000 | file -
+cat: Unable to write to output stream.
+/dev/stdin: ASCII text, with very long lines (462), with CRLF line terminators
+
+(.venv) noah@DESKTOP-DCTNJ6T:~/retail-intelligence/tp3$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | head -n 3
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+36890|71480|15556|44404|493944|2898|44093|10|114|0|39|79.49|94.59|83.24|442.65|3246.36|3100.11|3689.01|184.07|616.81|2629.55|2813.62|-470.56
+cat: Unable to write to output stream.
+
+(.venv) noah@DESKTOP-DCTNJ6T:~/retail-intelligence/tp3$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/item/item.dat | head -n 3
+0|AAAAAAAAAAAAAAAA|2000-01-14||quickly even dinos beneath the frays must have to boost boldly careful bold escapades: stealthily even forges over the dependencies integrate always past the quiet sly decoys-- notornis sol|72.29|64.96|3898712|71TS7NSbvH1YbdiQMG6ttBHKAljiNoIRB|1|Fan Shop|9|Sports & Outdoors|995|2VOxvrIWwlJQTSk6|small|99Ee1r6uFbZSSClAX3|dodger|Oz|Unknown|18|8m9n5Q7T33DNWidoA6nWlg6ydmpA1SKOoOJLXiLVb
+1|AAAAAAAAAAAAAAAB|2000-09-23||quietly quiet hockey players outside the furiously fluffy sauternes impress daringly silently quiet gifts? bold ruthless escapades run slyly epitaphs! warhorses of the carefull|95.67|30.57|2218494|qNBimHGBu763udH|4|New|3|Books|69|M0VWtUYYkxy6iEMa2XZOxQSCTxFrOqsXg|petite|dz1S8VrTflBJIq1kC61|tan|Dram|Unknown|91|CPB648WB37uUv5OCqjzYe7rH3T
+2|AAAAAAAAAAAAAAAC|2000-09-01||dogged dugouts need to maintain regularly in place of the furiously brave dinos! dugouts poach stealthily final escapades? sauternes will have to wake! tithes can use slowly until the frets. stea|62.74|47.70|6043423|ma5|3|Education & Reference|3|Books|831|SXEWAxq6kTcO8sAwISBAM9|N/A|nF9XEmsyODYrRYXE2P8H|mint|Bunch|Unknown|19|bMcWnXWH4yWhqADKdlZicQXcIhd48e8iROsScTzHAKPFcgh8
+cat: Unable to write to output stream.
+
+Taille exacte (relevée au Jour 2 et à l'étape 1) :
+store_sales.dat : 92 764 700 octets
+item.dat        :  6 799 286 octets
+
+==================================================================
+2. Notebook TP3_Retail_Intelligence.ipynb
+==================================================================
+
+--- Cellule 1 : lecture avec les noms de colonnes du schéma TPCx-BB
+(code : voir notebook, fonction lire_source)
+
+Sortie :
+Colonnes lues : 23 / attendues : 23
+Colonnes lues : 22 / attendues : 22
+
+--- Cellule 2 : schéma, échantillon, nombre de lignes
+
+===== store_sales
+root
+ |-- ss_sold_date_sk: integer (nullable = true)
+ |-- ss_sold_time_sk: integer (nullable = true)
+ |-- ss_item_sk: integer (nullable = true)
+ |-- ss_customer_sk: integer (nullable = true)
+ |-- ss_cdemo_sk: integer (nullable = true)
+ |-- ss_hdemo_sk: integer (nullable = true)
+ |-- ss_addr_sk: integer (nullable = true)
+ |-- ss_store_sk: integer (nullable = true)
+ |-- ss_promo_sk: integer (nullable = true)
+ |-- ss_ticket_number: integer (nullable = true)
+ |-- ss_quantity: integer (nullable = true)
+ |-- ss_wholesale_cost: double (nullable = true)
+ |-- ss_list_price: double (nullable = true)
+ |-- ss_sales_price: double (nullable = true)
+ |-- ss_ext_discount_amt: double (nullable = true)
+ |-- ss_ext_sales_price: double (nullable = true)
+ |-- ss_ext_wholesale_cost: double (nullable = true)
+ |-- ss_ext_list_price: double (nullable = true)
+ |-- ss_ext_tax: double (nullable = true)
+ |-- ss_coupon_amt: double (nullable = true)
+ |-- ss_net_paid: double (nullable = true)
+ |-- ss_net_paid_inc_tax: double (nullable = true)
+ |-- ss_net_profit: double (nullable = true)
+
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|ss_sold_date_sk|ss_sold_time_sk|ss_item_sk|ss_customer_sk|ss_cdemo_sk|ss_hdemo_sk|ss_addr_sk|ss_store_sk|ss_promo_sk|ss_ticket_number|ss_quantity|ss_wholesale_cost|ss_list_price|ss_sales_price|ss_ext_discount_amt|ss_ext_sales_price|ss_ext_wholesale_cost|ss_ext_list_price|ss_ext_tax|ss_coupon_amt|ss_net_paid|ss_net_paid_inc_tax|ss_net_profit|
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|          36890|          71480|     10001|         44404|     493944|       2898|     44093|         10|        294|               0|         31|             18.0|        30.78|         23.08|              238.7|            715.48|                558.0|           954.18|     21.46|          0.0|     715.48|             736.94|       157.48|
+|          36890|          71480|     10000|         44404|     493944|       2898|     44093|         10|        279|               0|         54|            99.21|       148.82|         83.34|            3535.92|           4500.36|              5357.34|          8036.28|    225.02|          0.0|    4500.36|            4725.38|      -856.98|
+|          36890|          71480|     15556|         44404|     493944|       2898|     44093|         10|        114|               0|         39|            79.49|        94.59|         83.24|             442.65|           3246.36|              3100.11|          3689.01|    184.07|       616.81|    2629.55|            2813.62|      -470.56|
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+only showing top 3 rows
+Lignes : 667579 | Colonnes : 23
+
+===== item
+root
+ |-- i_item_sk: integer (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_rec_start_date: date (nullable = true)
+ |-- i_rec_end_date: string (nullable = true)
+ |-- i_item_desc: string (nullable = true)
+ |-- i_current_price: double (nullable = true)
+ |-- i_wholesale_cost: double (nullable = true)
+ |-- i_brand_id: integer (nullable = true)
+ |-- i_brand: string (nullable = true)
+ |-- i_class_id: integer (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- i_category_id: integer (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_manufact_id: integer (nullable = true)
+ |-- i_manufact: string (nullable = true)
+ |-- i_size: string (nullable = true)
+ |-- i_formulation: string (nullable = true)
+ |-- i_color: string (nullable = true)
+ |-- i_units: string (nullable = true)
+ |-- i_container: string (nullable = true)
+ |-- i_manager_id: integer (nullable = true)
+ |-- i_product_name: string (nullable = true)
+
++---------+----------------+----------------+--------------+--------------------+---------------+----------------+----------+--------------------+----------+--------------------+-------------+-----------------+-------------+--------------------+------+--------------------+-------+-------+-----------+------------+--------------------+
+|i_item_sk|       i_item_id|i_rec_start_date|i_rec_end_date|         i_item_desc|i_current_price|i_wholesale_cost|i_brand_id|             i_brand|i_class_id|             i_class|i_category_id|       i_category|i_manufact_id|          i_manufact|i_size|       i_formulation|i_color|i_units|i_container|i_manager_id|      i_product_name|
++---------+----------------+----------------+--------------+--------------------+---------------+----------------+----------+--------------------+----------+--------------------+-------------+-----------------+-------------+--------------------+------+--------------------+-------+-------+-----------+------------+--------------------+
+|        0|AAAAAAAAAAAAAAAA|      2000-01-14|          NULL|quickly even dino...|          72.29|           64.96|   3898712|71TS7NSbvH1YbdiQM...|         1|            Fan Shop|            9|Sports & Outdoors|          995|    2VOxvrIWwlJQTSk6| small|  99Ee1r6uFbZSSClAX3| dodger|     Oz|    Unknown|          18|8m9n5Q7T33DNWidoA...|
+|        1|AAAAAAAAAAAAAAAB|      2000-09-23|          NULL|quietly quiet hoc...|          95.67|           30.57|   2218494|     qNBimHGBu763udH|         4|                 New|            3|            Books|           69|M0VWtUYYkxy6iEMa2...|petite| dz1S8VrTflBJIq1kC61|    tan|   Dram|    Unknown|          91|CPB648WB37uUv5OCq...|
+|        2|AAAAAAAAAAAAAAAC|      2000-09-01|          NULL|dogged dugouts ne...|          62.74|           47.7|   6043423|                 ma5|         3|Education & Refer...|            3|            Books|          831|SXEWAxq6kTcO8sAwI...|   N/A|nF9XEmsyODYrRYXE2P8H|   mint|  Bunch|    Unknown|          19|bMcWnXWH4yWhqADKd...|
++---------+----------------+----------------+--------------+--------------------+---------------+----------------+----------+--------------------+----------+--------------------+-------------+-----------------+-------------+--------------------+------+--------------------+-------+-------+-----------+------------+--------------------+
+only showing top 3 rows
+Lignes : 17820 | Colonnes : 22
+
+--- Cellule 3 : colonnes qui contiennent des valeurs nulles
+
+===== store_sales
+ss_cdemo_sk : 238
+ss_hdemo_sk : 295
+ss_addr_sk : 448
+ss_promo_sk : 158
+===== item
+i_rec_end_date : 17820
+i_item_desc : 4
+i_brand_id : 8
+i_brand : 6
+
+--- Cellule 4 : unicité des identifiants (clé candidate)
+
+item - lignes : 17820
+item - i_item_sk distincts : 17820
+item - i_item_id distincts : 17820
+store_sales - lignes : 667579
+store_sales - (ticket, produit) distincts : 663443
