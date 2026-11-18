@@ -1,0 +1,112 @@
+TP Jour 3 – UC-06 – Étape 3 : Explorer les données avec PySpark (Noah)
+Sources : store_sales et item (hdfs:///retail-lake/raw/tpcxbb/initial/)
+Notebook : ~/retail-intelligence/tp3/TP3_Retail_Intelligence.ipynb
+Date : 18/11/2026
+
+(Chargement, schéma, échantillon, comptage et valeurs nulles : voir etape2_sorties_commandes.txt)
+
+==================================================================
+Cellule 1 : minimum et maximum des colonnes numériques
+==================================================================
+
+===== store_sales
+ss_sold_date_sk           min =        36890   max =        38697
+ss_sold_time_sk           min =            0   max =        86399
+ss_item_sk                min =            0   max =        17819
+ss_customer_sk            min =            2   max =        98999
+ss_cdemo_sk               min =           18   max =      1920742
+ss_hdemo_sk               min =            0   max =         7199
+ss_addr_sk                min =            0   max =        49499
+ss_store_sk               min =            0   max =           11
+ss_promo_sk               min =            0   max =          299
+ss_ticket_number          min =            0   max =        89099
+ss_quantity               min =            1   max =          100
+ss_wholesale_cost         min =          1.0   max =        100.0
+ss_list_price             min =          1.0   max =        200.0
+ss_sales_price            min =          0.0   max =        199.3
+ss_ext_discount_amt       min =          0.0   max =      18984.0
+ss_ext_sales_price        min =          0.0   max =      18745.0
+ss_ext_wholesale_cost     min =          1.0   max =       9997.0
+ss_ext_list_price         min =          1.2   max =      19814.0
+ss_ext_tax                min =          0.0   max =       1637.8
+ss_coupon_amt             min =          0.0   max =     14371.66
+ss_net_paid               min =          0.0   max =      18745.0
+ss_net_paid_inc_tax       min =          0.0   max =      19869.7
+ss_net_profit             min =      -9866.6   max =       9134.0
+===== item
+i_item_sk                 min =            0   max =        17819
+i_current_price           min =          0.1   max =        99.98
+i_wholesale_cost          min =         0.02   max =        87.35
+i_brand_id                min =      1001703   max =     10015586
+i_class_id                min =            1   max =           16
+i_category_id             min =            1   max =            9
+i_manufact_id             min =            1   max =         1000
+i_manager_id              min =            1   max =          100
+
+==================================================================
+Cellule 2 : doublons exacts (toutes les colonnes identiques)
+==================================================================
+
+store_sales - lignes : 667579 | lignes différentes : 667579 | doublons exacts : 0
+item - lignes : 17820 | lignes différentes : 17820 | doublons exacts : 0
+
+==================================================================
+Cellule 3 : couples (ticket, produit) répétés
+==================================================================
+
+Couples répétés : 4038
+
+(1re colonne = nombre de fois que le couple apparaît, 2e colonne = nombre de couples)
++----------+----------+
+|nb_couples|nb_couples|
++----------+----------+
+|         3|        94|
+|         2|      3942|
+|         4|         2|
++----------+----------+
+
+Lignes en trop : 3942 x 1 + 94 x 2 + 2 x 3 = 4136
+
+Exemple (ticket 1598, produit 10003) :
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|ss_sold_date_sk|ss_sold_time_sk|ss_item_sk|ss_customer_sk|ss_cdemo_sk|ss_hdemo_sk|ss_addr_sk|ss_store_sk|ss_promo_sk|ss_ticket_number|ss_quantity|ss_wholesale_cost|ss_list_price|ss_sales_price|ss_ext_discount_amt|ss_ext_sales_price|ss_ext_wholesale_cost|ss_ext_list_price|ss_ext_tax|ss_coupon_amt|ss_net_paid|ss_net_paid_inc_tax|ss_net_profit|
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|36922          |47417          |10003     |23998         |1917492    |553        |48315     |4          |32         |1598            |51         |41.87            |60.29        |29.54         |1568.25            |1506.54           |2135.37              |3074.79          |120.52    |0.0          |1506.54    |1627.06            |-628.83      |
+|36922          |47417          |10003     |23998         |1917492    |553        |48315     |4          |60         |1598            |42         |65.41            |109.23       |40.42         |2890.02            |1697.64           |2747.22              |4587.66          |50.93     |0.0          |1697.64    |1748.57            |-1049.58     |
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+
+==================================================================
+Cellule 4 : valeurs atypiques ou incohérentes dans store_sales
+==================================================================
+
+quantité <= 0                                 : 0
+prix de vente <= 0                            : 3324
+prix de vente > prix catalogue                : 0
+montant payé < 0                              : 0
+marge < 0                                     : 495971
+montant ≠ quantité × prix (écart > 0,01)      : 0
+
+==================================================================
+Cellule 5 : valeurs atypiques ou incohérentes dans item
+==================================================================
+
++------------------------+-----+
+|i_category              |count|
++------------------------+-----+
+|Music                   |8143 |
+|Books                   |5335 |
+|Movies & TV             |1286 |
+|Electronics             |692  |
+|Clothing & Accessories  |610  |
+|Home & Kitchen          |476  |
+|Sports & Outdoors       |465  |
+|Tools & Home Improvement|408  |
+|Toys & Games            |405  |
++------------------------+-----+
+
+i_class              : 1576 valeurs vides / N/A / Unknown / NO_SUB_CAT
+i_size               : 2502 valeurs vides / N/A / Unknown / NO_SUB_CAT
+i_units              : 1767 valeurs vides / N/A / Unknown / NO_SUB_CAT
+i_container          : 17820 valeurs vides / N/A / Unknown / NO_SUB_CAT
+prix <= 0 : 0
+coût d'achat > prix de vente : 7768
