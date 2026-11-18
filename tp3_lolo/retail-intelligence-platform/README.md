@@ -97,3 +97,9 @@ limites) : `docs/data-dictionary/gold.md`. Schemas : `docs/data-dictionary/schem
 `outputs/formats/` (repertoire de test dedie), le relit et le verifie, puis compare
 avec CSV et JSON (types, volume, vitesse). Comparaison argumentee :
 `docs/architecture/comparaison_formats.md`.
+
+## Etape 9 - Controles qualite
+
+`tests/controles_qualite.ipynb` : 152 controles (completude, unicite, validite des types,
+coherence, volumes, cles candidates, integrite referentielle) sur Silver et Gold.
+Rapport : `docs/quality/rapport_qualite.md`.
