@@ -90,3 +90,10 @@ Produites par `transformations/aggregation/agregations_gold.ipynb` dans `data/go
 
 Documentation (finalite, sources, granularite, colonnes, mesures, regles de calcul,
 limites) : `docs/data-dictionary/gold.md`. Schemas : `docs/data-dictionary/schemas/gold_*.json`.
+
+## Etape 8 - Format Parquet
+
+`notebooks/comparaison_formats.ipynb` : ecrit `sales_enriched` en Parquet dans
+`outputs/formats/` (repertoire de test dedie), le relit et le verifie, puis compare
+avec CSV et JSON (types, volume, vitesse). Comparaison argumentee :
+`docs/architecture/comparaison_formats.md`.
