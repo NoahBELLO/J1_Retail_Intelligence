@@ -1,0 +1,525 @@
+{
+  "flowContents": {
+    "identifier": "4b0a816c-f78e-381a-9def-4de633826365",
+    "instanceIdentifier": "e941dda5-01a1-1000-c89a-f7bcfa6ad081",
+    "name": "NiFi Flow",
+    "comments": "",
+    "position": { "x": 0.0, "y": 0.0 },
+    "processGroups": [],
+    "remoteProcessGroups": [],
+    "processors": [
+      {
+        "identifier": "50e3e500-63d4-3af2-9120-f56f7705a744",
+        "instanceIdentifier": "ea079a00-01a1-1000-0f2f-78b28e5a6fff",
+        "name": "GetFile",
+        "comments": "",
+        "position": { "x": 196.0, "y": -66.79998779296875 },
+        "type": "org.apache.nifi.processors.standard.GetFile",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Keep Source File": "false",
+          "Minimum File Age": "0 sec",
+          "Polling Interval": "30 sec",
+          "Input Directory": "/data/nifi/input",
+          "Maximum File Age": null,
+          "Batch Size": "10",
+          "Maximum File Size": null,
+          "Minimum File Size": "0 B",
+          "Ignore Hidden Files": "true",
+          "Recurse Subdirectories": "false",
+          "File Filter": "[^\\.].*",
+          "Path Filter": null
+        },
+        "propertyDescriptors": {
+          "Keep Source File": {
+            "name": "Keep Source File",
+            "displayName": "Keep Source File",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Minimum File Age": {
+            "name": "Minimum File Age",
+            "displayName": "Minimum File Age",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Polling Interval": {
+            "name": "Polling Interval",
+            "displayName": "Polling Interval",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Input Directory": {
+            "name": "Input Directory",
+            "displayName": "Input Directory",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Maximum File Age": {
+            "name": "Maximum File Age",
+            "displayName": "Maximum File Age",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Batch Size": {
+            "name": "Batch Size",
+            "displayName": "Batch Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Maximum File Size": {
+            "name": "Maximum File Size",
+            "displayName": "Maximum File Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Minimum File Size": {
+            "name": "Minimum File Size",
+            "displayName": "Minimum File Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Ignore Hidden Files": {
+            "name": "Ignore Hidden Files",
+            "displayName": "Ignore Hidden Files",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Recurse Subdirectories": {
+            "name": "Recurse Subdirectories",
+            "displayName": "Recurse Subdirectories",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "File Filter": {
+            "name": "File Filter",
+            "displayName": "File Filter",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Path Filter": {
+            "name": "Path Filter",
+            "displayName": "Path Filter",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b0a816c-f78e-381a-9def-4de633826365"
+      },
+      {
+        "identifier": "1e128fc0-8b83-30ac-8cd6-1ecb3eceb558",
+        "instanceIdentifier": "ea1a4d4d-01a1-1000-bb0b-1a7f742e4b14",
+        "name": "PutHDFS",
+        "comments": "",
+        "position": { "x": 696.0, "y": -66.79998779296875 },
+        "type": "org.apache.nifi.processors.hadoop.PutHDFS",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-hadoop-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Hadoop Configuration Resources": "/opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml",
+          "Remote Owner": null,
+          "Permissions Umask": null,
+          "Kerberos User Service": null,
+          "Additional Classpath Resources": null,
+          "Resource Transfer Source": "FLOWFILE_CONTENT",
+          "IO Buffer Size": null,
+          "Remote Group": null,
+          "File Resource Service": null,
+          "Block Size": null,
+          "Compression Codec": "NONE",
+          "Writing Strategy": "writeAndRename",
+          "Ignore Locality": "false",
+          "Replication": null,
+          "Append Mode": "DEFAULT",
+          "Directory": "/retail-lake/raw/nifi",
+          "Conflict Resolution Strategy": "fail"
+        },
+        "propertyDescriptors": {
+          "Hadoop Configuration Resources": {
+            "name": "Hadoop Configuration Resources",
+            "displayName": "Hadoop Configuration Resources",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false,
+            "resourceDefinition": {
+              "cardinality": "MULTIPLE",
+              "resourceTypes": ["FILE"]
+            }
+          },
+          "Remote Owner": {
+            "name": "Remote Owner",
+            "displayName": "Remote Owner",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Permissions Umask": {
+            "name": "Permissions Umask",
+            "displayName": "Permissions Umask",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Kerberos User Service": {
+            "name": "Kerberos User Service",
+            "displayName": "Kerberos User Service",
+            "identifiesControllerService": true,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Additional Classpath Resources": {
+            "name": "Additional Classpath Resources",
+            "displayName": "Additional Classpath Resources",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false,
+            "resourceDefinition": {
+              "cardinality": "MULTIPLE",
+              "resourceTypes": ["FILE", "DIRECTORY"]
+            }
+          },
+          "Resource Transfer Source": {
+            "name": "Resource Transfer Source",
+            "displayName": "Resource Transfer Source",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "IO Buffer Size": {
+            "name": "IO Buffer Size",
+            "displayName": "IO Buffer Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Remote Group": {
+            "name": "Remote Group",
+            "displayName": "Remote Group",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "File Resource Service": {
+            "name": "File Resource Service",
+            "displayName": "File Resource Service",
+            "identifiesControllerService": true,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Block Size": {
+            "name": "Block Size",
+            "displayName": "Block Size",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Compression Codec": {
+            "name": "Compression Codec",
+            "displayName": "Compression Codec",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Writing Strategy": {
+            "name": "Writing Strategy",
+            "displayName": "Writing Strategy",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Ignore Locality": {
+            "name": "Ignore Locality",
+            "displayName": "Ignore Locality",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Replication": {
+            "name": "Replication",
+            "displayName": "Replication",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Append Mode": {
+            "name": "Append Mode",
+            "displayName": "Append Mode",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Directory": {
+            "name": "Directory",
+            "displayName": "Directory",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Conflict Resolution Strategy": {
+            "name": "Conflict Resolution Strategy",
+            "displayName": "Conflict Resolution Strategy",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": ["success"],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b0a816c-f78e-381a-9def-4de633826365"
+      },
+      {
+        "identifier": "972afd1d-db0b-3a7f-ad3e-7411a6014e04",
+        "instanceIdentifier": "ea1c4a33-01a1-1000-fa1d-b99b581b07cf",
+        "name": "LogAttribute",
+        "comments": "",
+        "position": { "x": 696.0, "y": 193.20001220703125 },
+        "type": "org.apache.nifi.processors.standard.LogAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Log FlowFile Properties": "true",
+          "Log Level": "info",
+          "Attributes to Ignore": null,
+          "Attributes to Log": null,
+          "Attributes to Ignore Regular Expression": null,
+          "Output Format": "Line per Attribute",
+          "Log Payload": "false",
+          "Log Prefix": null,
+          "Character Set": "UTF-8",
+          "Attributes to Log Regular Expression": ".*"
+        },
+        "propertyDescriptors": {
+          "Log FlowFile Properties": {
+            "name": "Log FlowFile Properties",
+            "displayName": "Log FlowFile Properties",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Log Level": {
+            "name": "Log Level",
+            "displayName": "Log Level",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Attributes to Ignore": {
+            "name": "Attributes to Ignore",
+            "displayName": "Attributes to Ignore",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Attributes to Log": {
+            "name": "Attributes to Log",
+            "displayName": "Attributes to Log",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Attributes to Ignore Regular Expression": {
+            "name": "Attributes to Ignore Regular Expression",
+            "displayName": "Attributes to Ignore Regular Expression",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Output Format": {
+            "name": "Output Format",
+            "displayName": "Output Format",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Log Payload": {
+            "name": "Log Payload",
+            "displayName": "Log Payload",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Log Prefix": {
+            "name": "Log Prefix",
+            "displayName": "Log Prefix",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Character Set": {
+            "name": "Character Set",
+            "displayName": "Character Set",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          },
+          "Attributes to Log Regular Expression": {
+            "name": "Attributes to Log Regular Expression",
+            "displayName": "Attributes to Log Regular Expression",
+            "identifiesControllerService": false,
+            "sensitive": false,
+            "dynamic": false
+          }
+        },
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 25,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": ["success"],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4b0a816c-f78e-381a-9def-4de633826365"
+      }
+    ],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [
+      {
+        "identifier": "099fdad6-699d-32a6-94b6-631f3f3c6bc7",
+        "instanceIdentifier": "ea1bc2d4-01a1-1000-cfbe-bbfa6a1c9c95",
+        "name": "",
+        "source": {
+          "id": "50e3e500-63d4-3af2-9120-f56f7705a744",
+          "type": "PROCESSOR",
+          "groupId": "4b0a816c-f78e-381a-9def-4de633826365",
+          "name": "GetFile",
+          "comments": "",
+          "instanceIdentifier": "ea079a00-01a1-1000-0f2f-78b28e5a6fff"
+        },
+        "destination": {
+          "id": "1e128fc0-8b83-30ac-8cd6-1ecb3eceb558",
+          "type": "PROCESSOR",
+          "groupId": "4b0a816c-f78e-381a-9def-4de633826365",
+          "name": "PutHDFS",
+          "comments": "",
+          "instanceIdentifier": "ea1a4d4d-01a1-1000-bb0b-1a7f742e4b14"
+        },
+        "labelIndex": 0,
+        "zIndex": 1,
+        "selectedRelationships": ["success"],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4b0a816c-f78e-381a-9def-4de633826365"
+      },
+      {
+        "identifier": "98f5e6e3-fc82-337e-b8f8-3dc211909065",
+        "instanceIdentifier": "ea1cb61e-01a1-1000-995a-c41a2b3351c1",
+        "name": "",
+        "source": {
+          "id": "1e128fc0-8b83-30ac-8cd6-1ecb3eceb558",
+          "type": "PROCESSOR",
+          "groupId": "4b0a816c-f78e-381a-9def-4de633826365",
+          "name": "PutHDFS",
+          "comments": "",
+          "instanceIdentifier": "ea1a4d4d-01a1-1000-bb0b-1a7f742e4b14"
+        },
+        "destination": {
+          "id": "972afd1d-db0b-3a7f-ad3e-7411a6014e04",
+          "type": "PROCESSOR",
+          "groupId": "4b0a816c-f78e-381a-9def-4de633826365",
+          "name": "LogAttribute",
+          "comments": "",
+          "instanceIdentifier": "ea1c4a33-01a1-1000-fa1d-b99b581b07cf"
+        },
+        "labelIndex": 0,
+        "zIndex": 2,
+        "selectedRelationships": ["failure"],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4b0a816c-f78e-381a-9def-4de633826365"
+      }
+    ],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP"
+  },
+  "externalControllerServices": {},
+  "parameterContexts": {},
+  "flowEncodingVersion": "1.0",
+  "parameterProviders": {},
+  "latest": false
+}

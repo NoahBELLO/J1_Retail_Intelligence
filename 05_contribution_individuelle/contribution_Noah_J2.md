@@ -4,7 +4,7 @@
 
 ### Étape 1 – Vérifier l'environnement Hadoop
 
-> Commandes et résultats : `03_UC03_hdfs/preuves/etape1_sorties_commandes.txt`.
+> Commandes et résultats : `preuves/j2/hadoop/etape1_sorties_commandes.txt`.
 
 #### 1. Commandes lancées
 
@@ -36,7 +36,7 @@ Mon environnement tourne sur une seule machine : le NameNode et le DataNode sont
 
 ### Étape 2 – Découvrir les commandes HDFS
 
-> Commandes et résultats : `03_UC03_hdfs/preuves/etape2_sorties_commandes.txt`.
+> Commandes et résultats : `preuves/j2/hdfs/etape2_sorties_commandes.txt`.
 
 #### 1. Les 6 opérations demandées
 
@@ -63,7 +63,7 @@ Aucune vraie erreur, mais au début plusieurs commandes n'affichaient rien :
 
 ### Étape 3 – Créer l'arborescence du Data Lake
 
-> Commandes et résultats : `03_UC03_hdfs/preuves/etape3_sorties_commandes.txt`.
+> Commandes et résultats : `preuves/j2/hdfs/etape3_sorties_commandes.txt`.
 
 #### 1. Commandes lancées
 
@@ -112,7 +112,7 @@ Au Jour 1, on avait appelé « Bronze » la zone qui garde les fichiers d'origin
 
 ### Étape 4 – Déposer les données TPCx-BB
 
-> Commandes et résultats : `03_UC03_hdfs/preuves/etape4_sorties_commandes.txt`.
+> Commandes et résultats : `preuves/j2/hdfs/etape4_sorties_commandes.txt`.
 
 #### 1. Fichier choisi
 
@@ -161,7 +161,7 @@ Je l'ai mis dans `raw/tpcxbb/initial` car il vient du dossier `data/`, c'est-à-
 
 ### Étape 5 – Vérifier le stockage
 
-> Commandes et résultats : `03_UC03_hdfs/preuves/etape5_sorties_commandes.txt`.
+> Commandes et résultats : `preuves/j2/hdfs/etape5_sorties_commandes.txt`.
 
 #### 1. Les contrôles
 
@@ -192,8 +192,8 @@ Il faut récupérer tout le fichier pour le comparer, ce qui serait long avec de
 
 ### Étape 6 – Découvrir l'environnement NiFi
 
-> Commandes et résultats : `04_UC04_nifi/preuves/etape6_decouverte_nifi.txt`.
-> Capture : `04_UC04_nifi/preuves/etape6_puthdfs_absent.jpg` (la recherche « PutHDFS » donne « Showing 0 of 294 »).
+> Commandes et résultats : `preuves/j2/nifi/etape6_decouverte_nifi.txt`.
+> Capture : `preuves/j2/nifi/etape6_puthdfs_absent.jpg` (la recherche « PutHDFS » donne « Showing 0 of 294 »).
 
 #### 1. Ce que j'ai relevé
 
@@ -227,7 +227,7 @@ Dans mon flux : `GetFile` lit le fichier et crée un FlowFile, la Connection l'a
 
 ### Étape 7 – Comprendre les éléments de l'interface NiFi
 
-> Commandes et résultats : `04_UC04_nifi/preuves/etape7_preparation.txt`.
+> Commandes et résultats : `preuves/j2/nifi/etape7_preparation.txt`.
 
 #### 1. Préparation
 
@@ -253,7 +253,7 @@ J'ai choisi `store.dat` (la liste des magasins) parce que le TP demande un petit
 
 ### Étape 8 – Construire le flux GetFile vers PutHDFS
 
-> Captures : `04_UC04_nifi/preuves/etape8_flux_getfile_puthdfs.jpg` (le flux), `etape8_proprietes_getfile.jpg` et `etape8_proprietes_puthdfs.jpg` (les propriétés), `etape8_puthdfs_disponible.jpg` (PutHDFS après installation).
+> Captures : `preuves/j2/nifi/etape8_flux_getfile_puthdfs.jpg` (le flux), `etape8_proprietes_getfile.jpg` et `etape8_proprietes_puthdfs.jpg` (les propriétés), `etape8_puthdfs_disponible.jpg` (PutHDFS après installation).
 
 #### 1. Le flux
 
@@ -292,8 +292,8 @@ GetFile  --success-->  PutHDFS  --failure-->  LogAttribute
 
 ### Étape 9 – Démarrer et tester le flux
 
-> Résultats : `04_UC04_nifi/preuves/etapes9_10_11_sorties.txt`.
-> Capture : `04_UC04_nifi/preuves/etape9_flux_execute.jpg`.
+> Résultats : `preuves/j2/nifi/etapes9_10_11_sorties.txt`.
+> Capture : `preuves/j2/nifi/etape9_flux_execute.jpg`.
 
 #### 1. Ce que j'ai fait
 
@@ -325,7 +325,7 @@ Ce dépôt a été fait par NiFi, sans `hdfs dfs -put`.
 
 ### Étape 10 – Tester une erreur simple
 
-> Captures : `04_UC04_nifi/preuves/etape10_erreur_dossier_inexistant.jpg` (le message), `etape10_historique_configuration.jpg` et `etape10_historique_detail.jpg` (le journal des modifications de NiFi).
+> Captures : `preuves/j2/nifi/etape10_erreur_dossier_inexistant.jpg` (le message), `etape10_historique_configuration.jpg` et `etape10_historique_detail.jpg` (le journal des modifications de NiFi).
 
 #### 1. Le test
 
@@ -349,7 +349,7 @@ J'ai remis `Input Directory` à `/data/nifi/input`. GetFile redevient valide.
 
 ### Étape 11 – Traçabilité et provenance
 
-> Captures : `04_UC04_nifi/preuves/etape11_provenance_evenements.jpg` (la liste), `etape11_provenance_detail_send.jpg` (le détail de l'envoi vers HDFS).
+> Captures : `preuves/j2/nifi/etape11_provenance_evenements.jpg` (la liste), `etape11_provenance_detail_send.jpg` (le détail de l'envoi vers HDFS).
 
 #### 1. Ce que j'ai relevé (menu ☰ → *Data Provenance*)
 

@@ -164,7 +164,7 @@ Ce sont les mêmes tables, mais avec **de nouvelles données à ajouter** : nouv
 
 ## 9. Fichiers déposés dans HDFS (UC-03, étape 4)
 
-Preuves : `03_UC03_hdfs/preuves/etape4_depot_donnees_lorenzo.txt`.
+Preuves : `preuves/j2/hdfs/etape4_depot_donnees_lorenzo.txt`.
 
 | Information | Valeur |
 |---|---|
