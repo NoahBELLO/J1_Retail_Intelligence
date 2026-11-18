@@ -1,0 +1,72 @@
+=== 01_silver - lancé le 2026-11-18 16:09:47
+Lu : hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat -> 667579 lignes
+Lu : hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/item/item.dat -> 17820 lignes
+Écrit : hdfs://localhost:9000/retail-lake/silver/item
+Écrit : hdfs://localhost:9000/retail-lake/silver/store_sales
+Écrit : hdfs://localhost:9000/retail-lake/quality/rejets/item
+Écrit : hdfs://localhost:9000/retail-lake/quality/rejets/store_sales
+
+--- Contrôles après écriture
+[item] relecture OK : 17820 lignes, 24 colonnes
+[item] raw 17820 = silver 17820 + rejets 0 + doublons retirés 0
+[item] mêmes colonnes et mêmes types qu'avant l'écriture : True
+[item] schéma silver :
+    i_item_sk                 int
+    i_item_id                 string
+    i_rec_start_date          date
+    i_rec_end_date            date
+    i_item_desc               string
+    i_current_price           decimal(7,2)
+    i_wholesale_cost          decimal(7,2)
+    i_brand_id                int
+    i_brand                   string
+    i_class_id                int
+    i_class                   string
+    i_category_id             int
+    i_category                string
+    i_manufact_id             int
+    i_manufact                string
+    i_size                    string
+    i_formulation             string
+    i_color                   string
+    i_units                   string
+    i_manager_id              int
+    i_product_name            string
+    source_fichier            string
+    source_lot                string
+    date_traitement           timestamp
+[item] provenance : [Row(source_fichier='hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/item/item.dat', source_lot='initial')]
+[store_sales] relecture OK : 667579 lignes, 27 colonnes
+[store_sales] raw 667579 = silver 667579 + rejets 0 + doublons retirés 0
+[store_sales] mêmes colonnes et mêmes types qu'avant l'écriture : True
+[store_sales] schéma silver :
+    ss_sold_date_sk           int
+    ss_sold_time_sk           int
+    ss_item_sk                int
+    ss_customer_sk            int
+    ss_cdemo_sk               int
+    ss_hdemo_sk               int
+    ss_addr_sk                int
+    ss_store_sk               int
+    ss_promo_sk               int
+    ss_ticket_number          int
+    ss_quantity               int
+    ss_wholesale_cost         decimal(7,2)
+    ss_list_price             decimal(7,2)
+    ss_sales_price            decimal(7,2)
+    ss_ext_discount_amt       decimal(7,2)
+    ss_ext_sales_price        decimal(7,2)
+    ss_ext_wholesale_cost     decimal(7,2)
+    ss_ext_list_price         decimal(7,2)
+    ss_ext_tax                decimal(7,2)
+    ss_coupon_amt             decimal(7,2)
+    ss_net_paid               decimal(7,2)
+    ss_net_paid_inc_tax       decimal(7,2)
+    ss_net_profit             decimal(7,2)
+    prix_zero                 boolean
+    source_fichier            string
+    source_lot                string
+    date_traitement           timestamp
+[store_sales] provenance : [Row(source_fichier='hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat', source_lot='initial')]
+[store_sales] ventes à prix 0 repérées (prix_zero) : 3324
+Fin du script 01_silver

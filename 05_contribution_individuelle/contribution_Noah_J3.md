@@ -28,7 +28,7 @@ L'environnement virtuel (`.venv`) garde PySpark et Jupyter à part, sans toucher
 - **Spark / PySpark** : 4.3.0, avec Java 21 (`pyspark --version`).
 - **JupyterLab** : 4.6.6 (`jupyter lab --version`).
 - **Mode d'exécution** : `local[*]` (`spark.sparkContext.master`), c'est-à-dire que Spark tourne sur ma machine seule et utilise tous les cœurs disponibles (pas de cluster).
-- **Ressources** : 2 cœurs (`nproc`), 3,8 Go de mémoire pour WSL (`free -h`), environ 930 Go de disque libre (`df -h`).
+- **Ressources** : 2 cœurs (`nproc`), 3,8 Go de mémoire pour WSL (`free -h`), environ 930 Go de disque libre (`df -h`). À l'étape 5, je suis passé à 4 cœurs et 8 Go, parce que WSL manquait de mémoire (voir les erreurs rencontrées de l'étape 5).
 - **HDFS** : démarré, `NameNode` et `DataNode` sont visibles (`jps`).
 
 #### 3. Les chemins
@@ -193,3 +193,415 @@ J'ai mis le nettoyage dans un notebook à part (`TP3_Nettoyage.ipynb`), séparé
 - **Types** : les montants sont passés de `double` à `decimal(7,2)`, `i_rec_end_date` de `string` à `date`. `i_container` a été retirée.
 
 Les données nettoyées restent pour l'instant en mémoire. Elles seront écrites dans `silver` à l'étape 6.
+
+### Étape 5 – Réaliser les transformations
+
+> Commandes et résultats : `preuves/j3/spark/etape5_sorties_commandes.txt`. Notebook : `~/retail-intelligence/tp3/TP3_Nettoyage.ipynb` (cellules 6 à 9).
+
+J'ai ajouté les transformations à la suite du nettoyage, dans le même notebook, parce qu'elles partent des données nettoyées (`ventes_propres`, `produits_propres`). Ensuite, j'ai exécuté tout le notebook d'un coup (`jupyter nbconvert --execute`) pour vérifier qu'il marche du début à la fin.
+
+#### 1. La jointure ventes + produits
+
+- **Les deux sources** : `ventes_propres` (issues de `store_sales`) et `produits_propres` (issus de `item`).
+- **Les colonnes utilisées** : `ss_item_sk` dans les ventes et `i_item_sk` dans les produits.
+- **Pourquoi cette relation est sûre** : je ne me suis pas basé sur des noms de colonnes qui se ressemblent. J'ai vérifié 3 choses :
+  - le schéma TPCx-BB dit que `ss_item_sk` désigne le produit vendu ;
+  - `i_item_sk` est unique dans `item` (17 820 valeurs pour 17 820 lignes) ;
+  - toutes les valeurs de `ss_item_sk` existent dans `item` (0 vente avec un produit inconnu).
+- **Nature de la relation et cardinalité attendue** : plusieurs ventes pour un même produit, et un seul produit par vente. On s'attend donc à garder exactement le même nombre de lignes.
+- **Type de jointure** : `left`, pour garder toutes les ventes même si un produit manquait.
+- **Nombre de lignes** : 667 579 avant, 667 579 après. Aucune ligne en plus, donc aucun produit n'est en double.
+- **Ventes non rapprochées** : 0.
+- **Colonnes ajoutées aux ventes** : `i_item_id`, `i_product_name`, `i_category`, `i_class`, `i_brand`.
+- **Remarque** : les 17 820 produits ont tous été vendus au moins une fois.
+
+#### 2. L'agrégation : chiffre d'affaires par catégorie
+
+- **Question du Jour 1** : *« Quels produits et quelles catégories génèrent le plus de chiffre d'affaires ? »* (P4, Indispensable).
+- **Granularité du résultat** : une ligne = une catégorie de produits, donc 9 lignes.
+- **Règles de calcul** :
+  - `chiffre_affaires` = somme de `ss_net_paid` (KPI-01 du Jour 1 : remises déduites, sans les taxes) ;
+  - `quantite_vendue` = somme de `ss_quantity` (KPI-04) ;
+  - `nombre_lignes_vente` = nombre de lignes de ticket ;
+  - `nombre_produits_vendus` = nombre de produits différents ;
+  - `part_ca_pct` = CA de la catégorie ÷ CA total × 100, arrondi à 2 chiffres.
+- **Renommage** : `i_category` devient `categorie`, et les mesures ont des noms en français, pour que le résultat soit lisible par le métier.
+
+Résultat :
+
+| Catégorie | Chiffre d'affaires | Quantité vendue | Part du CA |
+|---|---|---|---|
+| Music | 519 666 693,84 | 15 238 374 | 45,17 % |
+| Books | 307 151 503,25 | 9 007 511 | 26,70 % |
+| Movies & TV | 74 735 891,89 | 2 189 279 | 6,50 % |
+| Clothing & Accessories | 56 754 855,82 | 1 640 550 | 4,93 % |
+| Electronics | 55 715 087,49 | 1 632 098 | 4,84 % |
+| Home & Kitchen | 41 260 511,11 | 1 226 839 | 3,59 % |
+| Sports & Outdoors | 40 926 938,33 | 1 209 305 | 3,56 % |
+| Toys & Games | 27 437 825,33 | 809 999 | 2,38 % |
+| Tools & Home Improvement | 26 880 279,31 | 801 519 | 2,34 % |
+
+#### 3. Contrôle du résultat
+
+- **CA total des ventes** : 1 150 529 586,37. **Somme des 9 catégories** : 1 150 529 586,37. C'est le même montant.
+- **Lignes des ventes** : 667 579. **Somme des lignes des catégories** : 667 579. C'est le même nombre.
+
+Aucune vente n'a été perdue ni comptée deux fois.
+
+#### 4. Ce que je retiens
+
+- `Music` et `Books` font à elles deux 72 % du chiffre d'affaires. Mais ce sont aussi les catégories qui ont le plus de produits (46 % et 30 % des produits, étape 3). Le CA suit donc surtout le nombre de produits, ce qui vient sûrement de la façon dont les données ont été générées.
+- L'unité est supposée être l'euro, comme au Jour 1 : la devise n'est pas indiquée.
+
+#### 5. Erreurs rencontrées
+
+| Erreur | Cause | Correction |
+|---|---|---|
+| WSL ne répond plus (`Wsl/Service/0x8007274c`) | WSL n'avait droit qu'à 4 Go de mémoire, alors que HDFS, NiFi et plusieurs sessions Spark tournaient en même temps | Mémoire de WSL passée à 8 Go et 4 cœurs dans `C:\Users\Noah\.wslconfig`, puis `wsl --shutdown` et relance de HDFS (`start-dfs.sh`). NiFi n'est plus relancé, il ne sert pas au TP3. Je ferme aussi le notebook d'exploration quand je ne m'en sers plus |
+
+### Étape 6 – Produire les données Silver
+
+> Commandes et résultats : `preuves/j3/spark/etape6_sorties_commandes.txt`. Script : `scripts/01_silver.py`.
+
+#### 1. Ce que fait le script
+
+Pour que le traitement puisse être relancé, j'ai repris le nettoyage du notebook (étape 4) dans un script :
+
+1. Il lit `store_sales` et `item` dans la zone `raw`, avec les schémas écrits à la main.
+2. Il applique les règles de nettoyage de l'étape 4.
+3. Il écrit les données propres dans `silver`, et les lignes mises à l'écart dans `quality/rejets`, avec leur motif.
+4. Il relit ce qu'il vient d'écrire pour le contrôler.
+
+#### 2. Organisation et convention de nommage
+
+```
+/retail-lake/
+├── silver/
+│   ├── store_sales/       Ventes nettoyées (Parquet)
+│   └── item/              Produits nettoyés (Parquet)
+└── quality/
+    └── rejets/
+        ├── store_sales/   Ventes mises à l'écart + motif_rejet
+        └── item/          Produits mis à l'écart + motif_rejet
+```
+
+- **Un dossier par table**, avec le nom de la table TPCx-BB (`store_sales`, `item`). On retrouve tout de suite d'où viennent les données.
+- **Les colonnes gardent les noms TPCx-BB** (`ss_…`, `i_…`), pour pouvoir les comparer avec la documentation du jeu de données. Les noms en français sont réservés au Gold, qui est fait pour le métier.
+- **Format Parquet** : il garde les types (`decimal`, `date`) et prend peu de place (voir l'étape 8).
+- Je n'ai créé que les 2 domaines traités, comme le demande le TP.
+
+#### 3. Colonnes et provenance
+
+- **Types explicites** : identifiants et quantité en `int`, montants en `decimal(7,2)`, dates en `date`.
+- **Colonnes ajoutées** :
+  - `prix_zero` (vrai / faux) : repère les ventes à prix 0 (étape 4) ;
+  - `source_fichier` : le fichier `raw` d'où vient la ligne, par exemple `hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/item/item.dat` ;
+  - `source_lot` : `initial` (premier envoi) ;
+  - `date_traitement` : le jour et l'heure du traitement.
+- **Colonne retirée** : `i_container` (toujours `Unknown`).
+
+Avec ces colonnes, chaque ligne de Silver permet de retrouver sa source et le moment où elle a été traitée.
+
+#### 4. Contrôles après écriture
+
+- **Fichiers présents** : 4 fichiers `part-….snappy.parquet` par table, plus `_SUCCESS` qui veut dire que l'écriture est allée jusqu'au bout (`hdfs dfs -ls -R`).
+- **Format et lisibilité** : les deux dossiers se relisent avec `spark.read.parquet`.
+- **Nombre de lignes** :
+  - `store_sales` : 667 579 en raw = 667 579 en silver + 0 mise à l'écart ;
+  - `item` : 17 820 en raw = 17 820 en silver + 0 mise à l'écart.
+- **Schéma** : mêmes colonnes et mêmes types qu'avant l'écriture (27 colonnes pour `store_sales`, 24 pour `item`).
+- **Cohérence** : les 3 324 ventes à prix 0 sont bien repérées par `prix_zero`.
+- **Taille** : 40,6 Mo pour `store_sales` (contre 88,5 Mo pour le fichier texte), 3,6 Mo pour `item`.
+- **État de HDFS** : `HEALTHY`, 0 bloc sous-répliqué (`hdfs fsck /retail-lake`).
+
+#### 5. Erreurs rencontrées
+
+| Erreur | Cause | Correction |
+|---|---|---|
+| Les fichiers écrits par Spark ont 3 copies (`-rw-r--r--   3`) alors que HDFS n'a qu'un DataNode | PySpark installé avec `pip` ne lit pas `hdfs-site.xml`, il prend la valeur par défaut (3 copies) | J'ai mis `spark.hadoop.dfs.replication = 1` dans la session Spark (`commun.py`) et j'ai relancé. Les fichiers ont maintenant 1 copie |
+| Le contrôle « schéma identique » répondait `False` | Après relecture, Spark marque toutes les colonnes comme pouvant être vides, ce qui n'était pas le cas de `source_lot` | Je compare seulement les noms et les types des colonnes : `True` |
+
+### Étape 7 – Produire les données Gold
+
+> Commandes et résultats : `preuves/j3/spark/etape7_sorties_commandes.txt`. Script : `scripts/02_gold.py`.
+
+Le script lit les deux tables Silver, vérifie la clé, fait la jointure de l'étape 5, calcule les indicateurs et écrit le résultat dans `/retail-lake/gold/ca_par_categorie/` (Parquet), puis le relit.
+
+#### 1. Fiche du jeu Gold
+
+| Élément | Description |
+|---|---|
+| Nom | `ca_par_categorie` – Synthèse des ventes par catégorie |
+| Finalité métier | Répondre à la question P4 du Jour 1 (Indispensable) : *« Quels produits et quelles catégories génèrent le plus de chiffre d'affaires ? »*, pour mettre en avant les catégories qui rapportent le plus |
+| Sources | `silver/store_sales` et `silver/item`, reliées par `ss_item_sk` = `i_item_sk` (jointure vérifiée à l'étape 5) |
+| Granularité | Une ligne = une catégorie de produits (9 lignes), sur toute la période des ventes |
+| Dimension | `categorie` (venant de `i_category`) |
+| Mesures | `chiffre_affaires`, `quantite_vendue`, `nombre_lignes_vente`, `nombre_produits_vendus`, `part_ca_pct` |
+| Règles de calcul | `chiffre_affaires` = somme de `ss_net_paid` (KPI-01 : remises déduites, sans taxes). `quantite_vendue` = somme de `ss_quantity` (KPI-04). `nombre_lignes_vente` = nombre de lignes de ticket. `nombre_produits_vendus` = nombre de `ss_item_sk` différents. `part_ca_pct` = CA de la catégorie ÷ CA total × 100, arrondi à 2 chiffres |
+| Colonnes de traçabilité | `source` (tables Silver utilisées), `date_traitement` |
+| Usage | Analyse descriptive et graphiques du Jour 4 |
+| Limites d'interprétation | Ventes en magasin seulement (pas le web). Pas de découpage par période (`date_dim` non chargée). Devise supposée en euros. Données inventées : le CA suit surtout le nombre de produits de chaque catégorie. Les retours (`store_returns`) ne sont pas déduits |
+
+#### 2. Colonnes
+
+- `categorie` : `string`
+- `chiffre_affaires` : `decimal(17,2)`
+- `quantite_vendue`, `nombre_lignes_vente`, `nombre_produits_vendus` : `bigint`
+- `part_ca_pct` : `decimal(5,2)`
+- `source` : `string`
+- `date_traitement` : `timestamp`
+
+#### 3. Résultat
+
+- **Relecture** : 9 lignes, 8 colonnes.
+- **Classement** : `Music` (45,17 %), puis `Books` (26,70 %), puis `Movies & TV` (6,50 %). Le détail est dans le tableau de l'étape 5.
+- **Contrôle** : le CA total de Silver (1 150 529 586,37) est égal à la somme du Gold.
+
+### Étape 8 – Utiliser le format Parquet
+
+> Commandes et résultats : `preuves/j3/spark/etape8_sorties_commandes.txt`. Script : `scripts/03_formats.py`.
+
+#### 1. Parquet produit et relu
+
+- **Silver et Gold sont en Parquet** : `silver/store_sales`, `silver/item` et `gold/ca_par_categorie`.
+- **Relecture** : elle fonctionne (`spark.read.parquet`) et le schéma est conservé, avec les montants toujours en `decimal(7,2)` et les dates en `date`.
+- **Nombre de lignes** : identique avant et après l'écriture (étapes 6 et 7).
+- **Valeurs** : exploitables, puisque le Gold est calculé directement à partir du Silver relu.
+- **Répertoires** : bien identifiés, un dossier par table, avec des fichiers `part-….snappy.parquet` (`snappy` = compression).
+
+#### 2. Comparaison des formats
+
+J'ai écrit le même jeu (`silver/store_sales`, 667 579 lignes, 27 colonnes) en CSV, en JSON et en Parquet dans `outputs/comparaison_formats/`. Ensuite, j'ai relu chaque version **sans donner de schéma** et j'ai calculé le total de `ss_net_paid`.
+
+| | CSV | JSON | Parquet |
+|---|---|---|---|
+| Organisation | Lignes de texte, valeurs séparées par des virgules | Un objet `{"colonne": valeur}` par ligne | Données rangées par colonne, compressées |
+| Lisibilité | Lisible avec un éditeur de texte | Lisible, mais le nom des colonnes est répété sur chaque ligne | Pas lisible à l'œil, il faut un outil (Spark) |
+| Taille observée | 175,5 Mo (189 % du fichier `.dat`) | 480,6 Mo (518 %) | **40,6 Mo (44 %)** |
+| Types à la relecture | Tout est en `string` | Montants en `double`, dates en `string` | Types conservés : `decimal(7,2)`, `int`, `timestamp` |
+| Total `ss_net_paid` | 1 150 529 586,37 | 1 150 529 586,37 | 1 150 529 586,37 |
+| Temps pour ce total | 2,58 s | 2,66 s | **0,45 s** |
+| Usages adaptés | Échanger avec un tableur ou un autre outil | Échanger avec une application web ou une API | Stocker et analyser de gros volumes (Silver, Gold) |
+| Avantages | Simple, ouvert partout | Souple, peut contenir des données imbriquées | Petit, rapide, garde les types |
+| Limites | Pas de types, gros fichiers | Encore plus gros, types approximatifs | Illisible sans outil, ne se modifie pas ligne par ligne |
+
+Remarques :
+
+- Le CSV est plus gros que le fichier `.dat` d'origine à cause des colonnes de provenance. Le chemin du fichier source (`source_fichier`, environ 90 caractères) est répété sur chacune des 667 579 lignes. Parquet range les valeurs par colonne et compresse les répétitions, donc elles ne prennent presque plus de place.
+- Parquet est le plus rapide parce que Spark ne lit que la colonne `ss_net_paid`, alors qu'en CSV et en JSON il doit lire toutes les lignes en entier.
+- Parquet seul n'est **pas** une table transactionnelle. Si une écriture plante au milieu, il n'y a pas de retour en arrière possible, et il n'y a pas d'historique des versions. Avec `overwrite`, l'ancienne version est perdue.
+
+### Étape 9 – Mettre en œuvre les contrôles qualité
+
+> Commandes et résultats : `preuves/j3/spark/etape9_sorties_commandes.txt`. Script : `scripts/04_qualite.py`.
+
+#### 1. Comment j'ai fait
+
+Le script fait 36 contrôles sur `silver/store_sales`, `silver/item` et `gold/ca_par_categorie`. Chaque contrôle a un statut :
+
+- **OK** : la règle est respectée ;
+- **KO** : la règle n'est pas respectée, il faut corriger ;
+- **ATTENTION** : la règle est respectée, mais il reste une anomalie à connaître pour interpréter les chiffres.
+
+Le rapport est enregistré dans `/retail-lake/quality/rapport_qualite/` (CSV), avec la date du contrôle.
+
+#### 2. Les contrôles
+
+| Contrôle | Règle | Résultat | Statut |
+|---|---|---|---|
+| Volume | Lignes raw = lignes silver + lignes mises à l'écart | `store_sales` : 667 579 = 667 579 + 0. `item` : 17 820 = 17 820 + 0 | OK |
+| Volume | Gold : une ligne par catégorie | 9 lignes | OK |
+| Complétude | `ss_item_sk`, `ss_ticket_number`, `ss_sold_date_sk`, `ss_store_sk`, `ss_quantity`, `ss_net_paid`, `i_item_sk`, `i_category`, `categorie` non nuls | 0 null partout | OK |
+| Complétude | Colonnes non obligatoires | `ss_promo_sk` 0,02 %, `ss_addr_sk` 0,07 % de nulls | OK |
+| Complétude | `i_size` (non obligatoire) | 14 % de nulls (anciens `N/A`/`Unknown`) | ATTENTION |
+| Unicité | Aucune vente en double exact | 0 doublon | OK |
+| Clé candidate | `i_item_sk` unique dans `item`, `categorie` unique dans le Gold | 17 820 pour 17 820, 9 pour 9 | OK |
+| Validité | Montants en `decimal(7,2)`, identifiants et quantité en entier, `i_rec_start_date` en `date` | Types conformes | OK |
+| Cohérence | `ss_quantity` > 0, `ss_net_paid` ≥ 0, prix de vente ≤ prix catalogue, montant = quantité × prix, `i_current_price` > 0, CA Gold ≥ 0 | 0 ligne hors règle | OK |
+| Cohérence | 9 catégories dans `item` | 9 | OK |
+| Cohérence | Somme du CA Gold = CA Silver, somme des lignes Gold = lignes Silver | 1 150 529 586,37 = 1 150 529 586,37 et 667 579 = 667 579 | OK |
+| Cohérence | Somme des parts = 100 % (à 0,05 près) | 100,01 % (arrondis) | OK |
+| Cohérence | Ventes à prix 0 | 3 324 lignes, gardées | ATTENTION |
+| Cohérence | Ventes à marge négative | 495 971 lignes (74,3 %), gardées | ATTENTION |
+| Cohérence | Coût d'achat > prix de vente | 7 768 produits (43,6 %), gardés | ATTENTION |
+| Intégrité | Chaque `ss_item_sk` existe dans `silver/item` | 0 vente sans produit | OK |
+| Intégrité | Chaque `ss_store_sk` existe dans `store.dat` (déposé par NiFi au Jour 2) | 0 vente sans magasin | OK |
+
+#### 3. Bilan
+
+- **Règles respectées** : 32 contrôles OK sur 36, aucun KO.
+- **Anomalies restantes** (4 ATTENTION) : les ventes à prix 0, les marges négatives, les produits vendus à perte et les tailles manquantes. Je les ai gardées, parce qu'elles peuvent être de vrais cas et que le TP interdit de supprimer sans règle. Mais il faut les signaler à côté des indicateurs de marge.
+- **Données mises à l'écart** : 0 vente et 0 produit pour ce lot.
+- **Limites des contrôles** :
+  - le contrôle de volume ne compte pas les doublons retirés (0 ici, mais il faudrait l'ajouter pour le lot `refresh`) ;
+  - les dates des ventes ne sont pas contrôlées, car `date_dim` n'est pas chargée ;
+  - les contrôles sont relancés à la main, ils ne bloquent pas automatiquement la chaîne en cas de KO.
+- **Corrections possibles** : ajouter `date_dim` pour vérifier les dates, et arrêter la chaîne quand un contrôle est KO.
+
+### Étape 10 – Organiser les traitements
+
+> Commandes et résultats : `preuves/j3/spark/etape10_sorties_commandes.txt` (arborescence, exécution complète et copie des scripts).
+> Copie du code dans le dépôt : `preuves/j3/code/` (scripts, notebooks, README et journaux). Le dossier de travail reste `~/retail-intelligence/tp3/` dans WSL.
+
+#### 1. Organisation
+
+```
+~/retail-intelligence/tp3/
+├── README.md                         Procédure de reproduction
+├── TP3_Retail_Intelligence.ipynb     Exploration (étapes 1 à 3)
+├── TP3_Nettoyage.ipynb               Mise au point du nettoyage et des transformations (étapes 4 et 5)
+├── scripts/
+│   ├── config.py                     Paramètres : chemins d'entrée et de sortie, lot, mémoire
+│   ├── commun.py                     Session Spark, schémas, fonction de lecture, journal
+│   ├── 01_silver.py                  raw -> silver (+ rejets)
+│   ├── 02_gold.py                    silver -> gold
+│   ├── 03_formats.py                 Comparaison CSV / JSON / Parquet
+│   ├── 04_qualite.py                 Contrôles qualité
+│   └── lancer_tout.sh                Lance les 4 scripts dans l'ordre
+├── logs/                             Un journal par script
+└── outputs/comparaison_formats/      Sorties de test (CSV, JSON, Parquet)
+```
+
+Ce qui est séparé, comme demandé :
+
+- **Paramètres et chemins** : tout est dans `config.py`. Pour traiter le lot `refresh`, il suffit de changer `LOT`.
+- **Fonctions de lecture** : `lire_source_raw` dans `commun.py`, utilisée pour les deux sources.
+- **Transformations** : `01_silver.py` (nettoyage) et `02_gold.py` (jointure et agrégation).
+- **Contrôles qualité** : `04_qualite.py`.
+- **Écritures** : à la fin de chaque script, dans un dossier réservé.
+- **Journaux** : chaque script écrit ce qu'il fait dans `logs/<script>.log`.
+
+#### 2. Ordre d'exécution
+
+1. `01_silver.py` d'abord, parce que les autres scripts lisent `silver`.
+2. `02_gold.py` ensuite, parce qu'il a besoin de `silver`.
+3. `03_formats.py`, qui a besoin de `silver/store_sales`.
+4. `04_qualite.py` en dernier, parce qu'il contrôle `silver`, `gold` et les rejets.
+
+J'ai relancé toute la chaîne avec `./lancer_tout.sh` : les 4 scripts sont passés, en environ 3 minutes, et donnent les mêmes résultats. Le traitement est donc reproductible.
+
+## Reproduire les traitements (README)
+
+Le README complet est dans `~/retail-intelligence/tp3/README.md`, avec une copie dans le dépôt : `preuves/j3/code/README.md`.
+
+### Prérequis
+
+- Ubuntu 24.04 dans WSL, avec 8 Go de mémoire et 4 cœurs (`C:\Users\Noah\.wslconfig`).
+- Hadoop 3.5.0 (`/opt/hadoop`), HDFS démarré.
+- Environnement Python `~/retail-intelligence/tp3/.venv` avec `pyspark` et `jupyterlab`.
+
+### Versions
+
+- Python 3.12.3
+- Spark / PySpark 4.3.0, en mode `local[*]`
+- JupyterLab 4.6.6
+- Java 21 pour Spark, Java 17 pour Hadoop
+
+### Emplacement des données
+
+- **Entrée** (zone `raw`, jamais modifiée) :
+  - `/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat`
+  - `/retail-lake/raw/tpcxbb/initial/item/item.dat`
+  - `/retail-lake/raw/nifi/store.dat` (pour le contrôle des magasins)
+- **Sorties** :
+  - `/retail-lake/silver/{store_sales,item}/`
+  - `/retail-lake/gold/ca_par_categorie/`
+  - `/retail-lake/quality/rejets/{store_sales,item}/`
+  - `/retail-lake/quality/rapport_qualite/`
+
+### Paramètres
+
+Dans `scripts/config.py` : l'adresse HDFS, le lot (`initial` ou `refresh`), les chemins, la mémoire Spark (2 Go) et le nombre de copies HDFS (1).
+
+### Lancement
+
+```bash
+start-dfs.sh
+cd ~/retail-intelligence/tp3/scripts
+./lancer_tout.sh
+```
+
+### Sorties produites
+
+- `silver/store_sales` : 667 579 lignes ;
+- `silver/item` : 17 820 lignes ;
+- `gold/ca_par_categorie` : 9 lignes ;
+- 0 ligne mise à l'écart ;
+- un rapport qualité de 36 contrôles ;
+- un journal par script dans `logs/`.
+
+### Contrôles disponibles
+
+`04_qualite.py` vérifie les volumes, la complétude, l'unicité, les types, la cohérence et l'intégrité. Dernier résultat : 32 OK, 4 ATTENTION, 0 KO.
+
+### Limites connues
+
+- Les données sont inventées : la marge n'est pas réaliste.
+- Pas de dates réelles pour les ventes, car `date_dim` n'est pas chargée.
+- Seul le lot `initial` a été traité.
+- `overwrite` remplace le résultat précédent, sans historique.
+- Une seule machine, avec 1 copie des données.
+
+## Questions de recul
+
+### 1. Pourquoi est-il nécessaire de vérifier les schémas avant de commencer les transformations ?
+
+Parce que les calculs dépendent des types. Si on ne vérifie pas, on peut additionner du texte, faire des arrondis faux sur de l'argent (`double` au lieu de `decimal`) ou prendre un identifiant pour un nombre. Dans notre cas, `inferSchema` avait mis les montants en `double` et `i_rec_end_date` en `string` : il a fallu écrire le schéma à la main.
+
+### 2. Quelle différence existe entre une donnée brute, une donnée Silver et une donnée Gold ?
+
+- **Brute** (`raw`) : le fichier tel qu'on l'a reçu, sans titres ni types, qu'on ne modifie jamais.
+- **Silver** : les mêmes données nettoyées, avec les bons types, des règles appliquées et la provenance. Une ligne de vente reste une ligne de vente.
+- **Gold** : des données regroupées pour répondre à une question du métier, par exemple le CA par catégorie (9 lignes au lieu de 667 579).
+
+### 3. Pourquoi faut-il connaître la granularité d'une table avant de réaliser une agrégation ?
+
+Pour savoir ce qu'on compte. Une ligne de `store_sales` est une ligne de ticket, pas un ticket : compter les lignes ne donne donc pas le nombre de tickets. Et si on joint une table à la mauvaise granularité, des lignes peuvent être dupliquées et les sommes deviennent fausses.
+
+### 4. Quels risques présente une jointure réalisée sur une clé supposée ?
+
+- Des lignes **en double** si la clé n'est pas unique de l'autre côté : le CA serait alors compté plusieurs fois.
+- Des lignes **perdues ou sans correspondance** si les valeurs ne correspondent pas.
+- Un **résultat faux sans message d'erreur**.
+
+C'est pour ça que j'ai vérifié que `i_item_sk` était unique et que toutes les ventes trouvaient leur produit, puis comparé le nombre de lignes avant et après la jointure (667 579 des deux côtés).
+
+### 5. Pourquoi ne faut-il pas supprimer automatiquement les valeurs atypiques ?
+
+Parce qu'une valeur bizarre peut être un vrai cas : un produit offert (prix 0), une vente à perte (marge négative), une promotion. Les supprimer fausserait les résultats et ferait disparaître une information. Il faut d'abord comprendre ce qu'elles veulent dire. En attendant, je les garde et je les repère (`prix_zero`, statut ATTENTION).
+
+### 6. Quels contrôles permettent de vérifier la cohérence d'un jeu de données transformé ?
+
+- Comparer les **volumes** : lignes en entrée = lignes gardées + lignes mises à l'écart.
+- Vérifier que les **totaux** ne changent pas : CA Silver = somme du CA Gold.
+- Vérifier les **règles métier** : quantité > 0, montant = quantité × prix.
+- Vérifier les **clés** : unicité, aucun null, chaque vente a un produit connu.
+- **Relire** les fichiers écrits et vérifier leur schéma.
+
+### 7. Pourquoi Parquet est-il adapté aux usages analytiques ?
+
+Les données sont rangées par colonne et compressées. Pour une analyse, on lit souvent quelques colonnes sur beaucoup de lignes : Spark ne lit que celles dont il a besoin. Dans notre test, Parquet prend 40,6 Mo contre 175,5 Mo en CSV, et calcule le total en 0,45 s contre 2,58 s. En plus, il garde les types.
+
+### 8. Pourquoi Parquet seul ne fournit-il pas les garanties d'une table transactionnelle Lakehouse ?
+
+Un dossier Parquet n'est qu'un ensemble de fichiers :
+- si une écriture plante au milieu, il peut rester des fichiers à moitié écrits, sans retour en arrière ;
+- deux écritures en même temps peuvent se mélanger ;
+- il n'y a pas d'historique : avec `overwrite`, l'ancienne version est perdue ;
+- on ne peut pas modifier ou supprimer une seule ligne.
+
+Des formats comme Delta Lake ou Apache Iceberg ajoutent un journal des modifications au-dessus des fichiers Parquet pour apporter ces garanties.
+
+### 9. Dans quels cas une base NoSQL pourrait-elle compléter une architecture Data Lake ?
+
+Quand on a besoin de lire ou d'écrire **une seule information très vite**, par exemple afficher l'historique d'achats d'un client sur le site, ou le stock d'un produit en temps réel. Le Data Lake est fait pour analyser beaucoup de données d'un coup, pas pour répondre en quelques millisecondes à une question sur une seule ligne. Une base comme HBase peut stocker ce genre de données, avec une clé bien choisie.
+
+### 10. Quelles limites des données TPCx-BB doivent être prises en compte lors de l'interprétation des résultats ?
+
+- Les données sont **inventées** (générées au hasard) : 74 % des ventes ont une marge négative et 44 % des produits coûtent plus cher à l'achat qu'à la vente, ce qui n'arrive pas dans un vrai magasin.
+- Les noms de produits et de marques sont des suites de lettres au hasard.
+- La répartition des catégories est très déséquilibrée (`Music` = 46 % des produits), et c'est ce qui fait sa part de CA.
+- La devise n'est pas indiquée.
+- Ce n'est pas un benchmark officiel : on ne peut tirer aucune conclusion sur les performances.
+
+Les résultats servent à montrer que la chaîne fonctionne, pas à prendre de vraies décisions commerciales.

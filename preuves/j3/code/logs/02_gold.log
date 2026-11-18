@@ -1,0 +1,31 @@
+=== 02_gold - lancé le 2026-11-18 16:10:50
+Lu : hdfs://localhost:9000/retail-lake/silver/store_sales -> 667579 lignes
+Lu : hdfs://localhost:9000/retail-lake/silver/item -> 17820 lignes
+i_item_sk unique : True (17820 valeurs pour 17820 lignes)
+Ventes dont le produit est inconnu : 0
+Jointure : 667579 lignes avant, 667579 après, 0 non rapprochées
+Écrit : hdfs://localhost:9000/retail-lake/gold/ca_par_categorie
+Relecture OK : 9 lignes, 8 colonnes
+Schéma gold :
+    categorie                 string
+    chiffre_affaires          decimal(17,2)
+    quantite_vendue           bigint
+    nombre_lignes_vente       bigint
+    nombre_produits_vendus    bigint
+    part_ca_pct               decimal(5,2)
+    source                    string
+    date_traitement           timestamp
+
+categorie                   chiffre_affaires    quantite   lignes  produits  part_%
+Music                           519666693.84    15238374   301236      8143   45.17
+Books                           307151503.25     9007511   177671      5335   26.70
+Movies & TV                      74735891.89     2189279    43376      1286    6.50
+Clothing & Accessories           56754855.82     1640550    32372       610    4.93
+Electronics                      55715087.49     1632098    32619       692    4.84
+Home & Kitchen                   41260511.11     1226839    24380       476    3.59
+Sports & Outdoors                40926938.33     1209305    23911       465    3.56
+Toys & Games                     27437825.33      809999    16121       405    2.38
+Tools & Home Improvement         26880279.31      801519    15893       408    2.34
+
+CA total silver : 1150529586.37 | somme gold : 1150529586.37
+Fin du script 02_gold
