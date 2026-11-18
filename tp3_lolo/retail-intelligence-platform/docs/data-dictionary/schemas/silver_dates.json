@@ -1,0 +1,89 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "d_date_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "d_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "d_year",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "d_qoy",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "d_moy",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "d_dom",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "d_day_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "d_weekend",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "d_holiday",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_systeme",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_table",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_fichier",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}

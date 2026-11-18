@@ -1,0 +1,257 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "date_vente",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "trimestre",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "mois",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "jour_semaine",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "heure_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "ticket_id",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "ligne_ticket",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "client_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "promotion_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "produit_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "produit_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "nom_produit",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "categorie_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "categorie",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "sous_categorie",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "marque",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "magasin_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "magasin_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "nom_magasin",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "ville",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "etat",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "quantite",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "prix_catalogue_unitaire",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "prix_vente_unitaire",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_catalogue",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_remise",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_vente",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_coupon",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_net_paye",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "cout_total",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "marge",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "prix_nul",
+   "nullable": true,
+   "type": "boolean"
+  },
+  {
+   "metadata": {},
+   "name": "marge_negative",
+   "nullable": true,
+   "type": "boolean"
+  },
+  {
+   "metadata": {},
+   "name": "sans_promotion",
+   "nullable": true,
+   "type": "boolean"
+  },
+  {
+   "metadata": {},
+   "name": "_source_systeme",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_fichier",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_sources_silver",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  },
+  {
+   "metadata": {},
+   "name": "taux_marge",
+   "nullable": true,
+   "type": "decimal(12,4)"
+  },
+  {
+   "metadata": {},
+   "name": "taux_remise",
+   "nullable": true,
+   "type": "decimal(12,4)"
+  },
+  {
+   "metadata": {},
+   "name": "annee",
+   "nullable": true,
+   "type": "integer"
+  }
+ ],
+ "type": "struct"
+}

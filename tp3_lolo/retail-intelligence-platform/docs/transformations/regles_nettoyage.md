@@ -8,8 +8,8 @@ Sources : `store_sales`, `item`, `store`, ainsi que `date_dim`, qui sert de
 référentiel pour valider et traduire les clés de date.
 
 Sorties :
-- `data/silver/<table>/` : données nettoyées, en Parquet ;
-- `data/silver/rejets/<table>/` : lignes mises à l'écart, avec leur `motif_rejet`.
+- `data/silver/<domaine>/` : données nettoyées, en Parquet (`sales`, `products`, `stores`, `dates`, voir `docs/data-dictionary/silver.md`) ;
+- `data/silver/rejects/<domaine>/` : lignes mises à l'écart, avec leur `motif_rejet`.
 
 > **Volume traité** : le fichier `store_sales` complet (667 579 lignes) sature
 > la machine (5 Go de RAM). Le traitement porte donc sur un **échantillon de
@@ -47,7 +47,7 @@ Sorties :
 | **Horaires étranges** | `s_hours` = `8AM-8AM` (magasin Buffalo) | **Conservée** telle quelle | C'est peut-être un magasin ouvert 24 h sur 24, et la colonne ne sert à aucun indicateur |
 
 Toute exclusion est documentée : une ligne rejetée est écrite dans
-`data/silver/rejets/` avec son motif. Elle n'est jamais supprimée sans trace.
+`data/silver/rejects/` avec son motif. Elle n'est jamais supprimée sans trace.
 
 ## Résultats obtenus
 
