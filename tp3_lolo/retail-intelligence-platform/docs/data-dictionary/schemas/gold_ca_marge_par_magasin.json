@@ -1,0 +1,119 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "magasin_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "magasin_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "nom_magasin",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "ville",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "etat",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "chiffre_affaires",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "nb_transactions",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "quantites_vendues",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "marge",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "remises",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_catalogue",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "nb_lignes",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "panier_moyen",
+   "nullable": true,
+   "type": "decimal(19,2)"
+  },
+  {
+   "metadata": {},
+   "name": "taux_marge_pct",
+   "nullable": true,
+   "type": "decimal(25,2)"
+  },
+  {
+   "metadata": {},
+   "name": "taux_remise_pct",
+   "nullable": true,
+   "type": "decimal(25,2)"
+  },
+  {
+   "metadata": {},
+   "name": "part_ca_pct",
+   "nullable": true,
+   "type": "decimal(25,2)"
+  },
+  {
+   "metadata": {},
+   "name": "_sources_silver",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}

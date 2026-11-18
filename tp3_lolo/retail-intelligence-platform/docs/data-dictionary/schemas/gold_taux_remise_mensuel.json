@@ -1,0 +1,59 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "annee",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "mois",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "montant_catalogue",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "remises",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "taux_remise_pct",
+   "nullable": true,
+   "type": "decimal(25,2)"
+  },
+  {
+   "metadata": {},
+   "name": "nb_lignes",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "_sources_silver",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}

@@ -81,3 +81,12 @@ sont produits par les notebooks des etapes 4 et 5. Apres leur execution, lancer 
 Documentation : `docs/data-dictionary/silver.md` (organisation, convention de nommage,
 provenance, description de chaque colonne) et schemas de reference dans
 `docs/data-dictionary/schemas/`.
+
+## Etape 7 - Donnees Gold
+
+Produites par `transformations/aggregation/agregations_gold.ipynb` dans `data/gold/` :
+`ca_mensuel`, `ca_annuel`, `ca_marge_par_categorie`, `top10_produits`,
+`ca_marge_par_magasin`, `taux_remise_mensuel`.
+
+Documentation (finalite, sources, granularite, colonnes, mesures, regles de calcul,
+limites) : `docs/data-dictionary/gold.md`. Schemas : `docs/data-dictionary/schemas/gold_*.json`.
