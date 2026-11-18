@@ -1,7 +1,7 @@
 # Transformations et résultats - TP Jour 3, Étape 5
 
 Traitements :
-- `transformations/enrichment/enrichissement_ventes.ipynb` : jointures, renommage et colonnes calculées. Il produit `data/silver/ventes_enrichies/`.
+- `transformations/enrichment/enrichissement_ventes.ipynb` : jointures, renommage et colonnes calculées. Il produit `data/silver/sales_enriched/`.
 - `transformations/aggregation/agregations_gold.ipynb` : agrégations. Il produit `data/gold/<indicateur>/`.
 
 Bilans : `outputs/bilan_jointures.json`, `outputs/bilan_gold.json`
@@ -14,11 +14,11 @@ Bilans : `outputs/bilan_jointures.json`, `outputs/bilan_gold.json`
 ## Chaîne de traitement
 
 ```
-Raw (.dat)  --étape 4-->  Silver : store_sales, item, store, date_dim
+Raw (.dat)  --étape 4-->  Silver : sales, products, stores, dates
                                      |
                           étape 5a : jointures + renommage + colonnes calculées
                                      v
-                          Silver : ventes_enrichies (1 ligne = 1 produit dans 1 ticket)
+                          Silver : sales_enriched (1 ligne = 1 produit dans 1 ticket)
                                      |
                           étape 5b : agrégations
                                      v
@@ -26,7 +26,7 @@ Raw (.dat)  --étape 4-->  Silver : store_sales, item, store, date_dim
                                  ca_marge_par_magasin, top10_produits, taux_remise_mensuel
 ```
 
-## 1. Opérations réalisées (`ventes_enrichies`)
+## 1. Opérations réalisées (`sales_enriched`)
 
 | Opération | Détail |
 |---|---|

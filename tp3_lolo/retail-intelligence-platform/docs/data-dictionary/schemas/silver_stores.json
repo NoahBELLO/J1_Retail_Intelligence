@@ -1,0 +1,215 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "s_store_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "s_store_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_rec_start_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "s_rec_end_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "s_store_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_number_employees",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "s_floor_space",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "s_hours",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_manager",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_market_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "s_geography_class",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_market_desc",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_market_manager",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_division_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "s_division_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_company_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "s_company_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_street_number",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_street_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_street_type",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_suite_number",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_city",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_county",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_state",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_zip",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_country",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "s_gmt_offset",
+   "nullable": true,
+   "type": "decimal(5,2)"
+  },
+  {
+   "metadata": {},
+   "name": "s_tax_precentage",
+   "nullable": true,
+   "type": "decimal(5,2)"
+  },
+  {
+   "metadata": {},
+   "name": "s_closed_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "s_date_fermeture_invalide",
+   "nullable": true,
+   "type": "boolean"
+  },
+  {
+   "metadata": {},
+   "name": "_source_systeme",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_table",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_fichier",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}

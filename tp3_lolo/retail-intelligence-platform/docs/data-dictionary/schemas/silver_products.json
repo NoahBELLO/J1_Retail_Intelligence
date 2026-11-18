@@ -1,0 +1,173 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "i_item_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "i_item_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_rec_start_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "i_rec_end_date",
+   "nullable": true,
+   "type": "date"
+  },
+  {
+   "metadata": {},
+   "name": "i_item_desc",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_current_price",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "i_wholesale_cost",
+   "nullable": true,
+   "type": "decimal(7,2)"
+  },
+  {
+   "metadata": {},
+   "name": "i_brand_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "i_brand",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_class_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "i_class",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_category_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "i_category",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_manufact_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "i_manufact",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_size",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_formulation",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_color",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_units",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_container",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_manager_id",
+   "nullable": true,
+   "type": "integer"
+  },
+  {
+   "metadata": {},
+   "name": "i_product_name",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "i_cout_superieur_prix",
+   "nullable": true,
+   "type": "boolean"
+  },
+  {
+   "metadata": {},
+   "name": "_source_systeme",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_table",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_source_fichier",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}

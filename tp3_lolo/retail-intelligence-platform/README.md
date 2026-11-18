@@ -64,8 +64,20 @@ awk -F'|' '$10 % 10 == 0' ~/DEV/tpcxbb_source/retail_project/data/store_sales/st
 Puis executer les notebooks dans cet ordre (un seul a la fois) :
 
 1. `transformations/cleaning/nettoyage_silver.ipynb` : Raw -> `data/silver/`
-2. `transformations/enrichment/enrichissement_ventes.ipynb` : `data/silver/ventes_enrichies/`
+2. `transformations/enrichment/enrichissement_ventes.ipynb` : `data/silver/sales_enriched/`
 3. `transformations/aggregation/agregations_gold.ipynb` : Silver -> `data/gold/`
 
 Documentation : `docs/transformations/regles_nettoyage.md` et
 `docs/transformations/transformations_resultats.md`.
+
+## Etape 6 - Donnees Silver
+
+Les jeux Silver (`data/silver/sales`, `products`, `stores`, `dates`, `sales_enriched`)
+sont produits par les notebooks des etapes 4 et 5. Apres leur execution, lancer :
+
+4. `tests/controles_silver.ipynb` : controles apres ecriture (presence, format,
+   lisibilite, nombre de lignes, schema, coherence)
+
+Documentation : `docs/data-dictionary/silver.md` (organisation, convention de nommage,
+provenance, description de chaque colonne) et schemas de reference dans
+`docs/data-dictionary/schemas/`.
