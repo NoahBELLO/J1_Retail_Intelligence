@@ -1,0 +1,89 @@
+{
+ "fields": [
+  {
+   "metadata": {},
+   "name": "produit_sk",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "produit_id",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "nom_produit",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "categorie",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "chiffre_affaires",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "nb_transactions",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "quantites_vendues",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "marge",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "remises",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "montant_catalogue",
+   "nullable": true,
+   "type": "decimal(18,2)"
+  },
+  {
+   "metadata": {},
+   "name": "nb_lignes",
+   "nullable": true,
+   "type": "long"
+  },
+  {
+   "metadata": {},
+   "name": "_sources_silver",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_traitement",
+   "nullable": true,
+   "type": "string"
+  },
+  {
+   "metadata": {},
+   "name": "_date_traitement",
+   "nullable": true,
+   "type": "timestamp"
+  }
+ ],
+ "type": "struct"
+}
