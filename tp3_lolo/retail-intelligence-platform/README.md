@@ -45,3 +45,9 @@ Ouvrir et executer le notebook `transformations/exploration/inventaire_sources.i
 Sources lues (sans modification) dans `~/DEV/tpcxbb_source/retail_project/data`.
 Resultats : `outputs/inventaire_sources.json`, inventaire redige dans
 `docs/data-dictionary/inventaire_sources.md`.
+
+## Etape 3 - Exploration des sources
+
+Ouvrir et executer le notebook `transformations/exploration/exploration_sources.ipynb`
+(chargement, schema, echantillon, comptage, valeurs manquantes, doublons,
+valeurs atypiques et reponses aux questions techniques).
