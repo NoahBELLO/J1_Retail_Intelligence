@@ -1,0 +1,10 @@
+=== 03_formats - lancé le 2026-11-18 16:11:26
+Jeu comparé : hdfs://localhost:9000/retail-lake/silver/store_sales -> 667579 lignes, 27 colonnes
+
+Référence : fichier texte d'origine store_sales.dat = 92764700 octets
+
+format     taille (octets)  % du .dat   lignes  ss_net_paid   ss_quantity  date_traitement     total ss_net_paid temps (s)
+csv              175542752     189.2%   667579  string        string       string                  1150529586.37      2.58
+json             480608138     518.1%   667579  double        bigint       string                  1150529586.37      2.66
+parquet           40550999      43.7%   667579  decimal(7,2)  int          timestamp               1150529586.37      0.45
+Fin du script 03_formats

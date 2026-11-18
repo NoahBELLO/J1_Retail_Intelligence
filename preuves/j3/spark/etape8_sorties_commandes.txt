@@ -1,0 +1,41 @@
+TP Jour 3 – UC-06 – Étape 8 : Utiliser le format Parquet (scripts 01_silver.py, 02_gold.py, 03_formats.py) (Noah)
+Commande : cd ~/retail-intelligence/tp3/scripts && ./lancer_tout.sh
+Date : 18/11/2026
+
+=== 03_formats - lancé le 2026-11-18 16:11:26
+Jeu comparé : hdfs://localhost:9000/retail-lake/silver/store_sales -> 667579 lignes, 27 colonnes
+
+Référence : fichier texte d'origine store_sales.dat = 92764700 octets
+
+format     taille (octets)  % du .dat   lignes  ss_net_paid   ss_quantity  date_traitement     total ss_net_paid temps (s)
+csv              175542752     189.2%   667579  string        string       string                  1150529586.37      2.58
+json             480608138     518.1%   667579  double        bigint       string                  1150529586.37      2.66
+parquet           40550999      43.7%   667579  decimal(7,2)  int          timestamp               1150529586.37      0.45
+Fin du script 03_formats
+
+--- du -sb (taille des dossiers, octets)
+176914228	/home/noah/retail-intelligence/tp3/outputs/comparaison_formats/csv
+484362934	/home/noah/retail-intelligence/tp3/outputs/comparaison_formats/json
+40867851	/home/noah/retail-intelligence/tp3/outputs/comparaison_formats/parquet
+
+--- Contenu d'un dossier Parquet
+total 39940
+drwxr-xr-x 2 noah noah     4096 Nov 18 16:12 .
+drwxr-xr-x 5 noah noah     4096 Nov 18 16:12 ..
+-rw-r--r-- 1 noah noah        8 Nov 18 16:12 ._SUCCESS.crc
+-rw-r--r-- 1 noah noah    80780 Nov 18 16:12 .part-00000-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet.crc
+-rw-r--r-- 1 noah noah    79364 Nov 18 16:12 .part-00001-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet.crc
+-rw-r--r-- 1 noah noah    79212 Nov 18 16:12 .part-00002-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet.crc
+-rw-r--r-- 1 noah noah    77488 Nov 18 16:12 .part-00003-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet.crc
+-rw-r--r-- 1 noah noah        0 Nov 18 16:12 _SUCCESS
+-rw-r--r-- 1 noah noah 10338403 Nov 18 16:12 part-00000-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet
+-rw-r--r-- 1 noah noah 10157141 Nov 18 16:12 part-00001-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet
+-rw-r--r-- 1 noah noah 10138045 Nov 18 16:12 part-00002-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet
+-rw-r--r-- 1 noah noah  9917410 Nov 18 16:12 part-00003-928e4fb8-ca7c-49ba-b11a-51a74aebc2da-c000.snappy.parquet
+
+--- 2 premières lignes du CSV
+ss_sold_date_sk,ss_sold_time_sk,ss_item_sk,ss_customer_sk,ss_cdemo_sk,ss_hdemo_sk,ss_addr_sk,ss_store_sk,ss_promo_sk,ss_ticket_number,ss_quantity,ss_wholesale_cost,ss_list_price,ss_sales_price,ss_ext_discount_amt,ss_ext_sales_price,ss_ext_wholesale_cost,ss_ext_list_price,ss_ext_tax,ss_coupon_amt,ss_net_paid,ss_net_paid_inc_tax,ss_net_profit,prix_zero,source_fichier,source_lot,date_traitement
+36890,1207,7073,73180,919082,6157,36130,7,94,20,41,16.05,17.17,4.64,513.73,190.24,658.05,703.97,9.51,0.00,190.24,199.75,-467.81,false,hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/store_sales/store_
+
+--- 1re ligne du JSON
+{"ss_sold_date_sk":36890,"ss_sold_time_sk":1207,"ss_item_sk":7073,"ss_customer_sk":73180,"ss_cdemo_sk":919082,"ss_hdemo_sk":6157,"ss_addr_sk":36130,"ss_store_sk":7,"ss_promo_sk":94,"ss_ticket_number":20,"ss_quantity":41,"ss_wholesale_cost":16.05,"ss_list_price":17.17,"ss_sales_price":4.64,"ss_ext_discount_amt":513.73,"ss_ext_sales_price":190.24,"ss_ext_wholesale_cost":658.05,"ss_ext_list_price":703.97,"ss_ext_tax":9.51,"ss_coupon_amt":0.00,"ss_net_paid":190.24,"ss_net_paid_inc_tax":199.75,"ss_net_profit":-467.81,"prix_zero":false,"source_fichier":"hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat","source_lot":"initial","date_traitement":"2026-11-18T16:10:01.612+01:00"}

@@ -1,0 +1,88 @@
+TP Jour 3 – UC-06 – Étape 9 : Contrôles qualité (script 04_qualite.py) (Noah)
+Commande : cd ~/retail-intelligence/tp3/scripts && ./lancer_tout.sh
+Date : 18/11/2026
+
+=== 04_qualite - lancé le 2026-11-18 16:12:17
+Jeu                     Contrôle       Règle                                                         Résultat                              Statut
+silver/store_sales      Volume         lignes raw = lignes silver + lignes mises à l'écart           667579 = 667579 + 0                   OK
+silver/store_sales      Complétude     ss_item_sk non nul                                            0 null                                OK
+silver/store_sales      Complétude     ss_ticket_number non nul                                      0 null                                OK
+silver/store_sales      Complétude     ss_sold_date_sk non nul                                       0 null                                OK
+silver/store_sales      Complétude     ss_store_sk non nul                                           0 null                                OK
+silver/store_sales      Complétude     ss_quantity non nul                                           0 null                                OK
+silver/store_sales      Complétude     ss_net_paid non nul                                           0 null                                OK
+silver/store_sales      Complétude     ss_promo_sk (non obligatoire) : part de null                  158 null (0.02 %)                     OK
+silver/store_sales      Complétude     ss_addr_sk (non obligatoire) : part de null                   448 null (0.07 %)                     OK
+silver/store_sales      Unicité        aucune ligne identique sur toutes les colonnes                0 doublon(s)                          OK
+silver/store_sales      Validité       montants en decimal(7,2)                                      decimal(7,2)                          OK
+silver/store_sales      Validité       identifiants et quantité en entier                            int                                   OK
+silver/store_sales      Cohérence      ss_quantity > 0                                               0 ligne(s) hors règle                 OK
+silver/store_sales      Cohérence      ss_net_paid >= 0                                              0 ligne(s) hors règle                 OK
+silver/store_sales      Cohérence      ss_ext_sales_price = ss_quantity x ss_sales_price             0 ligne(s) hors règle                 OK
+silver/store_sales      Cohérence      prix de vente <= prix catalogue                               0 ligne(s) hors règle                 OK
+silver/store_sales      Cohérence      ventes à prix 0 (gardées, repérées par prix_zero)             3324 ligne(s)                         ATTENTION
+silver/store_sales      Cohérence      ventes à marge négative (gardées)                             495971 ligne(s) (74.3 %)              ATTENTION
+silver/store_sales      Intégrité      chaque ss_item_sk existe dans silver/item                     0 vente(s) sans produit               OK
+silver/store_sales      Intégrité      chaque ss_store_sk existe dans raw/nifi/store.dat             0 vente(s) sans magasin               OK
+silver/item             Volume         lignes raw = lignes silver + lignes mises à l'écart           17820 = 17820 + 0                     OK
+silver/item             Clé candidate  i_item_sk unique                                              17820 valeurs pour 17820 lignes       OK
+silver/item             Complétude     i_item_sk non nul                                             0 null                                OK
+silver/item             Complétude     i_category non nul                                            0 null                                OK
+silver/item             Complétude     i_size (non obligatoire) : part de null                       2502 null (14.0 %)                    ATTENTION
+silver/item             Validité       i_current_price en decimal(7,2), i_rec_start_date en date     decimal(7,2), date                    OK
+silver/item             Cohérence      i_current_price > 0                                           0 ligne(s) hors règle                 OK
+silver/item             Cohérence      coût d'achat > prix de vente (gardés)                         7768 produit(s) (43.6 %)              ATTENTION
+silver/item             Cohérence      nombre de catégories = 9 (i_category_id de 1 à 9)             9                                     OK
+gold/ca_par_categorie   Volume         une ligne par catégorie de silver/item                        9 lignes                              OK
+gold/ca_par_categorie   Unicité        categorie unique                                              9 valeurs pour 9 lignes               OK
+gold/ca_par_categorie   Complétude     categorie non nulle                                           0 null                                OK
+gold/ca_par_categorie   Cohérence      somme du CA gold = CA total silver                            1150529586.37 = 1150529586.37         OK
+gold/ca_par_categorie   Cohérence      somme des lignes gold = lignes silver                         667579 = 667579                       OK
+gold/ca_par_categorie   Cohérence      somme des parts = 100 % (à 0,05 près, à cause des arrondis)   100.01 %                              OK
+gold/ca_par_categorie   Cohérence      chiffre_affaires >= 0                                         0 ligne(s) hors règle                 OK
+
+Bilan : 36 contrôles - 32 OK, 4 ATTENTION, 0 KO
+Écrit : hdfs://localhost:9000/retail-lake/quality/rapport_qualite
+Fin du script 04_qualite
+
+--- Rapport écrit dans HDFS (CSV)
+Found 2 items
+-rw-r--r--   1 noah supergroup          0 2026-11-18 16:13 /retail-lake/quality/rapport_qualite/_SUCCESS
+-rw-r--r--   1 noah supergroup       4121 2026-11-18 16:13 /retail-lake/quality/rapport_qualite/part-00000-312a9846-1aff-4607-81af-216aae89a3d8-c000.csv
+jeu,controle,regle,resultat,statut,date_controle
+silver/store_sales,Volume,lignes raw = lignes silver + lignes mises à l'écart,667579 = 667579 + 0,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_item_sk non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_ticket_number non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_sold_date_sk non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_store_sk non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_quantity non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_net_paid non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_promo_sk (non obligatoire) : part de null,158 null (0.02 %),OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Complétude,ss_addr_sk (non obligatoire) : part de null,448 null (0.07 %),OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Unicité,aucune ligne identique sur toutes les colonnes,0 doublon(s),OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Validité,"montants en decimal(7,2)","decimal(7,2)",OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Validité,identifiants et quantité en entier,int,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,ss_quantity > 0,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,ss_net_paid >= 0,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,ss_ext_sales_price = ss_quantity x ss_sales_price,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,prix de vente <= prix catalogue,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,"ventes à prix 0 (gardées, repérées par prix_zero)",3324 ligne(s),ATTENTION,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Cohérence,ventes à marge négative (gardées),495971 ligne(s) (74.3 %),ATTENTION,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Intégrité,chaque ss_item_sk existe dans silver/item,0 vente(s) sans produit,OK,2026-11-18T16:13:01.327+01:00
+silver/store_sales,Intégrité,chaque ss_store_sk existe dans raw/nifi/store.dat,0 vente(s) sans magasin,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Volume,lignes raw = lignes silver + lignes mises à l'écart,17820 = 17820 + 0,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Clé candidate,i_item_sk unique,17820 valeurs pour 17820 lignes,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Complétude,i_item_sk non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Complétude,i_category non nul,0 null,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Complétude,i_size (non obligatoire) : part de null,2502 null (14.0 %),ATTENTION,2026-11-18T16:13:01.327+01:00
+silver/item,Validité,"i_current_price en decimal(7,2), i_rec_start_date en date","decimal(7,2), date",OK,2026-11-18T16:13:01.327+01:00
+silver/item,Cohérence,i_current_price > 0,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00
+silver/item,Cohérence,coût d'achat > prix de vente (gardés),7768 produit(s) (43.6 %),ATTENTION,2026-11-18T16:13:01.327+01:00
+silver/item,Cohérence,nombre de catégories = 9 (i_category_id de 1 à 9),9,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Volume,une ligne par catégorie de silver/item,9 lignes,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Unicité,categorie unique,9 valeurs pour 9 lignes,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Complétude,categorie non nulle,0 null,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Cohérence,somme du CA gold = CA total silver,1150529586.37 = 1150529586.37,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Cohérence,somme des lignes gold = lignes silver,667579 = 667579,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Cohérence,"somme des parts = 100 % (à 0,05 près, à cause des arrondis)",100.01 %,OK,2026-11-18T16:13:01.327+01:00
+gold/ca_par_categorie,Cohérence,chiffre_affaires >= 0,0 ligne(s) hors règle,OK,2026-11-18T16:13:01.327+01:00

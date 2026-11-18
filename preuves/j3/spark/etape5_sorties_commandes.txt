@@ -1,0 +1,86 @@
+TP Jour 3 – UC-06 – Étape 5 : Réaliser les transformations (Noah)
+Notebook : ~/retail-intelligence/tp3/TP3_Nettoyage.ipynb (cellules 6 à 9, à la suite du nettoyage)
+Exécution complète du notebook :
+  jupyter nbconvert --to notebook --execute --inplace TP3_Nettoyage.ipynb
+Environnement : WSL avec 8 Go de mémoire et 4 cœurs (voir erreurs rencontrées)
+Date : 18/11/2026
+
+(Cellules 1 à 5 : mêmes résultats qu'à l'étape 4 : 667 579 ventes et 17 820 produits gardés, 0 mis à l'écart)
+
+==================================================================
+Cellule 6 : vérifier la clé avant la jointure
+==================================================================
+
+produits - lignes : 17820 | i_item_sk distincts : 17820
+ventes dont le produit n'existe pas dans item : 0
+produits différents vendus : 17820
+
+==================================================================
+Cellule 7 : jointure ventes + produits (left, ss_item_sk = i_item_sk)
+==================================================================
+
+Lignes avant : 667579
+Lignes après : 667579
+Ventes non rapprochées : 0
++----------------+----------+----------+--------------------+-----------+-----------+
+|ss_ticket_number|ss_item_sk|i_category|             i_class|ss_quantity|ss_net_paid|
++----------------+----------+----------+--------------------+-----------+-----------+
+|              35|      3560|     Music|  Dance & Electronic|         31|    2296.48|
+|              41|     11504|     Books|Education & Refer...|         81|    4221.72|
+|              46|      4677|     Music|                Rock|         90|    7504.20|
+|              50|      1072|     Music|    Alternative Rock|         35|     714.70|
+|              64|      9835|     Books|Education & Refer...|         10|     497.70|
++----------------+----------+----------+--------------------+-----------+-----------+
+only showing top 5 rows
+
+==================================================================
+Cellule 8 : agrégation, chiffre d'affaires par catégorie
+==================================================================
+
++------------------------+----------------+---------------+-------------------+----------------------+-----------+
+|categorie               |chiffre_affaires|quantite_vendue|nombre_lignes_vente|nombre_produits_vendus|part_ca_pct|
++------------------------+----------------+---------------+-------------------+----------------------+-----------+
+|Music                   |519666693.84    |15238374       |301236             |8143                  |45.17      |
+|Books                   |307151503.25    |9007511        |177671             |5335                  |26.70      |
+|Movies & TV             |74735891.89     |2189279        |43376              |1286                  |6.50       |
+|Clothing & Accessories  |56754855.82     |1640550        |32372              |610                   |4.93       |
+|Electronics             |55715087.49     |1632098        |32619              |692                   |4.84       |
+|Home & Kitchen          |41260511.11     |1226839        |24380              |476                   |3.59       |
+|Sports & Outdoors       |40926938.33     |1209305        |23911              |465                   |3.56       |
+|Toys & Games            |27437825.33     |809999         |16121              |405                   |2.38       |
+|Tools & Home Improvement|26880279.31     |801519         |15893              |408                   |2.34       |
++------------------------+----------------+---------------+-------------------+----------------------+-----------+
+
+==================================================================
+Cellule 9 : contrôler que l'agrégation ne perd rien
+==================================================================
+
+CA total des ventes  : 1150529586.37
+Somme des catégories : 1150529586.37
+Lignes des ventes    : 667579
+Somme des lignes     : 667579
+root
+ |-- categorie: string (nullable = true)
+ |-- chiffre_affaires: decimal(17,2) (nullable = true)
+ |-- quantite_vendue: long (nullable = true)
+ |-- nombre_lignes_vente: long (nullable = false)
+ |-- nombre_produits_vendus: long (nullable = false)
+ |-- part_ca_pct: decimal(24,2) (nullable = true)
+
+==================================================================
+Problème rencontré avant l'exécution
+==================================================================
+
+WSL ne répondait plus :
+  Code d'erreur : Wsl/Service/0x8007274c
+Cause : mémoire de WSL limitée à 4 Go (.wslconfig) alors que HDFS, NiFi et
+plusieurs sessions Spark tournaient en même temps.
+Correction (PowerShell Windows) :
+  Copy-Item C:\Users\Noah\.wslconfig C:\Users\Noah\.wslconfig.bak
+  Set-Content C:\Users\Noah\.wslconfig "[wsl2]`r`nmemory=8GB`r`nprocessors=4`r`nswap=2GB" -Encoding ascii
+  wsl --shutdown
+Puis dans WSL : start-dfs.sh (NiFi non relancé, inutile au TP3).
+Après redémarrage :
+  nproc -> 4
+  free -h -> Mem: total 7.8Gi
+  jps -> NameNode, DataNode, SecondaryNameNode
