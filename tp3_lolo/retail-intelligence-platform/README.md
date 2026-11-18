@@ -51,3 +51,21 @@ Resultats : `outputs/inventaire_sources.json`, inventaire redige dans
 Ouvrir et executer le notebook `transformations/exploration/exploration_sources.ipynb`
 (chargement, schema, echantillon, comptage, valeurs manquantes, doublons,
 valeurs atypiques et reponses aux questions techniques).
+
+## Etapes 4 et 5 - Nettoyage, transformations, agregations
+
+Le fichier `store_sales` complet est trop lourd pour la machine : on travaille
+sur un echantillon de 10 % des tickets. A creer une fois, depuis ce dossier :
+
+```
+awk -F'|' '$10 % 10 == 0' ~/DEV/tpcxbb_source/retail_project/data/store_sales/store_sales.dat > data/samples/store_sales_echantillon.dat
+```
+
+Puis executer les notebooks dans cet ordre (un seul a la fois) :
+
+1. `transformations/cleaning/nettoyage_silver.ipynb` : Raw -> `data/silver/`
+2. `transformations/enrichment/enrichissement_ventes.ipynb` : `data/silver/ventes_enrichies/`
+3. `transformations/aggregation/agregations_gold.ipynb` : Silver -> `data/gold/`
+
+Documentation : `docs/transformations/regles_nettoyage.md` et
+`docs/transformations/transformations_resultats.md`.
