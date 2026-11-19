@@ -1,11 +1,11 @@
 {
- "_commentaire": "Parametres de l'analyse UC-08 (TP Jour 4). Chemins relatifs a la racine tp4_lolo/retail-intelligence-platform. Les donnees Silver / Gold sont celles produites au TP3 (non recopiees).",
+ "_commentaire": "Parametres de l'analyse UC-08 (TP Jour 4, chaine des notebooks). Chemins relatifs a la racine du depot. Les donnees Silver / Gold sont celles produites au TP3 par run_pipeline.sh (non recopiees).",
  "chemins": {
-  "projet_tp3": "../../tp3_lolo/retail-intelligence-platform",
-  "silver": "../../tp3_lolo/retail-intelligence-platform/data/silver",
-  "gold": "../../tp3_lolo/retail-intelligence-platform/data/gold",
-  "rapport_qualite": "../../tp3_lolo/retail-intelligence-platform/outputs/rapport_qualite.json",
-  "bilan_gold": "../../tp3_lolo/retail-intelligence-platform/outputs/bilan_gold.json",
+  "projet_tp3": ".",
+  "silver": "data/silver",
+  "gold": "data/gold",
+  "rapport_qualite": "outputs/rapport_qualite.json",
+  "bilan_gold": "outputs/bilan_gold.json",
   "outputs": "analytics/outputs",
   "visualisations": "analytics/visualizations"
  },
