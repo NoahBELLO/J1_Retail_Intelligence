@@ -1,0 +1,8 @@
+niveau,variable,nb_valeurs,nb_vides,min,max,moyenne,mediane,ecart_type,somme
+ligne de vente,quantite,66593,0,1.0,100.0,50.85,51.0,28.92,3386076.0
+ligne de vente,prix_vente_unitaire,66593,0,0.0,194.54,37.83,27.44,34.57,
+ligne de vente,montant_net_paye,66593,0,0.0,17746.82,1738.2,882.39,2189.21,115752176.68
+ligne de vente,montant_remise,66593,0,0.0,17233.3,1924.95,1052.2,2286.15,128188499.09
+ticket,montant_ticket,8910,0,0.0,60903.9,12991.27,11718.01,9111.99,115752176.68
+ticket,articles_par_ticket,8910,0,1.0,1020.0,380.03,373.0,217.79,3386076.0
+ticket,lignes_par_ticket,8910,0,1.0,14.0,7.47,7.0,4.02,

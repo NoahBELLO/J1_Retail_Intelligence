@@ -1,0 +1,31 @@
+{
+ "_commentaire": "Parametres de l'analyse UC-08 (TP Jour 4). Chemins relatifs a la racine tp4_lolo/retail-intelligence-platform. Les donnees Silver / Gold sont celles produites au TP3 (non recopiees).",
+ "chemins": {
+  "projet_tp3": "../../tp3_lolo/retail-intelligence-platform",
+  "silver": "../../tp3_lolo/retail-intelligence-platform/data/silver",
+  "gold": "../../tp3_lolo/retail-intelligence-platform/data/gold",
+  "rapport_qualite": "../../tp3_lolo/retail-intelligence-platform/outputs/rapport_qualite.json",
+  "bilan_gold": "../../tp3_lolo/retail-intelligence-platform/outputs/bilan_gold.json",
+  "outputs": "analytics/outputs",
+  "visualisations": "analytics/visualizations"
+ },
+ "spark": {
+  "_commentaire": "Ressources reduites (PC 5 Go de RAM) ; Arrow desactive (pyarrow non installe, petits resultats) ; pas de barre de progression",
+  "master": "local[2]",
+  "niveau_journal": "ERROR",
+  "config": {
+   "spark.sql.shuffle.partitions": "4",
+   "spark.driver.memory": "768m",
+   "spark.ui.enabled": "false",
+   "spark.ui.showConsoleProgress": "false",
+   "spark.sql.execution.arrow.pyspark.enabled": "false"
+  }
+ },
+ "analyse": {
+  "devise": "EUR (supposée : la devise n'est pas indiquée dans TPCx-BB)",
+  "mois_incomplet": "2005-12",
+  "date_fin_donnees": "2005-12-13",
+  "classes_histogramme": 30,
+  "dpi": 150
+ }
+}
