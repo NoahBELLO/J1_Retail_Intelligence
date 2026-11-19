@@ -1,0 +1,8 @@
+controle,ok,preuve
+Les jeux de donnees utilises sont identifies,True,analytics/outputs/inventaire_jeux.csv
+Les schemas et granularites ont ete verifies,True,etape 1 : cle unique par jeu
+Les KPI disposent d'une definition explicite,True,analytics/outputs/kpi_dictionnaire.csv
+Les calculs sont reproductibles,True,KPI Silver = Gold ca_annuel
+Les statistiques sont coherentes avec les donnees,True,somme des tickets = CA ; nb valeurs = nb lignes
+Les visualisations sont lisibles et legendees,True,analytics/visualizations/*.png
+Les exports sont presents,True,analytics/outputs/*.csv
