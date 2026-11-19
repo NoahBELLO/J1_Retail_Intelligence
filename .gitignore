@@ -1,0 +1,20 @@
+# Environnement Python (à recréer, voir le README)
+.venv/
+/bin/
+/include/
+/lib/
+/lib64
+pyvenv.cfg
+.ipynb_checkpoints/
+__pycache__/
+
+# Résultats produits par le pipeline du Jour 3 (régénérables avec run_pipeline.sh)
+/outputs/*
+!/outputs/.gitkeep
+
+# Données produites (Silver, Gold, échantillon) : régénérables, pas versionnées
+/data/silver/*
+!/data/silver/.gitkeep
+/data/gold/*
+!/data/gold/.gitkeep
+/data/samples/store_sales_echantillon.dat

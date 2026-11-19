@@ -1,0 +1,36 @@
+{
+ "_commentaire": "Parametres du pipeline Retail Intelligence (TP Jour 3). Chemins relatifs a la racine du depot ; ~ = dossier personnel.",
+ "chemins": {
+  "source_tpcxbb": "~/DEV/tpcxbb_source/retail_project/data",
+  "schema_tpcxbb": "01_UC01_besoin_exploration/preuves/tpcxbb_schema.json",
+  "echantillon_ventes": "data/samples/store_sales_echantillon.dat",
+  "silver": "data/silver",
+  "gold": "data/gold",
+  "outputs": "outputs",
+  "logs": "outputs/logs",
+  "schemas": "docs/data-dictionary/schemas"
+ },
+ "echantillon": {
+  "_commentaire": "actif = true : store_sales reduit aux tickets dont le numero est multiple de modulo_ticket (10 = 10 % des tickets). false = fichier complet (machine puissante requise).",
+  "actif": true,
+  "modulo_ticket": 10
+ },
+ "spark": {
+  "master": "local[2]",
+  "niveau_journal": "ERROR",
+  "config": {
+   "spark.sql.shuffle.partitions": "4",
+   "spark.driver.memory": "768m",
+   "spark.ui.enabled": "false"
+  }
+ },
+ "periode_attendue": {
+  "debut": "2001-01-01",
+  "fin": "2005-12-13"
+ },
+ "qualite": {
+  "taux_vide_max": 0.01,
+  "tolerance_montant": 0.01,
+  "ratio_mois_min": 0.5
+ }
+}

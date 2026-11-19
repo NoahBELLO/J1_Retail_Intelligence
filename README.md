@@ -4,6 +4,7 @@ Retail Intelligence Platform (IPSSI).
 
 - Jour 1 : UC-01 et UC-02 (besoin, exploration, architecture).
 - Jour 2 : UC-03 et UC-04 (Data Lake HDFS, ingestion NiFi). Organisation des fichiers du Jour 2 selon le §17 du TP.
+- Jour 3 : UC-06 (transformation, qualité, Silver / Gold, Parquet). Organisation des fichiers du Jour 3 selon le §10.1 du TP.
 
 ## Contenu – Jour 1
 
@@ -54,9 +55,65 @@ Retail Intelligence Platform (IPSSI).
 
 Les fichiers `*_lorenzo.*` sont les preuves de Lorenzo, les autres celles de Noah.
 
+## Contenu – Jour 3 (UC-06)
+
+Deux chaînes de traitement font la même transformation Raw → Silver → Gold :
+
+- **Pipeline des notebooks** (Lorenzo) : 4 sources (`store_sales`, `item`, `store`, `date_dim`), 6 jeux Gold. Il lit les fichiers bruts sur le disque et travaille sur un échantillon de 10 % des tickets. C'est la chaîne principale.
+- **Scripts PySpark sur le Data Lake HDFS** (Noah) : 2 sources (`store_sales`, `item`) et 1 jeu Gold, sur le fichier **complet**. Ils lisent la zone `raw` de HDFS du Jour 2 et écrivent dans `silver`, `gold` et `quality`. Ils confirment les résultats de l'échantillon (part de `Music` : 45,02 % sur l'échantillon, 45,17 % sur le fichier complet).
+
+### Livrables obligatoires (§10.2)
+
+| N° | Livrable | Fichiers |
+|---|---|---|
+| 1 | Fiche environnement | `docs/environment/fiche_environnement_j3.md`, `tests/environnement/` |
+| 2 | Inventaire technique | `docs/data-dictionary/inventaire_sources.md`, `notebooks/exploration/inventaire_sources.ipynb` |
+| 3 | Notebook d'exploration | `notebooks/exploration/exploration_sources.ipynb` |
+| 4 | Règles de nettoyage | `docs/transformations/regles_nettoyage.md`, `notebooks/cleaning/nettoyage_silver.ipynb` |
+| 5 | Scripts PySpark | `notebooks/cleaning/`, `notebooks/transformations/`, `run_pipeline.sh` ; scripts `transformations/silver/`, `transformations/gold/` |
+| 6 | Données Silver | `data/silver/` (régénérées), `docs/data-dictionary/silver.md`, `docs/data-dictionary/schemas/silver_*.json` |
+| 7 | Données Gold | `data/gold/` (régénérées), `docs/data-dictionary/gold.md`, `docs/data-dictionary/schemas/gold_*.json` |
+| 8 | Données Parquet | `docs/architecture/comparaison_formats.md`, `notebooks/transformations/comparaison_formats.ipynb` |
+| 9 | Rapport qualité | `docs/quality/rapport_qualite.md`, `notebooks/quality/` |
+| 10 | README | ce fichier, section « Reproduire les traitements du Jour 3 » |
+| 11 | Preuves | sorties enregistrées dans les notebooks, `preuves/j3/` |
+| – | Questions de recul | `docs/questions-recul-j3.md` |
+
+### Arborescence du Jour 3
+
+```
+docs/
+  environment/          étape 1 : fiche environnement (nos deux machines)
+  data-dictionary/      étapes 2, 6, 7 : inventaire, Silver, Gold, schemas/
+  transformations/      étapes 4, 5 : règles de nettoyage, transformations et résultats
+  quality/              étape 9 : rapport de qualité
+  architecture/         étape 8 : comparaison des formats
+  questions-recul-j3.md
+notebooks/
+  exploration/          étapes 2, 3 : inventaire, exploration
+  cleaning/             étapes 4, 6 : Raw -> Silver
+  transformations/      étapes 5, 7, 8 : jointures, Gold, comparaison des formats
+  quality/              étapes 6, 9 : contrôles Silver, rapport de qualité
+transformations/
+  silver/  gold/        scripts PySpark sur HDFS (Raw -> Silver -> Gold)
+  config.py  commun.py  03_formats.py  04_qualite.py  lancer_tout.sh
+config/parametres.json  paramètres du pipeline des notebooks
+data/
+  samples/              fichier de test, échantillon de store_sales (régénéré)
+  raw/  bronze/         vides : Raw est lu dans le dossier source ou dans HDFS
+  silver/  gold/        produits par le pipeline (Parquet, non versionnés)
+tests/environnement/    étape 1 : tests d'installation et de l'environnement
+outputs/                bilans, journaux, fichiers de test (non versionnés)
+run_pipeline.sh         lance le pipeline des notebooks
+preuves/j3/             preuves de Noah (sorties des étapes 1 à 10, copie de son espace de travail)
+```
+
+Les dossiers `docs/lakehouse/` et `docs/nosql/` du §10.1 correspondent aux parties facultatives (partie avancée et UC-05), qui n'ont pas été réalisées.
+
 ## Contributions individuelles (05_contribution_individuelle)
 - `contribution_Noah.md`, `contribution_Lorenzo.md` : Jour 1
 - `contribution_Noah_J2.md` : Jour 2
+- `contribution_Noah_J3.md` : Jour 3
 
 ## Relancer les scripts d'exploration
 
@@ -104,3 +161,121 @@ Interface : https://localhost:8443/nifi (identifiants générés au premier dém
 1. Arrêter les processeurs dans NiFi (clic droit → *Stop*).
 2. `/opt/nifi/bin/nifi.sh stop`
 3. `stop-dfs.sh`
+
+## Reproduire les traitements du Jour 3
+
+### Prérequis
+- **Environnement Python** `.venv` à la racine du dépôt, avec `pyspark` et `jupyter` (`nbconvert`) :
+  ```bash
+  python3 -m venv .venv && .venv/bin/pip install pyspark jupyterlab
+  ```
+  Un autre environnement peut être utilisé en définissant les variables `JUPYTER` et `PYTHON`.
+- **Java 17 ou plus** pour Spark (21 observé).
+- **Données TPCx-BB** (`retail_project/data`), hors du dépôt à cause de leur taille.
+- **Schéma du Jour 1** : `01_UC01_besoin_exploration/preuves/tpcxbb_schema.json`, schéma de référence (noms et types des colonnes).
+- **`awk`**, pour créer l'échantillon.
+- **Mémoire** : environ 1,5 Go de RAM libre pour le pipeline des notebooks, 2 Go pour les scripts HDFS. Une seule session Spark à la fois (fermer les autres notebooks).
+- **HDFS** : seulement pour les scripts de `transformations/` (`start-dfs.sh`).
+
+### Versions observées
+Détail dans `docs/environment/fiche_environnement_j3.md`.
+
+| Élément | Lorenzo | Noah |
+|---|---|---|
+| Système | Ubuntu 26.04.1 LTS | Ubuntu 24.04.5 (WSL) |
+| Python | 3.14.4 | 3.12.3 |
+| PySpark / Spark | 4.3.0 | 4.3.0 |
+| Java (Spark) | OpenJDK 21.0.13 | OpenJDK 21.0.13 |
+| Hadoop | 3.5.0 | 3.5.0 |
+| Mode d'exécution | `local[2]`, 768 Mo | `local[*]`, 2 Go |
+
+### Emplacement des données
+
+| Zone | Pipeline des notebooks | Scripts HDFS |
+|---|---|---|
+| **Raw** (jamais modifiée) | `<retail_project>/data/<table>/<table>.dat`, lu sur place | `/retail-lake/raw/tpcxbb/initial/<table>/` (déposé au Jour 2) |
+| Échantillon | `data/samples/store_sales_echantillon.dat` (10 % des tickets, 66 593 lignes) | – (fichier complet) |
+| **Silver** | `data/silver/` : `sales`, `products`, `stores`, `dates`, `sales_enriched`, `rejects/` | `/retail-lake/silver/store_sales`, `/retail-lake/silver/item` |
+| **Gold** | `data/gold/` : `ca_mensuel`, `ca_annuel`, `ca_marge_par_categorie`, `top10_produits`, `ca_marge_par_magasin`, `taux_remise_mensuel` | `/retail-lake/gold/ca_par_categorie` |
+| Rejets et rapport | `data/silver/rejects/`, `outputs/rapport_qualite.json` | `/retail-lake/quality/rejets/`, `/retail-lake/quality/rapport_qualite/` |
+| Journaux | `outputs/logs/` | `outputs/logs_hdfs/` |
+
+Tout est en Parquet, sauf le rapport qualité (JSON ou CSV). Les données produites et `outputs/` ne sont pas versionnées (voir `.gitignore`) : les commandes ci-dessous les recréent.
+
+### Paramètres
+- Pipeline des notebooks : **`config/parametres.json`**. Aucun chemin n'est écrit en dur dans les notebooks du pipeline : chacun lit ce fichier dans sa première cellule.
+
+  | Paramètre | Valeur par défaut | Rôle |
+  |---|---|---|
+  | `chemins.source_tpcxbb` | `~/DEV/tpcxbb_source/retail_project/data` | Dossier des fichiers bruts. **À adapter** sur une autre machine |
+  | `chemins.schema_tpcxbb` | `01_UC01_besoin_exploration/preuves/tpcxbb_schema.json` | Schéma de référence |
+  | `chemins.echantillon_ventes`, `silver`, `gold`, `outputs`, `logs`, `schemas` | `data/...`, `outputs/...`, `docs/...` | Entrées et sorties, relatives à la racine du dépôt |
+  | `echantillon.actif` | `true` | `false` pour traiter `store_sales` complet (machine plus puissante) |
+  | `echantillon.modulo_ticket` | `10` | Tickets gardés : numéro multiple de 10, soit 10 % |
+  | `spark.master`, `spark.config` | `local[2]`, 768 Mo, 4 partitions | Ressources Spark |
+  | `periode_attendue` | du 2001-01-01 au 2005-12-13 | Utilisée par les contrôles |
+  | `qualite.*` | vide < 1 %, tolérance 0,01, mois ≥ 50 % de la moyenne | Seuils des contrôles qualité |
+
+- Scripts HDFS : **`transformations/config.py`** (adresse HDFS, lot `initial` ou `refresh`, chemins, mémoire, 1 copie HDFS).
+
+### Ordre d'exécution
+
+**Étapes 1 à 3** (lancées à la main une fois, sur les fichiers complets) :
+1. `tests/environnement/verif_environnement.ipynb` : versions, session Spark, lecture et écriture d'un fichier de test.
+2. `notebooks/exploration/inventaire_sources.ipynb` : inventaire technique.
+3. `notebooks/exploration/exploration_sources.ipynb` : exploration (schémas, valeurs manquantes, doublons, valeurs atypiques).
+
+**Pipeline des notebooks (étapes 4 à 9)** :
+```bash
+./run_pipeline.sh              # notebooks 1 à 5
+./run_pipeline.sh --formats    # + comparaison des formats
+```
+Le script crée l'échantillon s'il n'existe pas, puis exécute les notebooks un par un. Chaque notebook lit ce que le précédent a écrit, et le script s'arrête au premier en échec :
+```
+Raw (.dat)
+  |  1. notebooks/cleaning/nettoyage_silver.ipynb                  étapes 4 et 6
+  v
+silver/sales, products, stores, dates (+ silver/rejects/)
+  |  2. notebooks/transformations/enrichissement_ventes.ipynb      étape 5
+  v
+silver/sales_enriched
+  |  3. notebooks/transformations/agregations_gold.ipynb           étapes 5 et 7
+  v
+gold/*
+     4. notebooks/quality/controles_silver.ipynb                   étape 6 : contrôles techniques
+     5. notebooks/quality/controles_qualite.ipynb                  étape 9 : rapport de qualité
+     6. notebooks/transformations/comparaison_formats.ipynb        étape 8 (option --formats)
+```
+Pour lancer un notebook seul : `.venv/bin/jupyter nbconvert --to notebook --execute --inplace <notebook>`, ou l'ouvrir dans Jupyter (`.venv/bin/jupyter lab`).
+
+Chaque notebook du pipeline suit la même structure : paramètres, fonctions (lecture avec schéma explicite, rejets, jointure contrôlée, écriture avec provenance), transformations (règles R1 à R8), contrôles, écritures, journal.
+
+**Scripts PySpark sur HDFS** (fichier complet) :
+```bash
+start-dfs.sh
+bash transformations/lancer_tout.sh
+```
+Ordre : `silver/01_silver.py` (Raw → Silver + rejets), `gold/02_gold.py` (Silver → Gold), `03_formats.py` (CSV / JSON / Parquet), `04_qualite.py` (contrôles).
+
+### Sorties produites
+- Pipeline des notebooks : Silver (5 jeux et rejets), Gold (6 jeux), schémas de référence dans `docs/data-dictionary/schemas/`, bilans JSON dans `outputs/`, un journal par notebook dans `outputs/logs/`.
+- Scripts HDFS : `silver/store_sales` (667 579 lignes), `silver/item` (17 820 lignes), `gold/ca_par_categorie` (9 lignes), rapport de 36 contrôles, journaux dans `outputs/logs_hdfs/`.
+
+### Contrôles disponibles
+
+| Contrôle | Où | Résultat |
+|---|---|---|
+| Contrôles intégrés au traitement | `nettoyage_silver` (clés uniques et non nulles), `enrichissement_ventes` (lignes avant = après), `agregations_gold` (totaux Gold = Silver) | Arrêt du notebook en cas d'écart |
+| Contrôles techniques Silver | `notebooks/quality/controles_silver.ipynb` | 77 contrôles, tous OK |
+| Contrôles qualité | `notebooks/quality/controles_qualite.ipynb` | 152 contrôles : 135 OK, 17 ALERTE, 0 KO |
+| Contrôles qualité (fichier complet, HDFS) | `transformations/04_qualite.py` | 36 contrôles : 32 OK, 4 ATTENTION, 0 KO |
+| Lecture Parquet | `notebooks/transformations/comparaison_formats.ipynb`, `transformations/03_formats.py` | Relecture, schéma, lignes et valeurs OK |
+
+### Limites connues
+- **Échantillon** : le pipeline des notebooks réduit `store_sales` à 10 % des tickets. Les montants valent environ 10 % du réel, mais les taux, les parts et les évolutions restent représentatifs : les scripts HDFS sur le fichier complet donnent les mêmes parts par catégorie.
+- **Périmètre** : uniquement les ventes en magasin. Il manque le web, les retours et les stocks, donc certaines questions du Jour 1 restent sans réponse (part magasin / web, taux de retour, ruptures de stock).
+- **Données synthétiques** : 74 % des lignes ont une marge négative, les remises tournent autour de 50 %, et les dates de fermeture des magasins sont incohérentes (remplacées par `null`). La devise n'est pas indiquée.
+- **Décembre 2005 incomplet** : dernière vente le 13/12/2005.
+- **Parquet n'est pas ACID** : un `overwrite` interrompu peut laisser un dossier partiel, sans historique. Il faut relancer le traitement concerné, puis les contrôles.
+- **Exécution locale** : une seule machine, un traitement à la fois, pas de planification.
+- **Chemin de la source** : `chemins.source_tpcxbb` désigne un dossier de la machine de Lorenzo. Il faut l'adapter ailleurs.
