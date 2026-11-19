@@ -1,0 +1,76 @@
+TP4 - UC-07 parcours B : relevé du stockage local (HDFS) qui joue le rôle d'ADLS Gen2
+Commandes en lecture seule (WSL Ubuntu 24.04, 19/11/2026). Aucune ressource Azure créée.
+
+$ hadoop version
+Hadoop 3.5.0
+
+$ whoami ; id
+noah
+uid=1000(noah) gid=1000(noah) groups=1000(noah),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users),989(docker)
+
+$ hdfs getconf -confKey fs.defaultFS
+hdfs://localhost:9000
+$ hdfs getconf -confKey dfs.replication
+1
+$ hdfs getconf -confKey dfs.permissions.enabled
+true
+$ hdfs getconf -confKey dfs.namenode.acls.enabled
+true
+
+$ hdfs dfs -ls /retail-lake
+Found 7 items
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 hdfs://localhost:9000/retail-lake/bronze
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:49 hdfs://localhost:9000/retail-lake/gold
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 hdfs://localhost:9000/retail-lake/logs
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:51 hdfs://localhost:9000/retail-lake/quality
+drwxr-xr-x   - noah supergroup          0 2026-11-17 16:01 hdfs://localhost:9000/retail-lake/raw
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver
+drwxr-xr-x   - noah supergroup          0 2026-11-18 12:42 hdfs://localhost:9000/retail-lake/tp3
+
+$ hdfs dfs -ls -R /retail-lake | grep '^d'      (dossiers seulement)
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 hdfs://localhost:9000/retail-lake/bronze
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 hdfs://localhost:9000/retail-lake/bronze/tpcxbb
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:49 hdfs://localhost:9000/retail-lake/gold
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:49 hdfs://localhost:9000/retail-lake/gold/ca_par_categorie
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:22 hdfs://localhost:9000/retail-lake/logs
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:51 hdfs://localhost:9000/retail-lake/quality
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:51 hdfs://localhost:9000/retail-lake/quality/rapport_qualite
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/quality/rejets
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/quality/rejets/item
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/quality/rejets/store_sales
+drwxr-xr-x   - noah supergroup          0 2026-11-17 16:01 hdfs://localhost:9000/retail-lake/raw
+drwxr-xr-x   - noah supergroup          0 2026-11-17 16:30 hdfs://localhost:9000/retail-lake/raw/nifi
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:21 hdfs://localhost:9000/retail-lake/raw/tpcxbb
+drwxr-xr-x   - noah supergroup          0 2026-11-18 12:46 hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial
+drwxr-xr-x   - noah supergroup          0 2026-11-18 12:46 hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/item
+drwxr-xr-x   - noah supergroup          0 2026-11-18 09:59 hdfs://localhost:9000/retail-lake/raw/tpcxbb/initial/store_sales
+drwxr-xr-x   - noah supergroup          0 2026-11-17 14:21 hdfs://localhost:9000/retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver/item
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver/store_sales
+drwxr-xr-x   - noah supergroup          0 2026-11-18 12:42 hdfs://localhost:9000/retail-lake/tp3
+drwxr-xr-x   - noah supergroup          0 2026-11-18 12:42 hdfs://localhost:9000/retail-lake/tp3/input
+
+$ hdfs dfs -du -h /retail-lake
+0       0       hdfs://localhost:9000/retail-lake/bronze
+3.0 K   3.0 K   hdfs://localhost:9000/retail-lake/gold
+0       0       hdfs://localhost:9000/retail-lake/logs
+10.0 K  10.0 K  hdfs://localhost:9000/retail-lake/quality
+95.0 M  95.0 M  hdfs://localhost:9000/retail-lake/raw
+42.1 M  42.1 M  hdfs://localhost:9000/retail-lake/silver
+0       0       hdfs://localhost:9000/retail-lake/tp3
+
+$ hdfs dfs -getfacl /retail-lake/gold
+# file: hdfs://localhost:9000/retail-lake/gold
+# owner: noah
+# group: supergroup
+user::rwx
+group::r-x
+other::r-x
+
+$ ls -ld ~/retail-intelligence/tp3 ~/retail-intelligence/tp4
+drwxr-xr-x 7 noah noah 4096 Nov 18 16:14 /home/noah/retail-intelligence/tp3
+drwxr-xr-x 3 noah noah 4096 Nov 19 14:30 /home/noah/retail-intelligence/tp4
+
+$ grep -rIl -i "password\|secret" ~/retail-intelligence/tp3/scripts ~/retail-intelligence/tp4/analytics/notebooks
+aucun fichier          -> aucun mot de passe ni secret écrit dans le code
