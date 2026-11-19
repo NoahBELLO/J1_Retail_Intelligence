@@ -1,0 +1,25 @@
+Notebook écrit : TP4_Retail_Intelligence.ipynb (37 cellules)
+Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/11/19 14:19:03 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[NbConvertApp] Writing 188748 bytes to TP4_Retail_Intelligence.ipynb
+
+real	1m8.809s
+user	0m8.522s
+sys	0m1.244s
+/home/noah/retail-intelligence/tp4/analytics/outputs:
+total 24
+drwxr-xr-x 2 noah noah 4096 Nov 19 14:14 .
+drwxr-xr-x 5 noah noah 4096 Nov 19 14:11 ..
+-rw-r--r-- 1 noah noah  629 Nov 19 14:19 ca_par_categorie.csv
+-rw-r--r-- 1 noah noah  635 Nov 19 14:19 kpi.csv
+-rw-r--r-- 1 noah noah  660 Nov 19 14:19 kpi_par_magasin.csv
+-rw-r--r-- 1 noah noah  473 Nov 19 14:19 statistiques.csv
+
+/home/noah/retail-intelligence/tp4/analytics/visualizations:
+total 160
+drwxr-xr-x 2 noah noah  4096 Nov 19 14:14 .
+drwxr-xr-x 5 noah noah  4096 Nov 19 14:11 ..
+-rw-r--r-- 1 noah noah 85509 Nov 19 14:19 ca_par_categorie.png
+-rw-r--r-- 1 noah noah 69310 Nov 19 14:19 ca_par_magasin.png
