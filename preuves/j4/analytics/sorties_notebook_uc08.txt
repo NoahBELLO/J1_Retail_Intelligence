@@ -1,0 +1,294 @@
+Sorties du notebook analytics/notebooks/TP4_Retail_Intelligence.ipynb
+Exécution complète : jupyter nbconvert --to notebook --execute --inplace (noyau retail-tp4)
+
+
+================================================================================
+# TP4 – UC-08 : Analyse des données et visualisation
+================================================================================
+
+================================================================================
+## 1. Import des bibliothèques
+================================================================================
+
+--- Cellule de code 1
+>>> import sys ...
+Python     : 3.12.3
+PySpark    : 4.3.0
+Pandas     : 3.1.1
+Matplotlib : 3.11.2
+
+--- Cellule de code 2
+>>> HDFS = "hdfs://localhost:9000" ...
+
+================================================================================
+## 2. Création de la session Spark
+================================================================================
+
+--- Cellule de code 3
+>>> spark = ( ...
+/home/noah/retail-intelligence/tp3/.venv/lib/python3.12/site-packages/pyspark/testing/utils.py:127: FutureWarning: PySpark does not yet fully support pandas >= 3.0.0. Some features may not work correctly. It is recommended to use pandas < 3.0.0 for now.
+  require_minimum_pandas_version()
+Version Spark : 4.3.0
+Mode          : local[*]
+
+================================================================================
+## 3. Chargement des jeux de données
+================================================================================
+
+--- Cellule de code 4
+>>> ventes = spark.read.parquet(SILVER_VENTES) ...
+silver/store_sales          667579 lignes   27 colonnes
+silver/item                  17820 lignes   24 colonnes
+gold/ca_par_categorie            9 lignes    8 colonnes
+
+================================================================================
+## 4. Vérification des schémas, des volumes et de la granularité
+================================================================================
+
+--- Cellule de code 5
+>>> ventes.printSchema()
+root
+ |-- ss_sold_date_sk: integer (nullable = true)
+ |-- ss_sold_time_sk: integer (nullable = true)
+ |-- ss_item_sk: integer (nullable = true)
+ |-- ss_customer_sk: integer (nullable = true)
+ |-- ss_cdemo_sk: integer (nullable = true)
+ |-- ss_hdemo_sk: integer (nullable = true)
+ |-- ss_addr_sk: integer (nullable = true)
+ |-- ss_store_sk: integer (nullable = true)
+ |-- ss_promo_sk: integer (nullable = true)
+ |-- ss_ticket_number: integer (nullable = true)
+ |-- ss_quantity: integer (nullable = true)
+ |-- ss_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_list_price: decimal(7,2) (nullable = true)
+ |-- ss_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_discount_amt: decimal(7,2) (nullable = true)
+ |-- ss_ext_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_ext_list_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_tax: decimal(7,2) (nullable = true)
+ |-- ss_coupon_amt: decimal(7,2) (nullable = true)
+ |-- ss_net_paid: decimal(7,2) (nullable = true)
+ |-- ss_net_paid_inc_tax: decimal(7,2) (nullable = true)
+ |-- ss_net_profit: decimal(7,2) (nullable = true)
+ |-- prix_zero: boolean (nullable = true)
+ |-- source_fichier: string (nullable = true)
+ |-- source_lot: string (nullable = true)
+ |-- date_traitement: timestamp (nullable = true)
+
+--- Cellule de code 6
+>>> produits.select("i_item_sk", "i_item_id", "i_category", "i_class", "i_current_price").printSchema() ...
+root
+ |-- i_item_sk: integer (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- i_current_price: decimal(7,2) (nullable = true)
+
+root
+ |-- categorie: string (nullable = true)
+ |-- chiffre_affaires: decimal(17,2) (nullable = true)
+ |-- quantite_vendue: long (nullable = true)
+ |-- nombre_lignes_vente: long (nullable = true)
+ |-- nombre_produits_vendus: long (nullable = true)
+ |-- part_ca_pct: decimal(5,2) (nullable = true)
+ |-- source: string (nullable = true)
+ |-- date_traitement: timestamp (nullable = true)
+
+--- Cellule de code 7
+>>> ventes.select("ss_ticket_number", "ss_store_sk", "ss_item_sk", "ss_quantity", ...
++----------------+-----------+----------+-----------+--------------+-----------------+-------------------+-----------+
+|ss_ticket_number|ss_store_sk|ss_item_sk|ss_quantity|ss_sales_price|ss_ext_list_price|ss_ext_discount_amt|ss_net_paid|
++----------------+-----------+----------+-----------+--------------+-----------------+-------------------+-----------+
+|              20|          7|      7073|         41|          4.64|           703.97|             513.73|     190.24|
+|              36|          1|     10003|         29|         37.63|          1704.91|             613.64|    1091.27|
+|              36|          1|     13725|         60|         17.82|          1876.20|             807.00|     748.44|
+|              12|          2|      6655|         20|         32.77|          1170.40|             515.00|     655.40|
+|              12|          2|      6719|         27|         43.60|          2942.73|            1765.53|     800.50|
++----------------+-----------+----------+-----------+--------------+-----------------+-------------------+-----------+
+only showing top 5 rows
+
+--- Cellule de code 8
+>>> nb_lignes = ventes.count() ...
+Lignes de vente                       : 667579
+Tickets différents                    : 89100
+Lignes par ticket en moyenne          : 7.49
+Couples (ticket, magasin) différents  : 89100
+  -> un ticket = un seul magasin      : True
+Couples (ticket, produit) différents  : 663443
+i_item_sk unique dans item            : True (17820 pour 17820)
+Ventes dont le produit est inconnu    : 0
+Magasins différents (ss_store_sk)     : 12
+Catégories dans le Gold               : 9
+
+================================================================================
+## 5. Calcul des KPI
+================================================================================
+
+--- Cellule de code 9
+>>> kpi = ventes.agg( ...
+Pour comparer : nombre de lignes de vente = 667579 (ce n'est PAS le nombre de transactions)
+     code                     kpi         valeur             unite  \
+0  KPI-01      Chiffre d'affaires  1150529586.37   euros (supposé)   
+1  KPI-02  Nombre de transactions          89100           tickets   
+2  KPI-03            Panier moyen       12912.79  euros par ticket   
+3  KPI-04       Quantités vendues       33755474          articles   
+4  KPI-05          Taux de remise          49.99                 %   
+
+                                           perimetre              source  
+0  ventes en magasin, toute la période, fichier c...  silver/store_sales  
+1  ventes en magasin, toute la période, fichier c...  silver/store_sales  
+2  ventes en magasin, toute la période, fichier c...  silver/store_sales  
+3  ventes en magasin, toute la période, fichier c...  silver/store_sales  
+4  ventes en magasin, toute la période, fichier c...  silver/store_sales
+
+--- Cellule de code 10
+>>> ca_gold = float(gold_categorie.agg(F.sum("chiffre_affaires")).first()[0]) ...
+CA Silver : 1150529586.37 | CA Gold : 1150529586.37 | écart : 0.0
+
+================================================================================
+## 6. Statistiques descriptives
+================================================================================
+
+--- Cellule de code 11
+>>> def statistiques(df, colonne, libelle, niveau): ...
+                                    mesure           niveau     nombre  \
+0         Quantité par ligne (ss_quantity)  ligne de ticket 667,579.00   
+1  Prix de vente unitaire (ss_sales_price)  ligne de ticket 667,579.00   
+2     Montant payé par ligne (ss_net_paid)  ligne de ticket 667,579.00   
+3                       Montant par ticket           ticket  89,100.00   
+4                        Lignes par ticket           ticket  89,100.00   
+
+   minimum   maximum   moyenne   mediane            somme  
+0     1.00    100.00     50.56     51.00    33,755,474.00  
+1     0.00    199.30     37.86     27.69              NaN  
+2     0.00 18,745.00  1,723.44    878.54 1,150,529,586.37  
+3     0.00 64,785.95 12,912.79 11,645.15 1,150,529,586.37  
+4     1.00     14.00      7.49      7.00              NaN
+
+--- Cellule de code 12
+>>> ventes.groupBy("ss_store_sk").agg( ...
++-----------+------+-------+
+|ss_store_sk|lignes|tickets|
++-----------+------+-------+
+|          0| 56018|   7456|
+|          1| 55676|   7422|
+|          2| 54633|   7359|
+|          3| 55397|   7396|
+|          4| 56211|   7462|
+|          5| 55122|   7369|
+|          6| 54574|   7284|
+|          7| 57589|   7645|
+|          8| 55737|   7414|
+|          9| 56040|   7435|
+|         10| 55109|   7409|
+|         11| 55473|   7449|
++-----------+------+-------+
++---------------+---------------+----------------+
+|premier_jour_sk|dernier_jour_sk|jours_differents|
++---------------+---------------+----------------+
+|          36890|          38697|            1808|
++---------------+---------------+----------------+
+
+================================================================================
+## 7. Première analyse métier : quelles catégories génèrent le plus de chiffre d'affaires ?
+================================================================================
+
+--- Cellule de code 13
+>>> produits_par_categorie = ( ...
+/home/noah/retail-intelligence/tp3/.venv/lib/python3.12/site-packages/pyspark/sql/pandas/conversion.py:324: FutureWarning: PySpark does not yet fully support pandas >= 3.0.0. Some features may not work correctly. It is recommended to use pandas < 3.0.0 for now.
+  require_minimum_pandas_version()
+                  categorie  chiffre_affaires  part_ca_pct  quantite_vendue  \
+0                     Music    519,666,693.84        45.17         15238374   
+1                     Books    307,151,503.25        26.70          9007511   
+2               Movies & TV     74,735,891.89         6.50          2189279   
+3    Clothing & Accessories     56,754,855.82         4.93          1640550   
+4               Electronics     55,715,087.49         4.84          1632098   
+5            Home & Kitchen     41,260,511.11         3.59          1226839   
+6         Sports & Outdoors     40,926,938.33         3.56          1209305   
+7              Toys & Games     27,437,825.33         2.38           809999   
+8  Tools & Home Improvement     26,880,279.31         2.34           801519   
+
+   produits_catalogue  part_produits_pct ca_par_produit  
+0                8143              45.70       63817.60  
+1                5335              29.94       57572.92  
+2                1286               7.22       58115.00  
+3                 610               3.42       93040.75  
+4                 692               3.88       80513.13  
+5                 476               2.67       86681.75  
+6                 465               2.61       88014.92  
+7                 405               2.27       67747.72  
+8                 408               2.29       65883.04
+
+================================================================================
+### Première visualisation : chiffre d'affaires par catégorie
+================================================================================
+
+--- Cellule de code 14
+>>> pdf_graph = pdf_categories.sort_values("chiffre_affaires")  # barres horizontales : la plus grande en haut ...
+[graphique affiché]
+
+================================================================================
+## 8. Deuxième analyse métier : quelles différences observe-t-on entre les magasins ?
+================================================================================
+
+--- Cellule de code 15
+>>> kpi_par_magasin = ( ...
+/home/noah/retail-intelligence/tp3/.venv/lib/python3.12/site-packages/pyspark/sql/pandas/conversion.py:324: FutureWarning: PySpark does not yet fully support pandas >= 3.0.0. Some features may not work correctly. It is recommended to use pandas < 3.0.0 for now.
+  require_minimum_pandas_version()
+Contrôle : somme du CA des magasins = 1150529586.37 | CA total = 1150529586.37
+Contrôle : somme des tickets des magasins = 89100 | tickets = 89100
+Écart max / min du CA : 1.052
+    magasin  chiffre_affaires  transactions  quantites_vendues  panier_moyen  \
+0         7     98,950,137.76          7645            2915053     12,943.12   
+1         4     96,770,105.59          7462            2832572     12,968.39   
+2         9     96,748,356.68          7435            2830684     13,012.56   
+3         0     96,727,851.94          7456            2830581     12,973.16   
+4         8     96,578,622.89          7414            2821869     13,026.52   
+5         3     96,063,990.59          7396            2800824     12,988.64   
+6         1     95,929,844.66          7422            2817524     12,925.07   
+7        11     95,607,843.48          7449            2790631     12,834.99   
+8         6     94,751,173.08          7284            2780253     13,008.12   
+9        10     94,263,977.55          7409            2785773     12,722.90   
+10        5     94,097,279.37          7369            2789703     12,769.34   
+11        2     94,040,402.78          7359            2760007     12,778.96   
+
+    taux_remise_pct  part_ca_pct  
+0             50.13         8.60  
+1             50.00         8.41  
+2             49.87         8.41  
+3             49.91         8.41  
+4             49.76         8.39  
+5             49.94         8.35  
+6             50.08         8.34  
+7             49.97         8.31  
+8             49.87         8.24  
+9             50.35         8.19  
+10            50.18         8.18  
+11            49.82         8.17
+
+================================================================================
+### Deuxième visualisation : chiffre d'affaires par magasin
+================================================================================
+
+--- Cellule de code 16
+>>> pdf_graph = pdf_magasins.sort_values("chiffre_affaires", ascending=False) ...
+[graphique affiché]
+
+================================================================================
+## 9. Interprétation et limites
+================================================================================
+
+================================================================================
+## 10. Conclusion et recommandations
+================================================================================
+
+--- Cellule de code 17
+>>> print("Fichiers produits :") ...
+Fichiers produits :
+   ../outputs/ca_par_categorie.csv (629 octets)
+   ../outputs/kpi.csv (635 octets)
+   ../outputs/kpi_par_magasin.csv (660 octets)
+   ../outputs/statistiques.csv (473 octets)
+   ../visualizations/ca_par_categorie.png (85509 octets)
+   ../visualizations/ca_par_magasin.png (69310 octets)

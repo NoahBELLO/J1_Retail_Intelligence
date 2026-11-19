@@ -1,0 +1,97 @@
+TP4 - Section 1 : installation et vérification des outils (Noah, WSL Ubuntu 24.04)
+Environnement réutilisé : ~/retail-intelligence/tp3/.venv (créé au TP3)
+
+==================================================================
+1.2 Vérifier l'environnement existant du TP3 (avant installation)
+==================================================================
+$ cd ~/retail-intelligence/tp3 && source .venv/bin/activate
+$ python --version
+Python 3.12.3
+$ java -version
+openjdk version "21.0.13.0.3" 2026-10-24
+$ python -c "import pyspark; print(pyspark.__version__)"
+4.3.0
+$ jupyter --version
+IPython          : 9.18.1
+ipykernel        : 7.4.0
+jupyter_client   : 8.10.0
+jupyter_core     : 5.9.1
+jupyter_server   : 2.21.1
+jupyterlab       : 4.6.6
+nbclient         : 0.11.0
+nbconvert        : 7.17.2
+nbformat         : 5.11.1
+$ python -c "import matplotlib; print(matplotlib.__version__)"
+ModuleNotFoundError: No module named 'matplotlib'
+$ python -c "import pandas; print(pandas.__version__)"
+ModuleNotFoundError: No module named 'pandas'
+$ jupyter kernelspec list
+Available kernels:
+  python3    /home/noah/retail-intelligence/tp3/.venv/share/jupyter/kernels/python3
+$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:           7.8Gi       1.2Gi       5.7Gi       3.5Mi       1.1Gi       6.5Gi
+Swap:          2.0Gi          0B       2.0Gi
+$ nproc
+4
+$ jps
+2581 Jps                      -> HDFS arrêté
+
+==================================================================
+1.3.2 Installer les bibliothèques
+==================================================================
+$ python -m pip install --upgrade pip
+Requirement already satisfied: pip in ./.venv/lib/python3.12/site-packages (26.3)
+$ python -m pip install matplotlib pandas jupyterlab ipykernel
+Successfully installed contourpy-1.4.0 cycler-0.12.1 fonttools-4.68.0 kiwisolver-1.5.1 matplotlib-3.11.2 numpy-2.5.5 pandas-3.1.1 pillow-13.0.0 pyparsing-3.3.3
+
+==================================================================
+1.3.3 Vérifier les installations
+==================================================================
+matplotlib 3.11.2
+pandas 3.1.1
+pyspark 4.3.0
+jupyterlab 4.6.6
+
+==================================================================
+1.3.4 Enregistrer l'environnement dans Jupyter
+==================================================================
+$ python -m ipykernel install --user --name retail-tp4 --display-name "Python - Retail TP4"
+Installed kernelspec retail-tp4 in /home/noah/.local/share/jupyter/kernels/retail-tp4
+$ jupyter kernelspec list
+Available kernels:
+  python3       /home/noah/retail-intelligence/tp3/.venv/share/jupyter/kernels/python3
+  retail-tp4    /home/noah/.local/share/jupyter/kernels/retail-tp4
+
+==================================================================
+Démarrage de HDFS et vérification des données Silver / Gold du TP3
+==================================================================
+$ start-dfs.sh
+Starting namenodes on [localhost]
+Starting datanodes
+Starting secondary namenodes [DESKTOP-DCTNJ6T]
+$ hdfs dfsadmin -safemode wait
+Safe mode is OFF
+$ jps
+3058 NameNode
+3175 DataNode
+3354 SecondaryNameNode
+3934 Jps
+$ hdfs dfs -ls hdfs://localhost:9000/retail-lake/silver hdfs://localhost:9000/retail-lake/gold
+Found 2 items
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver/item
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:48 hdfs://localhost:9000/retail-lake/silver/store_sales
+Found 1 items
+drwxr-xr-x   - noah supergroup          0 2026-11-19 09:49 hdfs://localhost:9000/retail-lake/gold/ca_par_categorie
+$ hdfs dfs -du -s -h .../silver/store_sales .../silver/item .../gold/ca_par_categorie
+38.7 M  38.7 M  hdfs://localhost:9000/retail-lake/silver/store_sales
+3.5 M   3.5 M   hdfs://localhost:9000/retail-lake/silver/item
+3.0 K   3.0 K   hdfs://localhost:9000/retail-lake/gold/ca_par_categorie
+
+==================================================================
+Problème rencontré pendant l'exécution du notebook
+==================================================================
+1re exécution : java.net.ConnectException: Call From DESKTOP-DCTNJ6T/127.0.1.1 to localhost:9000 failed on connection exception: Connection refused
+$ uptime
+ 14:12:12 up 1 min        -> WSL s'était arrêté (aucune fenêtre ouverte), HDFS avec lui
+Correction : relancer start-dfs.sh (et attendre "Safe mode is OFF") juste avant d'exécuter le notebook.

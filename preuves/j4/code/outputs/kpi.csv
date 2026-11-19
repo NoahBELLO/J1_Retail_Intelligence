@@ -1,0 +1,6 @@
+code,kpi,valeur,unite,perimetre,source
+KPI-01,Chiffre d'affaires,1150529586.37,euros (supposé),"ventes en magasin, toute la période, fichier complet",silver/store_sales
+KPI-02,Nombre de transactions,89100,tickets,"ventes en magasin, toute la période, fichier complet",silver/store_sales
+KPI-03,Panier moyen,12912.79,euros par ticket,"ventes en magasin, toute la période, fichier complet",silver/store_sales
+KPI-04,Quantités vendues,33755474,articles,"ventes en magasin, toute la période, fichier complet",silver/store_sales
+KPI-05,Taux de remise,49.99,%,"ventes en magasin, toute la période, fichier complet",silver/store_sales

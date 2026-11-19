@@ -1,0 +1,6 @@
+mesure,niveau,nombre,minimum,maximum,moyenne,mediane,somme
+Quantité par ligne (ss_quantity),ligne de ticket,667579.0,1.0,100.0,50.56,51.0,33755474.0
+Prix de vente unitaire (ss_sales_price),ligne de ticket,667579.0,0.0,199.3,37.86,27.69,
+Montant payé par ligne (ss_net_paid),ligne de ticket,667579.0,0.0,18745.0,1723.44,878.54,1150529586.37
+Montant par ticket,ticket,89100.0,0.0,64785.95,12912.79,11645.15,1150529586.37
+Lignes par ticket,ticket,89100.0,1.0,14.0,7.49,7.0,
