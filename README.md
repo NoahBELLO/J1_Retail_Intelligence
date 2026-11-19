@@ -5,6 +5,7 @@ Retail Intelligence Platform (IPSSI).
 - Jour 1 : UC-01 et UC-02 (besoin, exploration, architecture).
 - Jour 2 : UC-03 et UC-04 (Data Lake HDFS, ingestion NiFi). Organisation des fichiers du Jour 2 selon le §17 du TP.
 - Jour 3 : UC-06 (transformation, qualité, Silver / Gold, Parquet). Organisation des fichiers du Jour 3 selon le §10.1 du TP.
+- Jour 4 : UC-08 et UC-07 (analyse et visualisation, architecture Azure en parcours B local / open source). Organisation des fichiers du Jour 4 selon le §13.2 du TP.
 
 ## Contenu – Jour 1
 
@@ -110,10 +111,62 @@ preuves/j3/             preuves de Noah (sorties des étapes 1 à 10, copie de s
 
 Les dossiers `docs/lakehouse/` et `docs/nosql/` du §10.1 correspondent aux parties facultatives (partie avancée et UC-05), qui n'ont pas été réalisées.
 
+## Contenu – Jour 4 (UC-08 et UC-07)
+
+Comme au Jour 3, deux notebooks font la même analyse UC-08 :
+
+- **Notebook principal** (Lorenzo) : `analytics/notebooks/TP4_Retail_Intelligence.ipynb`. Il lit `data/silver/` et `data/gold/` du pipeline des notebooks, sur un échantillon de 10 % des tickets, avec les dates, les produits et les magasins. 3 analyses, 4 graphiques. C'est la chaîne principale.
+- **Notebook HDFS** (Noah) : `analytics/notebooks/TP4_HDFS_fichier_complet.ipynb`. Il lit les Silver et Gold des scripts HDFS, sur le **fichier complet**, sans les dates. Il confirme les résultats de l'échantillon (mêmes taux et moyennes à moins de 1 % près), et montre que le classement des magasins n'est pas fiable sur l'échantillon.
+
+UC-07 est fait en **parcours B (local / open source)** : la partie Azure est étudiée et simulée, **aucune ressource Azure n'a été créée**.
+
+### Livrables obligatoires (§13.1)
+
+| Code | Livrable | Fichiers |
+|---|---|---|
+| J4-01 | Inventaire analytique | `docs/analytics/inventaire-jeux.md`, `analytics/outputs/inventaire_jeux.csv` |
+| J4-02 | Dictionnaire des KPI | `docs/analytics/kpi-dictionary.md`, `analytics/outputs/kpi_dictionnaire.csv`, `analytics/outputs/kpi.csv`, `analytics/outputs/hdfs/kpi.csv` |
+| J4-03 | Analyses statistiques | `docs/analytics/business-analysis.md` (partie 1), `analytics/outputs/statistiques.csv`, `analytics/outputs/hdfs/statistiques.csv` |
+| J4-04 | Analyses métier | `docs/analytics/business-analysis.md` (partie 2), `analytics/outputs/analyse_*.csv`, `ventes_par_magasin.csv`, `hdfs/ca_par_categorie.csv`, `hdfs/kpi_par_magasin.csv` |
+| J4-05 | Visualisations | `analytics/visualizations/` (4 PNG) et `analytics/visualizations/hdfs/` (2 PNG), décrites dans `business-analysis.md` (partie 3) |
+| J4-06 | Synthèse décisionnelle | `docs/analytics/interpretation.md` |
+| J4-07 | Architecture Azure | `docs/cloud/azure-architecture.md` (composants, schéma, ADF / Synapse, architecture locale, correspondance, coûts) |
+| J4-08 | Organisation ADLS Gen2 | `docs/cloud/adls-organization.md` (zones, chemins, nommage, HNS) |
+| J4-09 | Sécurité | `docs/cloud/security-matrix.md` |
+| J4-10 | Preuves Azure | `azure/simulation/simulation-adls-gen2.md` (simulation documentée) ; preuve du stockage local : `preuves/j4/architecture/sorties_commandes.txt` |
+| J4-11 | README J4 | ce fichier : cette partie et « Reproduire les analyses du Jour 4 » |
+| – | Tests (§12) | `tests/analytics/tests-uc08.md`, `tests/cloud/tests-uc07.md`, `analytics/outputs/tests_uc08.csv` |
+| – | Questions de recul (§15) | `docs/questions-recul-j4.md` |
+
+### Arborescence du Jour 4
+
+```
+analytics/
+  notebooks/            TP4_Retail_Intelligence.ipynb (principal), TP4_HDFS_fichier_complet.ipynb
+  outputs/              tableaux CSV du notebook principal
+    hdfs/               tableaux CSV du notebook HDFS
+  visualizations/       graphiques PNG du notebook principal
+    hdfs/               graphiques PNG du notebook HDFS
+docs/
+  analytics/            J4-01 à J4-06 : inventaire, KPI, analyses, synthèse
+  cloud/                J4-07 à J4-09 : architecture, organisation ADLS Gen2, sécurité
+  questions-recul-j4.md
+azure/
+  simulation/           J4-10 : simulation de la mise en œuvre ADLS Gen2
+config/parametres_tp4.json   paramètres du notebook principal (chemins, Spark, graphiques)
+tests/
+  analytics/            tests UC-08 (§12.1)
+  cloud/                tests UC-07 (§12.2)
+preuves/j4/             preuves de Noah (installation, sorties du notebook, relevé HDFS, copie de son espace de travail)
+```
+
+Les dossiers `azure/architecture/`, `azure/configuration/` et `azure/evidence/` du §13.2 n'ont pas été créés : rien n'a été déployé sur Azure, il n'y a donc ni configuration ni capture. Le dossier `analytics/scripts/` n'a pas été créé non plus : toute l'analyse est dans les notebooks. Les parties complémentaires et avancées (CO-01 à CO-05, AV-01 à AV-04) n'ont pas été réalisées.
+
 ## Contributions individuelles (05_contribution_individuelle)
 - `contribution_Noah.md`, `contribution_Lorenzo.md` : Jour 1
 - `contribution_Noah_J2.md` : Jour 2
 - `contribution_Noah_J3.md` : Jour 3
+- `contribution_Noah_J4.md` : Jour 4
 
 ## Relancer les scripts d'exploration
 
@@ -279,3 +332,61 @@ Ordre : `silver/01_silver.py` (Raw → Silver + rejets), `gold/02_gold.py` (Silv
 - **Parquet n'est pas ACID** : un `overwrite` interrompu peut laisser un dossier partiel, sans historique. Il faut relancer le traitement concerné, puis les contrôles.
 - **Exécution locale** : une seule machine, un traitement à la fois, pas de planification.
 - **Chemin de la source** : `chemins.source_tpcxbb` désigne un dossier de la machine de Lorenzo. Il faut l'adapter ailleurs.
+
+## Reproduire les analyses du Jour 4
+
+### Prérequis
+- Les traitements du Jour 3 ont été lancés (voir la partie précédente) :
+  - `./run_pipeline.sh` pour le notebook principal (il crée `data/silver/`, `data/gold/` et `outputs/rapport_qualite.json`) ;
+  - HDFS démarré et `transformations/lancer_tout.sh` pour le notebook HDFS.
+- Environnement Python du Jour 3, avec en plus Matplotlib, Pandas et un noyau Jupyter `retail-tp4` :
+  ```bash
+  python -m pip install matplotlib "pandas<3" ipykernel
+  python -m ipykernel install --user --name retail-tp4 --display-name "Python - Retail TP4"
+  ```
+  PySpark 4.3 affiche un avertissement avec Pandas 3 : Lorenzo a installé `pandas<3`. Chez Noah, Pandas 3.1.1 marche, et les contrôles (sommes = total) sont bons.
+- **Mémoire** : une seule session Spark à la fois (fermer les autres notebooks).
+
+### Versions observées
+
+| Élément | Lorenzo | Noah |
+|---|---|---|
+| Système | Ubuntu 26.04.1 LTS | Ubuntu 24.04.5 (WSL) |
+| Python | 3.14.4 | 3.12.3 |
+| PySpark / Spark | 4.3.0, `local[2]`, 768 Mo | 4.3.0, `local[*]`, 2 Go |
+| Java (Spark) | OpenJDK 21.0.13 | OpenJDK 21.0.13 |
+| Pandas | 2.3.3 | 3.1.1 |
+| Matplotlib | 3.11.2 | 3.11.2 |
+| JupyterLab | 4.6.6 | 4.6.6 |
+
+### Paramètres
+- Notebook principal : `config/parametres_tp4.json` (chemins vers `data/silver/`, `data/gold/` et `outputs/`, ressources Spark, mois incomplet `2005-12`, réglages des graphiques). Le notebook trouve ce fichier en remontant les dossiers : il faut le lancer depuis le dépôt.
+- Notebook HDFS : les chemins sont dans sa 2e cellule de code (`hdfs://localhost:9000/retail-lake/...`).
+
+### Lancement
+Depuis `analytics/notebooks/`, environ 1 minute par notebook :
+```bash
+cd analytics/notebooks
+jupyter nbconvert --to notebook --execute --inplace TP4_Retail_Intelligence.ipynb
+
+start-dfs.sh && hdfs dfsadmin -safemode wait
+jupyter nbconvert --to notebook --execute --inplace \
+    --ExecutePreprocessor.kernel_name=retail-tp4 TP4_HDFS_fichier_complet.ipynb
+```
+On peut aussi ouvrir les notebooks dans JupyterLab, choisir le noyau « Python - Retail TP4 » et lancer *Run > Run All Cells*.
+
+### Sorties produites
+- Notebook principal : 10 CSV dans `analytics/outputs/` (inventaire, KPI, statistiques, analyses A1 à A3, tests) et 4 PNG dans `analytics/visualizations/`.
+- Notebook HDFS : 4 CSV dans `analytics/outputs/hdfs/` (KPI, statistiques, catégories, magasins) et 2 PNG dans `analytics/visualizations/hdfs/`.
+
+### Contrôles disponibles
+- Notebook principal : il s'arrête (`assert`) si une clé n'est pas unique, si les KPI Silver diffèrent du Gold `ca_annuel` ou si un test UC-08 échoue. Résultat : `analytics/outputs/tests_uc08.csv`, 7 tests à `True`.
+- Notebook HDFS : CA Silver = CA Gold `ca_par_categorie` (écart 0,00), somme par magasin = total (CA et tickets), un ticket = un seul magasin.
+
+### Limites connues
+- **Magasins seulement** : pas de `web_sales` ni de `store_returns`.
+- **Échantillon** de 10 % dans le notebook principal : les montants valent environ un dixième du réel, et le classement des magasins n'est pas fiable.
+- **Pas de dates ni de noms de magasins** dans le notebook HDFS.
+- **Données synthétiques** : marge non utilisée, remise d'environ 50 %, paniers irréalistes, devise supposée en euros.
+- **Azure** : rien n'est déployé, la partie Azure est une simulation documentée.
+- **Sorties enregistrées du notebook principal** : il a été exécuté par Lorenzo avant la mise en commun, quand le projet était encore dans `tp4_lolo/`. Les chemins affichés dans ses sorties sont donc les anciens. Seuls les chemins de `config/parametres_tp4.json` et du notebook ont été changés, pas les calculs.
