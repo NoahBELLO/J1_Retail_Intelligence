@@ -226,6 +226,312 @@ Ce que je retiens : un graphique ne prouve pas une explication. Le magasin 7 ven
 
 À noter aussi : PySpark 4.3.0 affiche un avertissement avec Pandas 3 (« pas encore complètement supporté »). Ce n'est pas une erreur, et mes contrôles (sommes = total) montrent que les résultats sont bons. Si un problème apparaît, il faudra installer `pandas<3`.
 
+## UC7
+
+> Commandes et résultats : `preuves/j4/architecture/sorties_commandes.txt` (relevé du stockage local, en lecture seule).
+
+### Choix du parcours
+
+J'ai choisi le **parcours B – local / open source**. Je n'ai pas d'abonnement Azure, et le TP dit que ce parcours est « une véritable modalité de réalisation » (§4.1).
+
+Ce que ça veut dire pour UC-07 :
+
+- **Ce qui est exécuté** : uniquement en local. HDFS joue le rôle du stockage, Spark celui des traitements (Jours 2, 3 et 4).
+- **Ce qui est seulement proposé** : toute la partie Azure. Je n'ai créé **aucune ressource Azure**, et les opérations Azure de l'étape 4 sont seulement décrites.
+
+### Étape 1 – Identifier les composants Azure
+
+#### 1. Les composants et leur rôle dans le projet
+
+- **Abonnement Azure** : le « contrat » et la facture. Toutes les ressources du projet y sont rattachées, et c'est lui qui paie. Ce n'est pas un serveur.
+- **Groupe de ressources** : un dossier qui regroupe toutes les ressources du projet (par exemple `rg-retail-intelligence`). On peut suivre leur coût ensemble, et tout supprimer d'un coup à la fin.
+- **Compte de stockage** : la ressource qui stocke les fichiers du Data Lake (`stretailintelligence`). Il a un nom unique dans tout Azure.
+- **Conteneur** : un grand dossier dans le compte de stockage. Je prévois un conteneur par zone (`raw`, `silver`, `gold`…).
+- **Azure Data Lake Storage Gen2 (ADLS Gen2)** : ce n'est pas une ressource à part. C'est un compte de stockage normal dans lequel on a activé le HNS, pour qu'il soit adapté à l'analyse de gros volumes.
+- **Hierarchical Namespace (HNS)** : l'option qui crée de vrais dossiers (voir l'étape 3).
+- **Microsoft Entra ID** : l'annuaire d'Azure. Il vérifie **qui** se connecte : une personne, un groupe ou une application (par exemple Data Factory).
+- **Azure RBAC** : les droits donnés à une identité sur **une ressource entière** (le compte de stockage ou un conteneur).
+- **ACL** : les droits **plus fins**, sur un dossier ou un fichier précis du Data Lake.
+
+#### 2. Les relations entre ces composants
+
+```
+Abonnement (paie)
+└── Groupe de ressources rg-retail-intelligence
+    └── Compte de stockage stretailintelligence  ← HNS activé = ADLS Gen2
+        └── Conteneurs raw, bronze, silver, gold, quality, logs
+            └── Dossiers et fichiers (store_sales/, item/, ...)
+
+Entra ID  → dit QUI se connecte (personnes, groupes, applications)
+RBAC      → donne des droits sur le compte ou un conteneur
+ACL       → donne des droits sur un dossier ou un fichier
+```
+
+Pour lire un fichier, il faut donc 3 choses : une identité reconnue par Entra ID, puis un droit RBAC **ou** un droit ACL sur le chemin.
+
+### Étape 2 – Concevoir l'organisation ADLS Gen2
+
+#### 1. L'organisation proposée
+
+Je reprends **exactement** les zones et les chemins de mon HDFS (relevé de cette étape), avec un conteneur par zone, comme prévu au Jour 1 (`UC02_local_vers_azure.md`). Comme ça, le passage vers Azure ne change que le début du chemin.
+
+```
+Compte de stockage stretailintelligence (HNS activé)
+├── raw/                      (conteneur)  fichiers reçus, jamais modifiés
+│   ├── tpcxbb/initial/store_sales/store_sales.dat
+│   ├── tpcxbb/initial/item/item.dat
+│   ├── tpcxbb/refresh/        lot de mise à jour
+│   └── nifi/store.dat         dépôt par le flux d'ingestion
+├── bronze/                   (conteneur)  tpcxbb/ : prévu, vide pour l'instant
+├── silver/                   (conteneur)  store_sales/, item/ (Parquet)
+├── gold/                     (conteneur)  ca_par_categorie/ (Parquet)
+├── quality/                  (conteneur)  rejets/store_sales/, rejets/item/, rapport_qualite/
+└── logs/                     (conteneur)  journaux des traitements
+```
+
+En local, le chemin commence par `hdfs://localhost:9000/retail-lake/`. Sur Azure, il commencerait par l'adresse du compte de stockage. La suite du chemin (`silver/store_sales/`) reste la même.
+
+Je n'ai pas mis de zone `documentation/` comme dans l'exemple du TP : notre documentation est dans Git, pas dans le Data Lake. Je n'ai pas repris non plus le dossier `tp3/` de HDFS, qui ne servait qu'aux tests du TP3.
+
+#### 2. Les zones
+
+| Zone | Fonction | Données déposées | Utilisateurs ou traitements | Conservation et traçabilité |
+|---|---|---|---|---|
+| `raw` | Garder les fichiers tels qu'on les a reçus | Fichiers `.dat` TPCx-BB, par lot (`initial`, `refresh`) | Écrit par l'ingestion (NiFi, ou Data Factory sur Azure). Lu par Spark | Gardé longtemps, jamais modifié : on peut tout refaire à partir de lui. Pour chaque fichier : taille, nombre de lignes, SHA-256, date du dépôt |
+| `bronze` | Les mêmes données, rangées pour être lues | Copie de `raw` avec la date du chargement | Spark | Comme `raw` |
+| `silver` | Données nettoyées et typées | Une table par dossier, en Parquet | Écrit par `01_silver.py`. Lu par `02_gold.py` et les analystes | Remplacé à chaque traitement. Chaque ligne garde `source_fichier`, `source_lot` et `date_traitement` |
+| `gold` | Données prêtes pour le métier | Agrégats en Parquet (`ca_par_categorie`) | Écrit par `02_gold.py`. Lu par les analystes, les tableaux de bord et le notebook UC-08 | Remplacé à chaque traitement. Colonnes `source` et `date_traitement` |
+| `quality` | Lignes mises à l'écart et rapports de contrôle | `rejets/<table>/` avec `motif_rejet`, `rapport_qualite/` | Écrit par `01_silver.py` et `04_qualite.py`. Lu par l'équipe Data | Gardé pour vérifier les rejets, puis vidé après un certain temps |
+| `logs` | Journaux des traitements | Un journal par script et par exécution | Écrit par les traitements. Lu par l'équipe Data | Gardé quelques mois |
+
+#### 3. Règles de nommage
+
+- **Compte de stockage** : `stretailintelligence`, sans tiret, car Azure n'accepte que des minuscules et des chiffres.
+- **Conteneurs** : le nom de la zone, en minuscules (`raw`, `silver`…).
+- **Dossiers** : un dossier par table. En `raw` et en `silver`, on garde le nom TPCx-BB (`store_sales`), et en `raw` le lot apparaît dans le chemin (`initial`, `refresh`). En `gold`, on utilise un nom métier en français, sous la forme `<indicateur>_par_<dimension>` (`ca_par_categorie`).
+- **Fichiers** : ceux de `raw` gardent leur nom d'origine. En `silver` et en `gold`, ce sont les fichiers `part-….snappy.parquet` écrits par Spark, avec `_SUCCESS`.
+
+### Étape 3 – Expliquer le rôle du HNS
+
+**Sans HNS**, un compte de stockage Azure (Blob) est « plat » : il n'y a pas de vrais dossiers. Un fichier s'appelle simplement `silver/store_sales/part-0.parquet`, et les `/` font partie du nom. Les dossiers qu'on voit ne sont qu'un affichage.
+
+**Avec HNS**, les dossiers existent vraiment, comme sur un disque ou dans HDFS.
+
+| | Sans HNS (Blob classique) | Avec HNS (ADLS Gen2) |
+|---|---|---|
+| **Organisation** | Une longue liste de fichiers, les dossiers sont « simulés » | Une vraie arborescence de dossiers |
+| **Renommer ou supprimer un dossier** | Il faut copier puis supprimer chaque fichier un par un : c'est lent, et si ça plante au milieu, il reste un dossier à moitié déplacé | Une seule opération, instantanée, qui marche en entier ou pas du tout |
+| **Droits** | Seulement sur le compte ou le conteneur (RBAC) | En plus, des ACL sur chaque dossier et chaque fichier |
+| **Usage adapté** | Stocker des images, des sauvegardes, des fichiers de site web | Les traitements analytiques (Spark, Synapse), le Data Lake |
+
+Pourquoi c'est important pour nous :
+
+- **Spark** écrit d'abord ses fichiers dans un dossier temporaire, puis le **renomme** quand tout est fini (d'où le fichier `_SUCCESS` vu au TP3). Sans HNS, ce renommage est lent et peut laisser des fichiers à moitié écrits.
+- **Les ACL** permettent par exemple de donner à un analyste la lecture de `gold/` sans lui ouvrir `raw/`.
+
+En local, **HDFS est déjà hiérarchique** : le NameNode garde l'arbre des dossiers. Au Jour 2, j'ai déplacé `store_sales.dat` avec `hdfs dfs -mv` en une seule opération. C'est exactement ce que le HNS apporte à Azure.
+
+### Étape 4 – Documenter une mise en œuvre (simulation)
+
+Azure n'étant pas utilisé, je fais la **simulation documentaire** demandée par le TP. **Aucune des commandes Azure ci-dessous n'a été lancée.**
+
+#### 1. L'organisation cible
+
+C'est celle de l'étape 2 : un compte ADLS Gen2, 6 conteneurs, et les mêmes chemins que dans HDFS.
+
+#### 2. Les ressources Azure nécessaires
+
+- un **abonnement** (avec l'accord du formateur) ;
+- un **groupe de ressources** `rg-retail-intelligence` ;
+- un **compte de stockage** `stretailintelligence`, avec le **HNS activé** ;
+- **6 conteneurs** : `raw`, `bronze`, `silver`, `gold`, `quality`, `logs` ;
+- dans Entra ID, **des groupes** (un par profil de l'étape 5), pas des droits donnés personne par personne ;
+- un coffre à secrets (**Key Vault**), si un service a besoin d'un mot de passe ;
+- une **alerte de budget** sur le groupe de ressources.
+
+#### 3. Les opérations de création et de dépôt (non exécutées)
+
+1. Se connecter au portail Azure avec son compte.
+2. Créer le groupe de ressources `rg-retail-intelligence`.
+3. Créer le compte de stockage `stretailintelligence`, en activant l'option **espace de noms hiérarchique** (HNS) : c'est ce qui en fait un ADLS Gen2.
+4. Créer les 6 conteneurs, puis les dossiers de l'étape 2.
+5. Déposer le fichier de démonstration dans `gold/ca_par_categorie/`.
+6. Donner les droits aux groupes (étape 5).
+
+Le **fichier de démonstration** serait `ca_par_categorie.csv` (UC-08, 9 lignes, 629 octets). Il est petit, il ne contient aucune donnée personnelle, et ses données sont synthétiques.
+
+#### 4. Les contrôles qui seraient faits
+
+1. **Le HNS est bien activé** : l'option apparaît comme activée dans les propriétés du compte.
+2. **Le fichier est présent** : il apparaît dans le conteneur `gold`.
+3. **Le fichier est intact** : même taille et même empreinte SHA-256 qu'en local, comme au Jour 2.
+4. **Les droits marchent** : avec un compte du groupe « analystes », la lecture de `gold` doit marcher et l'écriture doit être refusée.
+5. **Spark lit le fichier** : en changeant seulement le début du chemin dans `config.py`.
+6. **Nettoyage** : supprimer le groupe de ressources à la fin du test, pour ne rien payer.
+
+#### 5. Ce qui est réalisé et ce qui ne l'est pas
+
+| Action | Statut |
+|---|---|
+| Zones `raw`, `bronze`, `silver`, `gold`, `quality`, `logs` dans HDFS | **Exécuté** (Jour 2, relevé aujourd'hui) |
+| Dépôt des fichiers sources dans `raw` (manuel et par NiFi) | **Exécuté** (Jour 2) |
+| Traitements Spark Raw → Silver → Gold | **Exécuté** (Jour 3) |
+| Analyse et graphiques depuis Silver et Gold | **Exécuté** (UC-08, Jour 4) |
+| Abonnement, groupe de ressources, compte ADLS Gen2, conteneurs | **Non exécuté** (simulation) |
+| Dépôt du fichier de démonstration sur Azure et contrôles | **Non exécuté** (simulation) |
+| Groupes Entra ID, rôles RBAC, ACL Azure | **Non exécuté** (proposé à l'étape 5) |
+| Data Factory, Synapse | **Étudié seulement** (étape 6) |
+
+### Étape 5 – Étudier la sécurité
+
+#### 1. Matrice des droits
+
+J'ai adapté l'exemple du TP aux profils du Jour 1 (`UC02_gouvernance.md`), en suivant le principe du **moindre privilège** : chacun a seulement ce dont il a besoin.
+
+| Profil | `raw` / `bronze` | `silver` | `gold` | `quality` / `logs` |
+|---|---|---|---|---|
+| Ingestion (compte technique NiFi ou Data Factory) | Écriture contrôlée (ajout de fichiers seulement) | Aucun accès | Aucun accès | Écriture des journaux |
+| Équipe Data Engineering (et comptes techniques Spark) | Lecture | Lecture / écriture | Écriture contrôlée (par les traitements) | Lecture / écriture |
+| Analyste | Aucun accès par défaut | Lecture | Lecture | Lecture de `quality` |
+| Profils métier (P1, P2, P4) | Aucun accès | Aucun accès | Lecture | Aucun accès |
+| Administrateur | Gestion selon habilitation | Gestion selon habilitation | Gestion selon habilitation | Gestion selon habilitation |
+
+Différences avec le Jour 1 : au Jour 1, l'équipe Data avait « lecture / écriture partout ». Ici, je suis plus strict, comme le propose le TP : personne n'écrit à la main dans `raw` (seule l'ingestion y dépose), et `gold` n'est modifié que par les traitements.
+
+Sur Azure, je donnerais les droits larges avec le RBAC (par exemple : les analystes lisent les conteneurs `silver` et `gold`), et les droits plus fins avec des ACL (par exemple : un responsable de magasin lit seulement le dossier de son magasin).
+
+#### 2. Les différences à connaître
+
+- **RBAC** : des droits **larges**, donnés à une identité sur une ressource entière (le compte ou un conteneur). Exemple : « les analystes lisent tout le conteneur `gold` ».
+- **ACL** : des droits **fins**, sur un dossier ou un fichier (lire, écrire, ouvrir), comme les droits `rwx` sous Linux. Exemple : « ce groupe lit seulement `gold/ca_par_magasin/` ».
+- **Identités et authentification** : Entra ID vérifie qui se connecte, une personne avec son compte ou un service comme Data Factory. On donne les droits à des groupes, pas personne par personne.
+- **Secrets** : les mots de passe, les clés d'accès au stockage, les jetons. Ils ne doivent **jamais** être écrits dans le code ni dans Git : on les range dans un coffre à secrets (Key Vault sur Azure).
+
+### Étape 6 – Étudier ADF et Synapse
+
+C'est seulement de l'étude : je n'ai créé ni pipeline ni Workspace.
+
+#### 1. Les services
+
+- **Azure Data Factory (ADF)** : il déplace les données et lance les traitements dans le bon ordre, à heure fixe ou quand un fichier arrive. On suit chaque exécution dans un tableau de bord. Il ne stocke pas les données et ne fait pas les gros calculs.
+- **Azure Synapse Analytics** : un espace de travail qui regroupe plusieurs outils d'analyse (Spark, SQL, pipelines) au même endroit.
+- **Synapse Studio** : l'interface web de Synapse, où l'on écrit les notebooks et les requêtes SQL.
+- **Spark Pools** : des machines Spark gérées par Azure, qu'on allume pour un traitement. On paie le temps où elles tournent.
+- **Capacités SQL** : interroger les données du Data Lake en SQL, par exemple les fichiers Parquet de `gold`.
+
+#### 2. Qui fait quoi
+
+- **ADLS Gen2** : stocke les données.
+- **Data Factory** : déplace les données et enchaîne les traitements.
+- **Synapse** : l'environnement où l'on analyse et traite les données.
+- **Spark** : le moteur qui fait les calculs, dans Synapse ou ailleurs.
+
+#### 3. Dans notre projet
+
+- **ADF** remplacerait NiFi (copier les fichiers du kit dans `raw`) et mon script `lancer_tout.sh` (lancer `01_silver`, puis `02_gold`, puis `04_qualite`, et s'arrêter si un script plante).
+- **Un Spark Pool Synapse** exécuterait nos scripts PySpark presque sans changement. Il suffirait de changer le début des chemins dans `config.py`.
+- **Synapse SQL** permettrait aux analystes d'interroger `gold` en SQL, et de brancher Power BI dessus.
+
+### Étape 7 – Produire le schéma d'architecture Azure
+
+Tout ce qui est Azure est **proposé, non déployé**. Entre crochets, l'équivalent local **exécuté**.
+
+```
+ SOURCES                         INGESTION                  STOCKAGE : ADLS Gen2 (HNS)                 TRAITEMENTS
+┌──────────────────────┐      ┌─────────────────────┐     ┌──────────────────────────────┐        ┌──────────────────────┐
+│ TPCx-BB (kit)        │      │ Azure Data Factory  │     │ raw     fichiers d'origine   │        │ Synapse Spark Pool   │
+│ data/ (initial)      │ ───► │ copie + planning    │ ──► │ bronze  (prévu)              │ ◄────► │ 01_silver, 02_gold,  │
+│ data_refresh/        │      │ [NiFi + lancer_tout]│     │ silver  store_sales, item    │        │ 04_qualite           │
+│                      │      └─────────────────────┘     │ gold    ca_par_categorie     │        │ [Spark local[*]]     │
+│ Données complément.: │                                  │ quality rejets, rapports     │        └──────────────────────┘
+│ aucune               │                                  │ logs    journaux             │
+└──────────────────────┘                                  │ [HDFS /retail-lake]          │
+                                                          └──────────────┬───────────────┘
+                                                                         │ lecture de gold
+                                                          ┌──────────────▼───────────────┐
+ SÉCURITÉ (toutes les couches)                            │ USAGES ANALYTIQUES           │
+ Entra ID : un groupe par profil                          │ Synapse SQL,                 │
+ RBAC par conteneur + ACL par dossier (étape 5)           │ Power BI                     │
+ Key Vault pour les secrets, alerte de budget             │ [notebook UC-08, Matplotlib] │
+ [compte Linux + droits/ACL HDFS]                         └──────────────────────────────┘
+```
+
+- **Jeux Gold** : `ca_par_categorie` (en place), plus les analyses par magasin du notebook UC-08, qui pourraient devenir un jeu Gold.
+- **Données complémentaires** : aucune pour l'instant. Si on en ajoute, elles iront dans un dossier à part de `raw` (par exemple `raw/complementaire/`), pour ne pas les confondre avec TPCx-BB.
+
+### Étape 8 – Décliner l'architecture sans Azure (parcours B)
+
+1. **Zone de stockage** : HDFS (pas MinIO), à l'adresse `hdfs://localhost:9000/retail-lake`. 1 NameNode et 1 DataNode sur ma machine (WSL), avec 1 seule copie de chaque fichier (`dfs.replication = 1`). Taille actuelle : 95 Mo dans `raw`, 42 Mo dans `silver`, 3 Ko dans `gold`.
+2. **Les zones** : ce sont des **dossiers** HDFS : `raw`, `bronze`, `silver`, `gold`, `quality`, `logs`. Un dossier par table à l'intérieur. `bronze` existe mais est vide : au TP3, nos scripts lisent directement `raw`.
+3. **Iceberg et Parquet** :
+   - **Parquet** est un **format de fichier** : les données sont rangées par colonne et compressées. On l'utilise pour `silver` et `gold`.
+   - **Apache Iceberg** est un **format de table** posé au-dessus des fichiers Parquet. Il ajoute un journal des modifications, qui donne un historique des versions, des écritures qui marchent en entier ou pas du tout, et la possibilité de faire évoluer le schéma.
+   - Iceberg n'est pas installé : il est seulement étudié. Aujourd'hui, un `overwrite` remplace notre Gold sans garder l'ancienne version.
+4. **Traitement** : Apache Spark / PySpark 4.3.0 en `local[*]`. C'est lui qui fait tous les calculs : `01_silver.py`, `02_gold.py`, `04_qualite.py` et le notebook UC-08. **Exécuté.**
+5. **Requêtes analytiques** : Spark SQL, qui est déjà inclus dans PySpark. Mes calculs utilisent les fonctions DataFrame (`groupBy`, `agg`), qui font la même chose que du SQL. Trino n'est pas installé : il est étudié comme moteur SQL pour plusieurs utilisateurs à la fois.
+6. **Catalogue** : je n'en ai pas. On lit les données avec leur chemin (`spark.read.parquet(".../gold/ca_par_categorie")`). Je propose un **Hive Metastore** ou **Nessie** si on veut écrire `SELECT * FROM gold.ca_par_categorie` sans connaître le chemin.
+7. **Orchestration** : aujourd'hui, le script `lancer_tout.sh` enchaîne les 4 scripts, lancé à la main. NiFi fait l'ingestion (Jour 2). Une tâche `cron` pourrait le lancer chaque nuit, ou **Apache Airflow** pour avoir un vrai suivi des exécutions et des relances.
+8. **Sécurité en local** :
+   - **Comptes** : un seul compte Linux, `noah`, qui a aussi les droits administrateur (`sudo`).
+   - **Droits HDFS** : activés (`dfs.permissions.enabled = true`). Tous les dossiers sont en `drwxr-xr-x` et appartiennent à `noah` : moi seul peux écrire, tout le monde peut lire.
+   - **ACL HDFS** : elles sont activées (`dfs.namenode.acls.enabled = true`), mais aucune n'est posée (`getfacl` ne montre que les droits de base). On pourrait en poser comme sur Azure, par exemple pour donner la lecture de `gold` à un groupe « analystes ».
+   - **Vérification de l'identité** : HDFS croit le nom d'utilisateur Linux sans le vérifier. C'est acceptable seulement sur une machine personnelle.
+   - **Secrets** : aucun mot de passe dans le code (recherche `grep` : aucun fichier trouvé). Les identifiants de NiFi ne sont pas dans Git.
+   - **Séparation des environnements** : il n'y en a qu'un seul. Le dossier de test `tp3/` est même rangé dans le Data Lake. Il faudrait au moins séparer « test » et « production ».
+
+Le TP demande aussi une démonstration du traitement local : c'est le notebook UC-08, qui lit `silver` et `gold` dans HDFS avec Spark.
+
+### Étape 9 – Comparer les responsabilités, pas seulement les noms
+
+| Rôle fonctionnel | Azure | Retenu chez moi | Non déployé | Limites de l'équivalence |
+|---|---|---|---|---|
+| Stockage Data Lake | ADLS Gen2 (HNS) | HDFS, dossiers par zone | MinIO | HDFS sur 1 machine et 1 copie : si le disque casse, tout est perdu. ADLS garde plusieurs copies et grandit sans limite |
+| Tables analytiques | Tables du Lakehouse (Delta / Parquet) | Parquet seul | Iceberg | Parquet seul n'a ni historique ni écriture « tout ou rien » |
+| Traitement distribué | Synapse Spark Pool | Spark `local[*]`, 4 cœurs | – | Même moteur et même code, mais une seule machine : pas de vraie répartition sur plusieurs serveurs |
+| Requêtes SQL | Synapse SQL | Spark SQL / DataFrames | Trino | Pas de serveur SQL toujours disponible pour plusieurs analystes |
+| Catalogue / métadonnées | Catalogue de Synapse | Chemins écrits dans `config.py` | Hive Metastore, Nessie | Il faut connaître le chemin, pas de liste des tables |
+| Intégration / orchestration | Azure Data Factory | NiFi (Jour 2) + `lancer_tout.sh` | Airflow | Lancement à la main, pas de relance automatique ni d'alerte |
+| Visualisation | Power BI | Matplotlib dans Jupyter | Superset | Graphiques fixes (PNG), pas de tableau de bord interactif |
+| Identités et permissions | Entra ID, RBAC, ACL | Compte Linux, droits HDFS | ACL HDFS, comptes séparés | Un seul utilisateur, aucun vrai contrôle d'identité |
+| Environnement d'exécution | Services gérés par Azure | WSL (Ubuntu) sur mon PC | Docker, machine virtuelle | Je dois tout installer, démarrer et réparer moi-même |
+
+**Pourquoi il faut plusieurs outils pour remplacer Synapse** : Synapse est un seul service qui regroupe plusieurs fonctions, déjà branchées entre elles : Spark pour calculer, SQL pour interroger, des pipelines pour enchaîner, un catalogue et un studio web. En open source, chaque fonction est un outil séparé :
+
+- **Spark** pour les calculs ;
+- **Trino** ou Spark SQL pour le SQL ;
+- **Iceberg** pour les tables ;
+- un **catalogue** (Nessie ou Hive Metastore) ;
+- **Airflow** pour l'orchestration ;
+- **Superset** pour les tableaux de bord.
+
+Il faut les installer, les configurer et les faire marcher ensemble soi-même. C'est pour ça qu'« Iceberg = Synapse open source » est faux : Iceberg ne remplace qu'une seule de ces fonctions.
+
+### Justification des choix et limites
+
+#### 1. Mes choix
+
+- **Parcours B** : pas d'abonnement Azure. Ça évite aussi tout risque de facture, et le TP l'autorise.
+- **Mêmes zones et mêmes chemins** en local et sur Azure : le passage vers Azure ne change que l'adresse dans `config.py`.
+- **Un conteneur par zone** : on peut donner les droits RBAC zone par zone, sans ACL compliquées.
+
+#### 2. Coûts à surveiller sur Azure
+
+- **Le stockage** de nos ~140 Mo coûterait très peu.
+- **Ce qui coûte le plus**, ce sont les calculs : un Spark Pool ou un service SQL oublié et laissé allumé.
+- **Les opérations et les sorties de données** sont payantes aussi : chaque lecture et écriture, et les données qu'on télécharge hors d'Azure.
+- **Les précautions** : une alerte de budget, l'arrêt automatique des Spark Pools, et la suppression du groupe de ressources à la fin.
+- Le crédit gratuit n'empêche pas une facture une fois qu'il est épuisé.
+
+#### 3. Limites
+
+- **Rien n'a été testé sur Azure** : les opérations de l'étape 4 sont seulement décrites.
+- **La sécurité locale n'est pas représentative** : un seul utilisateur, sans contrôle d'identité.
+- **Iceberg, Trino, Airflow, MinIO et le catalogue** restent des composants étudiés, pas installés.
+
+### Erreurs rencontrées
+
+Aucune : pour UC-07, je n'ai fait que des relevés en lecture seule sur HDFS.
+
 ## Reproduire les analyses (README)
 
 Le README complet est dans `~/retail-intelligence/tp4/README.md`, avec une copie dans le dépôt : `preuves/j4/code/README.md`.
@@ -263,9 +569,7 @@ Le notebook recalcule tous les tableaux et graphiques en 1 minute environ, et le
 - `kpi_par_magasin.csv` : analyse 2 (12 lignes) ;
 - `ca_par_categorie.png` et `ca_par_magasin.png` : les deux graphiques.
 
-## Questions de recul (UC-08)
-
-Les questions 8 à 14 portent sur Azure : elles seront traitées avec UC-07.
+## Questions de recul
 
 ### 1. Pourquoi faut-il vérifier la granularité avant de calculer un KPI ?
 
@@ -312,3 +616,65 @@ Pour la deuxième, il faudrait des informations qu'on n'a pas (taille du magasin
 ### 7. Pourquoi les données synthétiques doivent-elles être identifiées dans la restitution ?
 
 Parce que les résultats ne décrivent pas une vraie entreprise. Ici, on voit des choses qui n'existeraient pas dans un vrai magasin : 50 % de remise partout, des tickets à 12 913 €, des magasins presque identiques. Si on ne le dit pas, quelqu'un pourrait prendre une décision sur de faux chiffres. C'est pour ça que je l'ai écrit en haut du notebook, en source sur chaque graphique et dans chaque constat.
+
+### 8. Quel est le rôle d'ADLS Gen2 dans votre architecture ?
+
+C'est l'endroit où seraient stockées toutes les données du projet, de `raw` à `gold`, avec un conteneur par zone. Il ne calcule rien : Spark lit et écrit dedans. Dans mon parcours local, c'est HDFS qui joue ce rôle, avec les mêmes zones et les mêmes chemins. Sur Azure, ADLS Gen2 reste une proposition.
+
+### 9. Quel intérêt apporte le Hierarchical Namespace ?
+
+Il crée de vrais dossiers dans le stockage Azure. Sans lui, les dossiers sont seulement simulés dans le nom des fichiers. Grâce à lui :
+- on peut renommer ou supprimer un dossier en une seule opération, ce dont Spark a besoin pour écrire ses résultats proprement (le dossier temporaire est renommé à la fin) ;
+- on peut mettre des droits (ACL) sur un dossier ou un fichier précis.
+
+HDFS fonctionne déjà comme ça.
+
+### 10. Quelle différence existe entre RBAC et ACL ?
+
+- **RBAC** : des droits larges, donnés à une identité sur une ressource entière (le compte de stockage, un conteneur). Exemple : « les analystes lisent le conteneur `gold` ».
+- **ACL** : des droits fins, sur un dossier ou un fichier, comme `rwx` sous Linux. Exemple : « un responsable de magasin lit seulement le dossier de son magasin ».
+
+### 11. Dans quels cas Azure Data Factory serait-il utile ?
+
+Quand il faut automatiser le chargement et l'enchaînement des traitements :
+- copier les nouveaux fichiers (le lot `refresh`) dans `raw` dès qu'ils arrivent, ou chaque nuit ;
+- lancer ensuite `01_silver`, `02_gold` et `04_qualite` dans l'ordre, et s'arrêter si l'un d'eux échoue ;
+- suivre chaque exécution et prévenir en cas d'erreur.
+
+Aujourd'hui, NiFi et mon script `lancer_tout.sh`, lancé à la main, font une partie de ce travail.
+
+### 12. Quel rôle pourrait jouer Synapse Analytics ?
+
+Ce serait l'endroit où l'on traite et analyse les données :
+- un **Spark Pool** exécuterait nos scripts PySpark presque sans changement, en changeant seulement les chemins ;
+- **Synapse SQL** permettrait aux analystes d'interroger `gold` en SQL, et de brancher Power BI ;
+- **Synapse Studio** remplacerait notre JupyterLab.
+
+### 13. Quels éléments de votre architecture sont réellement déployés et lesquels restent théoriques ?
+
+- **Déployés (en local)** :
+  - HDFS avec les zones `raw`, `bronze`, `silver`, `gold`, `quality`, `logs` (Jour 2) ;
+  - l'ingestion avec NiFi (Jour 2) ;
+  - les traitements Spark Raw → Silver → Gold et les contrôles qualité (Jour 3) ;
+  - le notebook d'analyse UC-08 (Jour 4) ;
+  - le format Parquet.
+- **Théoriques** :
+  - **toute la partie Azure** : abonnement, ADLS Gen2, conteneurs, Entra ID, RBAC, ACL, Key Vault, Data Factory, Synapse, Power BI ;
+  - **les outils open source étudiés** : Iceberg, Trino, catalogue (Nessie / Hive Metastore), Airflow, Superset, MinIO.
+
+### 14. Quels seraient les principaux risques de coût ou de sécurité dans une mise en production ?
+
+- **Coût** :
+  - un Spark Pool ou un service SQL oublié et laissé allumé ;
+  - des requêtes SQL qui lisent beaucoup de données ;
+  - les données téléchargées hors d'Azure ;
+  - une facture une fois le crédit gratuit épuisé.
+
+  Il faut une alerte de budget, l'arrêt automatique et la suppression des ressources de test.
+- **Sécurité** :
+  - donner trop de droits par simplicité (par exemple « Contributor » à tout le monde) ;
+  - laisser une clé d'accès ou un mot de passe dans le code ou dans Git ;
+  - ouvrir le compte de stockage à tout Internet ;
+  - laisser des données personnelles dans `silver` ou `gold`.
+
+  Il faut le moindre privilège, des groupes Entra ID, un coffre à secrets (Key Vault), et masquer les données personnelles dès Silver (règle du Jour 1).
